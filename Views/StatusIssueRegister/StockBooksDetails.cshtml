@@ -1,0 +1,196 @@
+﻿@* @{
+    ViewData["Title"] = "College Report";
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        body {
+            background-color: #f5f5f5;
+        }
+
+        /* 🔥 Sticky Header */
+        .sticky-top-custom {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: white;
+        }
+
+        .card {
+            border-radius: 10px;
+        }
+
+        .summary-box {
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .bg1 { background: #007bff; }
+        .bg2 { background: #28a745; }
+        .bg3 { background: #ffc107; color:black; }
+
+        /* 🔥 Table Slider */
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            overflow-x: auto;
+        }
+
+        /* 🔍 Search */
+        #searchInput {
+            max-width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container-fluid">
+
+    <!-- 🔥 FIXED HEADER -->
+    <div class="sticky-top-custom shadow p-3">
+
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                <h4>📊 College Report</h4>
+            </div>
+
+            <div class="col-md-3">
+                <select id="collegeSelect" class="form-control">
+                    <option>Select</option>
+                    <option>Ram Asra College of Education</option>
+                    <option>Asra College of Education</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" onclick="loadReport()">Get Report</button>
+            </div>
+
+            <!-- 🔍 Search Bar -->
+            <div class="col-md-4">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search book..." onkeyup="filterTable()" />
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Summary -->
+    <div class="row mt-4 text-center">
+        <div class="col-md-4">
+            <div class="summary-box bg1">
+                <h5>Total Books</h5>
+                <h3 id="totalBooks">0</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="summary-box bg2">
+                <h5>Unused Books</h5>
+                <h3 id="unusedBooks">0</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="summary-box bg3">
+                <h5>Total Titles</h5>
+                <h3 id="totalTitles">0</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📚 Table -->
+    <div class="card mt-4 p-3 shadow">
+        <h5>Stock Data</h5>
+
+        <!-- 🔥 SCROLLABLE TABLE -->
+        <div class="table-container">
+            <table class="table table-bordered table-striped" id="stockTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>AccessionNo</th>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Publisher</th>
+                        <th>Price</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+
+    let fullData = [];
+
+    async function loadReport() {
+        let college = document.getElementById("collegeSelect").value;
+
+        if (college === "Select") {
+            alert("Please select college");
+            return;
+        }
+
+        let response = await fetch('/api/report/college', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ collegeName: college })
+        });
+
+let data = await response.json();
+
+// Summary
+document.getElementById("totalBooks").innerText = data.totalBooks;
+document.getElementById("unusedBooks").innerText = data.unusedBooks;
+document.getElementById("totalTitles").innerText = data.totalTitles;
+        fullData = data.stockData;
+
+        renderTable(fullData);
+    }
+
+    function renderTable(data) {
+        let tbody = document.querySelector("#stockTable tbody");
+        tbody.innerHTML = "";
+
+        data.forEach(item => {
+            let row = `<tr>
+                <td>${item.AccessionNo}</td>
+                <td>${item.Title}</td>
+                <td>${item.Author}</td>
+                <td>${item.Publisher}</td>
+                <td>${item.Price}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+
+    // 🔍 Search Filter
+    function filterTable() {
+        let search = document.getElementById("searchInput").value.toLowerCase();
+
+        let filtered = fullData.filter(item =>
+            (item.Title && item.Title.toLowerCase().includes(search)) ||
+            (item.Author && item.Author.toLowerCase().includes(search)) ||
+            (item.Publisher && item.Publisher.toLowerCase().includes(search))
+        );
+
+        renderTable(filtered);
+    }
+
+</script>
+
+</body>
+</html> *@
