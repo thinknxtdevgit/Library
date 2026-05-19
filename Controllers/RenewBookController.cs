@@ -12,7 +12,8 @@ namespace lib.Controllers
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
-        public IActionResult Index()
+        [HttpGet("/RenewBook")]
+        public IActionResult RenewBook()
         {
             return View();
         }
@@ -24,9 +25,10 @@ namespace lib.Controllers
                 return BadRequest("Enter Accession No.");
 
             var info = GetBookInfo(req.AccessionNo);
-             
-            
-            //var extra = GetStudentStaffDetail(info.IDNo);
+
+            if (info == null)
+                return BadRequest("Accession No. does not exist");
+
             var Snap = GetPhoto(info.IDNo);
 
             if (info == null)
@@ -257,7 +259,6 @@ namespace lib.Controllers
 
                 con.Open();
                 int count = (int)cmd.ExecuteScalar();
-
                 return count > 0;
             }
         }

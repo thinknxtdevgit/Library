@@ -32,7 +32,7 @@ namespace lib.Controllers
             public string Signature { get; set; }
         }
         #endregion
-
+        [HttpGet("/ReceiveBook")]
         public IActionResult ReturnBook()
         {
             return View();

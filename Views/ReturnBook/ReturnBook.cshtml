@@ -1,1 +1,123 @@
-﻿
+﻿@{
+    ViewData["Title"] = "Return Book";
+}
+
+<h2>Return Book</h2>
+
+<div style="width:600px">
+
+    <label>Accession No</label>
+    <input type="text" id="rAccession" class="form-control" />
+
+    <label>ID No</label>
+    <input type="text" id="rIdNo" class="form-control" readonly />
+
+    <label>Name</label>
+    <input type="text" id="rName" class="form-control" readonly />
+
+    <label>Type</label>
+    <input type="text" id="rType" class="form-control" readonly />
+
+    <label>Issue Date</label>
+    <input type="text" id="rIssueDate" class="form-control" readonly />
+
+    <label>Last Return Date</label>
+    <input type="text" id="rLastDate" class="form-control" readonly />
+
+    <label>Title</label>
+    <input type="text" id="rTitle" class="form-control" readonly />
+
+    <label>Signature</label>
+    <input type="password" id="rSignature" class="form-control" />
+
+    <label>College Name</label>
+    <input type="text" id="rCollegeName" class="form-control" readonly />
+
+    <label>Course</label>
+    <input type="text" id="rCourse" class="form-control" readonly />
+
+    <label>Batch</label>
+    <input type="text" id="rBatch" class="form-control" readonly />
+
+    <br />
+
+    <button class="btn btn-danger" onclick="returnBook()">
+        Submit Return
+    </button>
+
+    <a href="/IssueBook" class="btn btn-primary">
+        Go To Issue Book
+    </a>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+
+    $("#rAccession").blur(function () {
+
+    let acc = $("#rAccession").val();
+
+    $.ajax({
+    url: "/ReceiveBook",
+    method: "POST",
+    contentType: "application/json",
+    data: JSON.stringify({
+    accessionNo: acc
+    }),
+
+    success: function (res) {
+
+    let d = res.data;
+
+    $("#rIdNo").val(d.idNo);
+    $("#rName").val(d.name);
+    $("#rType").val(d.type);
+    $("#rTitle").val(d.title);
+    $("#rCollegeName").val(d.college);
+
+    $("#rIssueDate").val(d.issueDate);
+    $("#rLastDate").val(d.lastReturnDate);
+
+    if (d.extraDetail) {
+    $("#rCourse").val(d.extraDetail.course);
+    $("#rBatch").val(d.extraDetail.batch);
+    }
+    },
+
+    error: function (err) {
+    alert(err.responseText);
+    }
+    });
+
+    });
+
+    function returnBook() {
+
+    let data = {
+    accessionNo: $("#rAccession").val(),
+    signature: $("#rSignature").val()
+    };
+
+    $.ajax({
+    url: "/ReceiveBook",
+    method: "POST",
+    contentType: "application/json",
+    data: JSON.stringify(data),
+
+    success: function (res) {
+
+    alert(res.message);
+
+    location.reload();
+    },
+
+    error: function (err) {
+    alert(err.responseText);
+    }
+    });
+
+    }
+
+</script>

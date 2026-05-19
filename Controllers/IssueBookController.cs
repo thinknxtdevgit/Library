@@ -62,14 +62,15 @@ namespace lib.Controllers
                 });
             }
 
-            //  ID + ACCESSION (NO SIGNATURE → ONLY BOOK DETAIL)
-            if (string.IsNullOrEmpty(request.signature))
+            // ONLY BOOK DETAIL
+            if (!string.IsNullOrEmpty(request.txtaccessionno)
+                && string.IsNullOrEmpty(request.signature))
             {
                 var book = checkAccessionDetail(request.txtaccessionno);
 
                 return Ok(new
                 {
-                    mode = "book",
+                    success = true,
                     bookDetail = book
                 });
             }

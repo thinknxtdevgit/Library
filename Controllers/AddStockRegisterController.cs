@@ -13,7 +13,11 @@ namespace lib.Controllers
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
         #region 🔹 Common DB Methods
-
+        [HttpGet("/AddStockRegister")]
+        public IActionResult AddStockRegister()
+        {
+            return View();
+        }
         private object ExecuteScalar(string query, params SqlParameter[] parameters)
         {
             using SqlConnection con = new SqlConnection(_connectionString);

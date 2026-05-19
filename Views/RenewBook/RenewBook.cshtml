@@ -1,0 +1,165 @@
+﻿@{
+    ViewData["Title"] = "Renew Book";
+}
+
+<h2>Renew Book</h2>
+
+<div style="width:700px">
+
+    <!-- ACCESSION -->
+    <label>Accession No</label>
+    <input type="text" id="txtAccessionNo" class="form-control" />
+    <br />
+
+    <!-- PHOTO -->
+    <img id="imgPhoto"
+         src=""
+         width="120"
+         height="120"
+         style="border:1px solid gray; margin-bottom:10px;" />
+
+    <!-- USER DETAILS -->
+    <label>Name</label>
+    <input type="text" id="txtName" class="form-control" readonly />
+
+    <label>ID No</label>
+    <input type="text" id="txtIDNo" class="form-control" readonly />
+
+    <label>Type</label>
+    <input type="text" id="txtType" class="form-control" readonly />
+
+    <label>Discipline</label>
+    <input type="text" id="txtDiscipline" class="form-control" readonly />
+
+    <br />
+
+    <!-- BOOK DETAILS -->
+    <label>Title</label>
+    <input type="text" id="txtTitle" class="form-control" readonly />
+
+    <label>Author</label>
+    <input type="text" id="txtAuthor" class="form-control" readonly />
+
+    <label>Issue Date</label>
+    <input type="text" id="txtIssueDate" class="form-control" readonly />
+
+    <label>Last Return Date</label>
+    <input type="text" id="txtLastReturnDate" class="form-control" readonly />
+
+    <br />
+
+    <!-- SIGNATURE -->
+    <label>Signature</label>
+    <input type="password" id="txtSignature" class="form-control" />
+
+    <br />
+
+    <button class="btn btn-danger" onclick="renewBook()">
+        Renew Book
+    </button>
+    
+    <a href="/IssueBook" class="btn btn-primary">
+        Go To Issue Book
+    </a>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+
+    // =========================
+    // GET BOOK DETAIL
+    // =========================
+    $("#txtAccessionNo").blur(function () {
+
+    let accessionNo = $("#txtAccessionNo").val();
+
+    $.ajax({
+    url: "/api/book/renew",
+    method: "POST",
+    contentType: "application/json",
+    data: JSON.stringify({
+    accessionNo: accessionNo
+    }),
+
+    success: function (res) {
+
+    if (!res.success) {
+    alert(res.message);
+    return;
+    }
+
+    let d = res.data;
+
+    $("#txtName").val(d.name);
+    $("#txtIDNo").val(d.idNo);
+    $("#txtType").val(d.type);
+    $("#txtDiscipline").val(d.discipline);
+
+    $("#txtTitle").val(d.title);
+    $("#txtAuthor").val(d.author);
+
+    $("#txtIssueDate").val(formatDate(d.dateOfIssue));
+    $("#txtLastReturnDate").val(formatDate(d.lastReturnDate));
+
+    // PHOTO
+    $("#imgPhoto").attr(
+    "src",
+    "/IssueBook/GetPhoto?idNo=" + d.idNo
+    );
+    },
+
+    error: function (err) {
+    alert(err.responseText);
+    }
+    });
+
+    });
+
+
+    // =========================
+    // RENEW BOOK
+    // =========================
+    function renewBook() {
+
+    let data = {
+    accessionNo: $("#txtAccessionNo").val(),
+    signature: $("#txtSignature").val()
+    };
+
+    $.ajax({
+    url: "/api/book/renew",
+    method: "POST",
+    contentType: "application/json",
+    data: JSON.stringify(data),
+
+    success: function (res) {
+
+    alert(res.message);
+
+    location.reload();
+    },
+
+    error: function (err) {
+    alert(err.responseText);
+    }
+    });
+
+    }
+
+
+    // =========================
+    // DATE FORMAT
+    // =========================
+    function formatDate(dateString) {
+
+    let d = new Date(dateString);
+
+    let day = String(d.getDate()).padStart(2, '0');
+    let month = String(d.getMonth() + 1).padStart(2, '0');
+    let year = d.getFullYear();
+
+    return day + "/" + month + "/" + year;
+    }
+
+</script>

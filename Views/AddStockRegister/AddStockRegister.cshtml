@@ -1,0 +1,200 @@
+﻿@{
+    ViewData["Title"] = "Add Stock Register";
+}
+
+<div class="container mt-4">
+
+    <h2>Add Stock Register</h2>
+
+    <div class="card p-4 shadow" style="max-width:700px;">
+
+        <!-- COLLEGE -->
+        <div class="mb-3">
+            <label>College Name</label>
+            <input type="text" id="txtCollegeName" class="form-control" />
+        </div>
+
+        <!-- ACCESSION -->
+        <div class="mb-3">
+            <label>Accession No</label>
+            <input type="number" id="txtAccessionNo" class="form-control" />
+        </div>
+
+        <!-- TITLE -->
+        <div class="mb-3">
+            <label>Title</label>
+            <input type="text" id="txtTitle" class="form-control" />
+        </div>
+
+        <!-- AUTHOR -->
+        <div class="mb-3">
+            <label>Author</label>
+            <input type="text" id="txtAuthor" class="form-control" />
+        </div>
+
+        <!-- PUBLISHER -->
+        <div class="mb-3">
+            <label>Publisher</label>
+            <input type="text" id="txtPublisher" class="form-control" />
+        </div>
+
+        <!-- CATEGORY -->
+        <div class="mb-3">
+            <label>Category</label>
+            <input type="text" id="txtCategory" class="form-control" />
+        </div>
+
+        <!-- SOURCE -->
+        <div class="mb-3">
+            <label>Source</label>
+            <input type="text" id="txtSource" class="form-control" />
+        </div>
+
+        <!-- EDITION -->
+        <div class="mb-3">
+            <label>Edition</label>
+            <input type="text" id="txtEdition" class="form-control" />
+        </div>
+
+        <!-- PRICE -->
+        <div class="mb-3">
+            <label>Price</label>
+            <input type="number" id="txtPrice" class="form-control" />
+        </div>
+
+        <!-- YEAR -->
+        <div class="mb-3">
+            <label>Year</label>
+            <input type="text" id="txtYear" class="form-control" />
+        </div>
+
+        <!-- PAGES -->
+        <div class="mb-3">
+            <label>Pages</label>
+            <input type="text" id="txtPages" class="form-control" />
+        </div>
+
+        <!-- BUTTON -->
+        <button class="btn btn-success" onclick="saveBook()">
+            Save Book
+        </button>
+
+        <button class="btn btn-primary" onclick="loadBook()">
+            Get Book
+        </button>
+
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+
+    // ================= SAVE BOOK =================
+
+    function saveBook() {
+
+    let data = {
+
+    collegeName: $("#txtCollegeName").val(),
+    accessionNo: parseInt($("#txtAccessionNo").val()),
+
+    title: $("#txtTitle").val(),
+    author: $("#txtAuthor").val(),
+    publisher: $("#txtPublisher").val(),
+    category: $("#txtCategory").val(),
+    source: $("#txtSource").val(),
+
+    edition: $("#txtEdition").val(),
+    price: parseFloat($("#txtPrice").val()),
+
+    year: $("#txtYear").val(),
+    pages: $("#txtPages").val(),
+
+    dateEntry: new Date()
+    };
+
+    $.ajax({
+
+    url: "/add",
+    type: "POST",
+    contentType: "application/json",
+
+    data: JSON.stringify(data),
+
+    success: function (res) {
+
+    alert(res);
+
+    clearForm();
+    },
+
+    error: function (err) {
+
+    console.log(err);
+
+    alert("Save Failed");
+    }
+    });
+    }
+
+    // ================= GET BOOK =================
+
+    function loadBook() {
+
+    let college = $("#txtCollegeName").val();
+    let accession = $("#txtAccessionNo").val();
+
+    $.ajax({
+
+    url: "/get?collegeName=" + college + "&accessionNo=" + accession,
+
+    type: "GET",
+
+    success: function (res) {
+
+    console.log(res);
+
+    $("#txtTitle").val(res.Title);
+    $("#txtAuthor").val(res.Author);
+    $("#txtPublisher").val(res.Publisher);
+    $("#txtCategory").val(res.Category);
+    $("#txtSource").val(res.Source);
+
+    $("#txtEdition").val(res.Edition);
+    $("#txtPrice").val(res.Price);
+
+    $("#txtYear").val(res.Year);
+    $("#txtPages").val(res.Pages);
+
+    alert("Book Loaded");
+    },
+
+    error: function (err) {
+
+    console.log(err);
+
+    alert("Book Not Found");
+    }
+    });
+    }
+
+    // ================= CLEAR =================
+
+    function clearForm() {
+
+    $("#txtTitle").val("");
+    $("#txtAuthor").val("");
+    $("#txtPublisher").val("");
+    $("#txtCategory").val("");
+    $("#txtSource").val("");
+
+    $("#txtEdition").val("");
+    $("#txtPrice").val("");
+
+    $("#txtYear").val("");
+    $("#txtPages").val("");
+    }
+
+</script>

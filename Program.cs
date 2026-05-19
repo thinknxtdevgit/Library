@@ -41,6 +41,6 @@ app.MapControllers();
 // 2. Default View Routing (localhost:5065 kholne par Admissions page dikhayega)
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=IssueBook}/{action=IssueBook}/{id?}");
+    pattern: "{controller=RenewBook}/{action=StockBooksDetails}/{id?}");
 
 app.Run();

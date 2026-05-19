@@ -1,128 +1,166 @@
-﻿@{
+﻿
+@{
     ViewData["Title"] = "Issue Book";
 }
+
 <div id="issueSection">
-<h2>Issue Book</h2>
 
-<div style="width:600px">
+    <h2>Issue Book</h2>
 
-    <!-- ID -->
-    <label>ID No</label>
-    <input type="text" id="txtIdNo" class="form-control" />
-    <br />
+    <div style="width:600px">
 
-    <!-- USER DETAILS -->
-    <label>Name</label>
-    <input type="text" id="txtName" class="form-control" readonly />
+        <!-- ID -->
+        <label>ID No</label>
+        <input type="text" id="txtIdNo" class="form-control" />
+        <br />
+
+        <!-- USER DETAILS -->
+        <label>Name</label>
+        <input type="text" id="txtName" class="form-control" readonly />
 
         <label>College Name</label>
         <input type="text" id="txtCollege" class="form-control" readonly />
 
-    <label>Course / Designation</label>
-    <input type="text" id="txtCourse" class="form-control" readonly />
+        <label>Course / Designation</label>
+        <input type="text" id="txtCourse" class="form-control" readonly />
 
         <label>Batch</label>
         <input type="text" id="txtBatch" class="form-control" readonly />
 
-    <label>Type</label>
-    <input type="text" id="txtType" class="form-control" readonly />
+        <label>Type</label>
+        <input type="text" id="txtType" class="form-control" readonly />
 
-    <label>Issue Date</label>
-    <input type="text" id="txtIssueDate" class="form-control" readonly />
+        <label>Issue Date</label>
+        <input type="text" id="txtIssueDate" class="form-control" readonly />
 
-    <label>Last Return Date</label>
-    <input type="text" id="txtReturnDate" class="form-control" readonly />
-    <!-- BOOK -->
-    <label>Accession No</label>
-    <input type="text" id="txtAccession" class="form-control" />
+        <label>Last Return Date</label>
+        <input type="text" id="txtReturnDate" class="form-control" readonly />
 
-    <label>Title</label>
-    <input type="text" id="txtTitle" class="form-control" readonly />
+        <hr />
 
-    <label>Author</label>
-    <input type="text" id="txtAuthor" class="form-control" readonly />
+        <!-- BOOK -->
+        <label>Accession No</label>
+        <input type="text" id="txtAccession" class="form-control" />
 
-    <label>Category</label>
-    <input type="text" id="txtCategory" class="form-control" readonly />
-    <!-- SIGNATURE -->
-    <label>Signature</label>
-    <input type="password" id="txtSignature" class="form-control" />
-    
-    <br />
+        <label>Title</label>
+        <input type="text" id="txtTitle" class="form-control" readonly />
 
+        <label>Author</label>
+        <input type="text" id="txtAuthor" class="form-control" readonly />
 
-    <!-- PREVIOUS -->
- 
+        <label>Category</label>
+        <input type="text" id="txtCategory" class="form-control" readonly />
+
+        <hr />
+
+        <!-- SIGNATURE -->
+        <label>Signature</label>
+        <input type="password" id="txtSignature" class="form-control" />
+
+        <br />
+
+        <!-- PREVIOUS -->
         <h4>Previous Issue</h4>
+
         <label id="lblTotalBooks" style="font-weight:bold; color:black;">
             Already Book Issued - 0
         </label>
 
-    <table border="1" width="150%" id="tblPrevious">
-        <thead>
-            <tr>
-              
-                <th>Title</th>
-                <th>Accession</th>
-                <th>Issue Date</th>
-                <th>Return Date</th>
-                <th>IDNo</th>
-                <th>Author</th>
-                <th>Coures</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+        <table border="1" width="150%" id="tblPrevious" class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Accession</th>
+                    <th>Issue Date</th>
+                    <th>Return Date</th>
+                    <th>ID No</th>
+                    <th>Author</th>
+                    <th>Course</th>
+                </tr>
+            </thead>
 
-    <br />
+            <tbody></tbody>
+        </table>
 
-        <button class="btn btn-success" onclick="issueBook()">Submit Issue</button>
-        <button class="btn btn-warning" onclick="showReturn()">Go to Return</button>
+        <br />
+
+        <button class="btn btn-success" onclick="issueBook()">
+            Issue Book
+        </button>
+
+        <button class="btn btn-warning" onclick="openReturnPage()">
+            Return Book
+        </button>
+
+        <button class="btn btn-danger" onclick="openRenewPage()">
+            Renew Book
+        </button>
+
+    </div>
 
 </div>
-</div>
-
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
 
-    // ================= ID ENTER =================
+    // =========================
+    // LOAD STUDENT / STAFF DETAIL
+    // =========================
     $("#txtIdNo").blur(function () {
 
-    let id = $("#txtIdNo").val();
+    let id = $("#txtIdNo").val().trim();
+
+    if (id == "") {
+    return;
+    }
 
     $.ajax({
+
     url: "/api/Login/checkid",
-    method: "POST",
+    type: "POST",
     contentType: "application/json",
+
     data: JSON.stringify({
     txtidno: id
     }),
+
     success: function (res) {
 
-    if (!res.data.success) {
+    console.log("ID RESPONSE =", res);
+
+    if (!res.data || res.data.success == false) {
+
     alert(res.data.message);
     return;
     }
 
     let d = res.data.data;
 
+    // USER DETAIL
     $("#txtName").val(d.name);
     $("#txtCollege").val(d.collegeName);
     $("#txtCourse").val(d.course || d.designation);
-    $("#txtBatch").val(d.batch);
+    $("#txtBatch").val(d.batch || d.department);
     $("#txtType").val(d.type);
     $("#txtReturnDate").val(d.lastReturnDate);
-    let today = new Date().toLocaleDateString('en-GB'); // dd/mm/yyyy
+
+    let today = new Date().toLocaleDateString('en-GB');
+
     $("#txtIssueDate").val(today);
+
+    // TOTAL BOOK
     $("#lblTotalBooks").text(
     "Already Book Issued - " + res.data.previousIssue.total
     );
-    // previous table
+
+    // PREVIOUS ISSUE TABLE
     let rows = "";
-    res.data.previousIssue.data.forEach(x => {
-    rows += `<tr>
+
+    res.data.previousIssue.data.forEach(function (x) {
+
+    rows += `
+    <tr>
     <td>${x.title}</td>
     <td>${x.accessionNo}</td>
     <td>${x.issueDate}</td>
@@ -130,219 +168,128 @@
     <td>${x.idNo}</td>
     <td>${x.author}</td>
     <td>${x.coures}</td>
-    </tr>`;
+    </tr>
+    `;
     });
 
     $("#tblPrevious tbody").html(rows);
+    },
+
+    error: function (err) {
+
+    console.log(err);
+    alert("ID Detail Load Error");
     }
     });
+
     });
 
 
-    // ================= ACCESSION =================
+    // =========================
+    // LOAD BOOK DETAIL
+    // =========================
     $("#txtAccession").blur(function () {
 
-    let id = $("#txtIdNo").val();
-    let acc = $("#txtAccession").val();
+    let id = $("#txtIdNo").val().trim();
+    let acc = $("#txtAccession").val().trim();
+
+    if (acc == "") {
+    return;
+    }
 
     $.ajax({
+
     url: "/api/Login/checkid",
-    method: "POST",
+    type: "POST",
     contentType: "application/json",
+
     data: JSON.stringify({
     txtidno: id,
     txtaccessionno: acc
     }),
+
     success: function (res) {
+
+    console.log("BOOK RESPONSE =", res);
 
     let b = res.bookDetail;
 
-    if (!b.success) {
-    alert(b.message);
+    if (!b || b.success == false) {
+
+    alert("Book not found");
     return;
     }
 
     $("#txtTitle").val(b.title);
     $("#txtAuthor").val(b.author);
     $("#txtCategory").val(b.category);
+    },
+
+    error: function (err) {
+
+    console.log(err);
+    alert("Book Detail Error");
     }
     });
+
     });
 
 
-    // ================= ISSUE =================
+    // =========================
+    // ISSUE BOOK
+    // =========================
     function issueBook() {
 
     let data = {
-    txtidno: $("#txtIdNo").val(),
-    txtaccessionno: $("#txtAccession").val(),
-    signature: $("#txtSignature").val()
+
+    txtidno: $("#txtIdNo").val().trim(),
+    txtaccessionno: $("#txtAccession").val().trim(),
+    signature: $("#txtSignature").val().trim()
     };
 
     $.ajax({
+
     url: "/api/Login/checkid",
-    method: "POST",
+    type: "POST",
     contentType: "application/json",
+
     data: JSON.stringify(data),
+
     success: function (res) {
 
-    if (res.data.success === false) {
+    console.log("ISSUE RESPONSE =", res);
+
+    if (!res.data || res.data.success == false) {
+
     alert(res.data.message);
     return;
     }
 
-    alert("Book Issued Successfully ✅");
+    alert("Book Issued Successfully");
 
     location.reload();
-    }
-    });
-    }
-
-</script>
-
-
-<hr />
-<div id="returnSection" style="display:none; margin-top:20px; width:600px">
-
-    <h3>Return Book</h3>
-
-    <label>Accession No</label>
-    <input type="text" id="rAccession" class="form-control" />
-
-    <label>ID No</label>
-    <input type="text" id="rIdNo" class="form-control" readonly />
-
-    <label>Name</label>
-    <input type="text" id="rName" class="form-control" readonly />
-
-    <label>Type</label>
-    <input type="text" id="rType" class="form-control" readonly />
-
-    <label>Issue Date</label>
-    <input type="text" id="rIssueDate" class="form-control" readonly />
-
-    <label>Last Return Date</label>
-    <input type="text" id="rLastDate" class="form-control" readonly />
-
-    <label>Title</label>
-    <input type="text" id="rTitle" class="form-control" readonly />
-
-    <label>Signature</label>
-    <input type="password" id="rSignature" class="form-control" />
-
-    <label>CollegeName</label>
-    <input type="text" id="rCollegeName" class="form-control" readonly />
-
-    <label>Course</label>
-    <input type="text" id="rCourse" class="form-control"readonly />
-
-    <label>Batch</label>
-    <input type="text" id="rBatch" class="form-control"readonly />
-
-    <br />
-
-
-    <button class="btn btn-danger" onclick="returnBook()">Submit Return</button>
-
-    <button class="btn btn-primary" onclick="showIssue()">
-        Go to Issue Book
-    </button>
-
-</div>
-
-
-@*  // ============Show/Hide Logic============= *@
-
-<script>
-    function showIssue() {
-    $("#issueSection").show();
-    $("#returnSection").hide();
-    }
-
-    function showReturn() {
-    $("#issueSection").hide();
-    $("#returnSection").show();
-    }
-
-    $(document).ready(function () {
-    showIssue(); // default
-    });
-</script>
-
-
-
-
-@* // ============Return Book============ *@
-
-<script>
-  
-
-    $("#rAccession").blur(function () {
-
-    let acc = $("#rAccession").val();
-
-    $.ajax({
-    url: "/ReceiveBook",
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify({ accessionNo: acc }),
-
-    success: function (res) {
-
-    if (!res.success) {
-    alert(res.message);
-    return;
-    }
-
-    let d = res.data;
-
-    $("#rIdNo").val(d.idNo);
-    $("#rName").val(d.name);
-    $("#rType").val(d.type);
-    $("#rTitle").val(d.title);
-    $("#rCollegeName").val(d.college);
-    $("#rIssueDate").val(res.data.issueDate);
-    $("#rLastDate").val(res.data.lastReturnDate);
-    if (d.extraDetail) {
-    $("#rCourse").val(d.extraDetail.course);
-    $("#rBatch").val(d.extraDetail.batch);
-    }
-    }
-    });
-    });
-
-
-    function returnBook() {
-
-    let data = {
-    accessionNo: $("#rAccession").val(),
-    signature: $("#rSignature").val()
-    };
-
-    $.ajax({
-    url: "/ReceiveBook",
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify(data),
-
-    success: function (res) {
-
-    if (!res.success) {
-    alert(res.message);
-    return;
-    }
-
-    if (res.mode === "receive") {
-    alert("Book Returned Successfully ✅");
-    location.reload();
-    }
     },
 
     error: function (err) {
-    alert("Something went wrong ❌");
+
     console.log(err);
+    alert("Issue Book Error");
     }
     });
+    }
+
+
+    // =========================
+    // OPEN PAGES
+    // =========================
+    function openReturnPage() {
+
+    window.location.href = "/ReceiveBook";
+    }
+
+    function openRenewPage() {
+
+    window.location.href = "/RenewBook";
     }
 
 </script>
