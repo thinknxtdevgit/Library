@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using lib.Models.ReturnBook;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -15,22 +16,7 @@ namespace lib.Controllers
 
 
 
-        public class BookRequest
-        {
-            public long AccessionNo { get; set; }
-            public string Signature { get; set; }  // optional
-        }
-        public class AccessionRequest
-        {
-            public long AccessionNo { get; set; }
 
-        }
-
-        public class ReceiveRequest
-        {
-            public long AccessionNo { get; set; }
-            public string Signature { get; set; }
-        }
         #endregion
         [HttpGet("/ReceiveBook")]
         public IActionResult ReturnBook()
@@ -38,7 +24,7 @@ namespace lib.Controllers
             return View();
         }
         [HttpPost("/ReceiveBook")]
-        public IActionResult ReceiveBook([FromBody] BookRequest req)
+        public IActionResult ReceiveBook([FromBody] ReceiveBookRequest req)
         {
             if (req.AccessionNo == 0)
                 return BadRequest("AccessionNo required");
@@ -127,11 +113,11 @@ namespace lib.Controllers
 
             InsertFine(con, req.AccessionNo, college, title, idNo, name, type, author, issueDate, lastReturnDate);
 
-            return Ok(new
+            return Ok(new ReceiveSuccessResponse
             {
-                success = true,
-                mode = "receive",
-                message = "Book received successfully"
+                Success = true,
+                Mode = "receive",
+                Message = "Book received successfully"
             });
         }
 

@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
-
+using lib.Models.IssueBook;
 
 namespace lib.Controllers
 {
@@ -24,14 +24,7 @@ namespace lib.Controllers
         public int StaffBookIssueDays = 15;
         private string varLibraryType = "Single";
 
-        // ================= REQUEST MODEL =================
-        public class IdRequest
-        {
-            public string txtidno { get; set; }
-            public string txtaccessionno { get; set; }
-            public string signature { get; set; }
-        }
-        //  [HttpGet("/")]
+    
         [HttpGet("/IssueBook")]
 
         public IActionResult IssueBook()
@@ -42,7 +35,7 @@ namespace lib.Controllers
 
         [HttpPost]
         [Route("api/Login/checkid")]
-        public IActionResult CheckId([FromBody] IdRequest request)
+        public IActionResult CheckId([FromBody] IssueBookRequest request)
         {
             if (request == null || string.IsNullOrEmpty(request.txtidno))
                 return BadRequest("ID cannot be empty");
@@ -559,246 +552,6 @@ namespace lib.Controllers
 
             return string.Join(",", colleges);
         }
-
-        // ================= Return Book =================
-
-        //[HttpPost]
-        //[Route("api/book/return")]
-        //public IActionResult ReturnBook([FromBody] ReturnBookRequest req)
-        //{
-        //    if (string.IsNullOrEmpty(req.Signature))
-        //        return BadRequest("Enter User Signature");
-
-        //    if (!CheckSignature(req.Signature))
-        //        return BadRequest("Signature does not match");
-
-        //    // DELETE
-        //    DeleteFromIssueRegister(req.IDNo, req.AccessionNo, req.CollegeName);
-
-        //    // TRANSACTION
-        //    TransactionReturn(req);
-
-        //    //  FINE
-        //    int totalFine = CalculateFine(req);
-
-        //    //  INSERT FINE
-        //    if (totalFine > 0)
-        //    {
-        //        InsertFineRegister(req, totalFine);
-        //    }
-
-        //    return Ok(new
-        //    {
-        //        message = "Book returned successfully",
-        //        fine = totalFine
-        //    });
-        //}
-        //[HttpPost]
-        //[Route("api/book/get-issued-detail")]
-        //public IActionResult GetIssuedBook([FromBody] dynamic req)
-        //{
-        //    string accessionNo = req.accessionNo;
-
-        //    using (SqlConnection con = new SqlConnection(_connectionString))
-        //    {
-        //        string sql = @"SELECT TOP 1 * FROM IssueRegister 
-        //               WHERE AccessionNo=@AccessionNo";
-
-        //        SqlCommand cmd = new SqlCommand(sql, con);
-        //        cmd.Parameters.AddWithValue("@AccessionNo", accessionNo);
-
-        //        con.Open();
-        //        SqlDataReader dr = cmd.ExecuteReader();
-
-        //        if (dr.Read())
-        //        {
-        //            return Ok(new
-        //            {
-        //                success = true,
-        //                data = new
-        //                {
-        //                    idNo = dr["IDNo"].ToString(),
-        //                    personName = dr["WhomIssued"].ToString(),
-        //                    type = dr["Type"].ToString(),
-        //                    issueDate = Convert.ToDateTime(dr["IssueDate"]).ToString("dd/MM/yyyy"),
-        //                    lastReturnDate = Convert.ToDateTime(dr["LastReturnDate"]).ToString("dd/MM/yyyy"),
-        //                    title = dr["Title"].ToString()
-        //                }
-        //            });
-        //        }
-        //    }
-
-        //    return Ok(new { success = false, message = "Book not issued" });
-        //}
-
-        
-
-
-        // ================= SIGNATURE METHOD =================
-        //private bool CheckSignature(string signature)
-        //{
-        //    using (SqlConnection con = new SqlConnection(_connectionString))
-        //    {
-        //        string sql = @"SELECT COUNT(*) 
-        //               FROM UserMaster 
-        //               WHERE Password=@Password";
-
-        //        SqlCommand cmd = new SqlCommand(sql, con);
-        //        cmd.Parameters.AddWithValue("@Password", signature);
-
-        //        con.Open();
-        //        int count = (int)cmd.ExecuteScalar();
-
-        //        return count > 0;
-        //    }
-        //}
-
-        //// ================= DELETE METHOD =================
-        //private void DeleteFromIssueRegister(long idNo, long accessionNo, string collegeName)
-        //{
-        //    using (SqlConnection con = new SqlConnection(_connectionString))
-        //    {
-        //        string sql = @"DELETE FROM IssueRegister 
-        //               WHERE IDNo=@IDNo 
-        //               AND AccessionNo=@AccessionNo 
-        //               AND CollegeName=@CollegeName";
-
-        //        SqlCommand cmd = new SqlCommand(sql, con);
-
-        //        cmd.Parameters.Add("@IDNo", SqlDbType.BigInt).Value = idNo;
-        //        cmd.Parameters.Add("@AccessionNo", SqlDbType.BigInt).Value = accessionNo;
-        //        cmd.Parameters.Add("@CollegeName", SqlDbType.NVarChar).Value = collegeName;
-
-        //        con.Open();
-        //        cmd.ExecuteNonQuery();
-        //    }
-        //}
-
-        //private long MaxID()
-        //{
-        //    long maxId = 1;
-
-        //    using (SqlConnection con = new SqlConnection(_connectionString))
-        //    {
-        //        string sql = "SELECT MAX(ID) FROM Transactions";
-
-        //        SqlCommand cmd = new SqlCommand(sql, con);
-        //        con.Open();
-
-        //        var result = cmd.ExecuteScalar();
-
-        //        if (result != DBNull.Value && result != null)
-        //            maxId = Convert.ToInt64(result) + 1;
-        //    }
-
-        //    return maxId; //  long return karo (string nahi)
-        //}
-
-        //// ================= TRANSACTION METHOD =================
-        //private void TransactionReturn(ReturnBookRequest req)
-        //{
-        //    using (SqlConnection con = new SqlConnection(_connectionString))
-        //    {
-        //        string sql = @"INSERT INTO Transactions 
-        //(ID, CollegeName, TransactionDate, TransactionTime, TransactionName, Type, 
-        // AccessionNo, Title, IDNo, PersonName, PersonType, UserID, UserName)
-        //VALUES
-        //(@ID, @CollegeName, @TransactionDate, @TransactionTime, @TransactionName, @Type,
-        // @AccessionNo, @Title, @IDNo, @PersonName, @PersonType, @UserID, @UserName)";
-
-        //        SqlCommand cmd = new SqlCommand(sql, con);
-
-        //        cmd.Parameters.Add("@ID", SqlDbType.BigInt).Value = MaxID();
-        //        cmd.Parameters.Add("@CollegeName", SqlDbType.VarChar).Value = req.CollegeName;
-        //        cmd.Parameters.Add("@TransactionDate", SqlDbType.SmallDateTime).Value = DateTime.Now;
-        //        cmd.Parameters.Add("@TransactionTime", SqlDbType.DateTime).Value = DateTime.Now;
-        //        cmd.Parameters.Add("@TransactionName", SqlDbType.NVarChar).Value = "Return";
-        //        cmd.Parameters.Add("@Type", SqlDbType.NVarChar).Value = "Book";
-
-        //        cmd.Parameters.Add("@AccessionNo", SqlDbType.BigInt).Value = req.AccessionNo;
-        //        cmd.Parameters.Add("@IDNo", SqlDbType.BigInt).Value = req.IDNo;
-
-        //        cmd.Parameters.Add("@Title", SqlDbType.NVarChar).Value = req.Title ?? "";
-        //        cmd.Parameters.Add("@PersonName", SqlDbType.NVarChar).Value = req.PersonName ?? "";
-        //        cmd.Parameters.Add("@PersonType", SqlDbType.NVarChar).Value = req.Type ?? "";
-
-        //        //  MAIN FIX
-        //        cmd.Parameters.Add("@UserID", SqlDbType.BigInt).Value = 1;
-
-        //        cmd.Parameters.Add("@UserName", SqlDbType.VarChar).Value = "Admin";
-
-        //        con.Open();
-        //        cmd.ExecuteNonQuery();
-        //    }
-        //}
-
-        //// ================= FINE CALCULATION =================
-
-        //private int CalculateFine(ReturnBookRequest req)
-        //{
-        //    int totalFine = 0;
-        //    int finePerDay = 0;
-
-        //    int days = (DateTime.Now.Date - req.LastReturnDate.Date).Days;
-
-        //    if (days > 0)
-        //    {
-        //        using (SqlConnection con = new SqlConnection(_connectionString))
-        //        {
-        //            string sql = "SELECT FinePerDay FROM MasterFine WHERE CollegeName=@CollegeName";
-
-        //            SqlCommand cmd = new SqlCommand(sql, con);
-        //            cmd.Parameters.AddWithValue("@CollegeName", req.CollegeName);
-
-        //            con.Open();
-        //            var result = cmd.ExecuteScalar();
-
-        //            if (result != null)
-        //                finePerDay = Convert.ToInt32(result);
-        //        }
-
-        //        totalFine = finePerDay * days;
-
-        //        if (req.Type == "Staff")
-        //            totalFine = 0;
-        //    }
-
-        //    return totalFine;
-        //}
-
-        //// ================= INSERT FINE =================
-        //private void InsertFineRegister(ReturnBookRequest req, int fine)
-        //{
-        //    using (SqlConnection con = new SqlConnection(_connectionString))
-        //    {
-        //        string sql = @"INSERT INTO FineRegister
-        //(CollegeName, DateOfFine, IDNo, Name, AccessionNo, Title, Author, 
-        // DateOfIssue, LastReturnDate, Fine, Discipline, UserID)
-        //VALUES
-        //(@CollegeName, @DateOfFine, @IDNo, @Name, @AccessionNo, @Title, @Author,
-        // @DateOfIssue, @LastReturnDate, @Fine, @Discipline, @UserID)";
-
-        //        SqlCommand cmd = new SqlCommand(sql, con);
-
-        //        cmd.Parameters.Add("@CollegeName", SqlDbType.NVarChar).Value = req.CollegeName;
-        //        cmd.Parameters.Add("@DateOfFine", SqlDbType.Date).Value = DateTime.Now.Date;
-
-        //        // 🔥 FIX (IMPORTANT)
-        //        cmd.Parameters.Add("@IDNo", SqlDbType.BigInt).Value = Convert.ToInt64(req.IDNo);
-        //        cmd.Parameters.Add("@AccessionNo", SqlDbType.BigInt).Value = Convert.ToInt64(req.AccessionNo);
-
-        //        cmd.Parameters.Add("@Name", SqlDbType.NVarChar).Value = req.PersonName ?? "";
-        //        cmd.Parameters.Add("@Title", SqlDbType.NVarChar).Value = req.Title ?? "";
-        //        cmd.Parameters.Add("@Author", SqlDbType.NVarChar).Value = req.Author ?? "";
-        //        cmd.Parameters.Add("@DateOfIssue", SqlDbType.Date).Value = req.IssueDate;
-        //        cmd.Parameters.Add("@LastReturnDate", SqlDbType.Date).Value = req.LastReturnDate;
-        //        cmd.Parameters.Add("@Fine", SqlDbType.Int).Value = fine;
-        //        cmd.Parameters.Add("@Discipline", SqlDbType.NVarChar).Value = req.Type ?? "";
-        //        cmd.Parameters.Add("@UserID", SqlDbType.NVarChar).Value = "Admin";
-
-        //        con.Open();
-        //        cmd.ExecuteNonQuery();
-        //    }
 
         }
     }

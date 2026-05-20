@@ -1,4 +1,6 @@
 using lib.Dbcontext;
+using lib.Interface;
+using lib.Service;
 using Microsoft.EntityFrameworkCore;
 using System;
 
@@ -11,6 +13,7 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbcontext>(options =>
     options.UseSqlServer(connectionString));
 
+builder.Services.AddScoped<ILoginService, LoginService>();
 // 3. MVC + API Support
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();

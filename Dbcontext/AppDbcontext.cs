@@ -13,6 +13,7 @@ namespace lib.Dbcontext
         {
 
         }
+        //public DbSet<UserMaster> UserMaster { get; set; }
         public DbSet<Admissions> Admissions { get; set; }
         public DbSet<MasterCourse> MasterCourses { get; set; }
     }

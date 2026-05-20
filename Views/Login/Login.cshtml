@@ -2,71 +2,176 @@
     ViewData["Title"] = "Login";
 }
 
-<h2>Library Login</h2>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Library Login</title>
 
-<div style="width:300px;">
-    <label>User Name</label>
-    <input type="text" id="username" class="form-control" />
+    <style>
+            body {
+                font-family: Arial;
+                background-color: #f4f4f4;
+            }
 
-    <label>Password</label>
-    <input type="password" id="password" class="form-control" />
+            .login-box {
+                width: 350px;
+                margin: 80px auto;
+                background: white;
+                padding: 25px;
+                border-radius: 8px;
+                box-shadow: 0px 0px 10px #ccc;
+            }
 
-    <label>Login Type</label>
-    <select id="loginType" class="form-control"></select>
+            h2 {
+                text-align: center;
+                margin-bottom: 25px;
+            }
 
-    <br />
-    <button onclick="login()" class="btn btn-primary">Login</button>
-</div>
+            .form-group {
+                margin-bottom: 15px;
+            }
 
-<hr />
+            label {
+                font-weight: bold;
+            }
 
-<h3>Result:</h3>
-<pre id="result"></pre>
+            input, select {
+                width: 100%;
+                padding: 10px;
+                margin-top: 5px;
+            }
 
-<script>
-    // 🔹 Load Login Types
-    async function loadLoginTypes() {
-        let res = await fetch('/api/Login/GetLoginTypes');
-        let data = await res.json();
+            button {
+                width: 100%;
+                padding: 10px;
+                background: #0078d7;
+                color: white;
+                border: none;
+                cursor: pointer;
+            }
 
-        let dropdown = document.getElementById("loginType");
-        dropdown.innerHTML = "";
+                button:hover {
+                    background: #005fa3;
+                }
 
-        data.forEach(x => {
-            let opt = document.createElement("option");
-            opt.value = x;
-            opt.text = x;
-            dropdown.appendChild(opt);
-        });
-    }
+            .message {
+                margin-top: 15px;
+                text-align: center;
+                font-weight: bold;
+            }
 
-    // 🔹 Login API Call
-    async function login() {
-        let model = {
-            userName: document.getElementById("username").value,
-            password: document.getElementById("password").value,
-            loginType: document.getElementById("loginType").value
-        };
+            .success {
+                color: green;
+            }
 
-        let res = await fetch('/api/Login/EnterOk', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(model)
-        });
+            .error {
+                color: red;
+            }
+    </style>
+</head>
+<body>
 
-        let resultBox = document.getElementById("result");
+    <div class="login-box">
 
-        if (res.ok) {
-            let data = await res.json();
-            resultBox.innerText = JSON.stringify(data, null, 2);
-        } else {
-            let error = await res.text();
-            resultBox.innerText = error;
-        }
-    }
+        <h2>Library Login</h2>
 
-    // Load on page start
-    loadLoginTypes();
-</script>
+        <div class="form-group">
+            <label>User Name</label>
+            <input type="text" id="txtUserName" />
+        </div>
+
+        <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="txtPassword" />
+        </div>
+
+        <div class="form-group">
+            <label>Login Type</label>
+            <select id="ddlLoginType">
+                <option value="">Loading...</option>
+            </select>
+        </div>
+
+        <button onclick="login()">Login</button>
+
+        <div id="message" class="message"></div>
+
+    </div>
+
+    <script>
+
+            // Load Login Types
+            window.onload = function () {
+                loadLoginTypes();
+            };
+
+            async function loadLoginTypes() {
+
+                let response = await fetch('/api/Login/GetLoginTypes');
+
+                let data = await response.json();
+
+                let ddl = document.getElementById("ddlLoginType");
+
+                ddl.innerHTML = '<option value="">Select</option>';
+
+                data.forEach(item => {
+
+                    ddl.innerHTML += `<option value="${item}">${item}</option>`;
+
+                });
+            }
+
+            // Login API Call
+            async function login() {
+
+                let userName = document.getElementById("txtUserName").value;
+
+                let password = document.getElementById("txtPassword").value;
+
+                let loginType = document.getElementById("ddlLoginType").value;
+
+                let response = await fetch('/api/Login/EnterOk', {
+
+                    method: 'POST',
+
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+
+                    body: JSON.stringify({
+                        userName: userName,
+                        password: password,
+                        loginType: loginType
+                    })
+                });
+
+                let messageDiv = document.getElementById("message");
+
+                if (response.ok) {
+
+                    let result = await response.json();
+
+                    messageDiv.className = "message success";
+
+                    messageDiv.innerHTML =
+                        "Login Successful : " + result.userName;
+
+                    console.log(result);
+
+                }
+                else {
+
+                    let error = await response.text();
+
+                    messageDiv.className = "message error";
+
+                    messageDiv.innerHTML = error;
+                }
+            }
+
+    </script>
+
+</body>
+</html>

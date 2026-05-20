@@ -148,10 +148,10 @@ namespace lib.Models
             public string UserID { get; set; }
 
             // ===== DEBIT =====
-            public List<DebitFeeModel> DebitFees { get; set; }
-            public string TotalDebit { get; set; }
+            //public List<DebitFeeModel> DebitFees { get; set; }
+            //public string TotalDebit { get; set; }
 
-            // ===== QUALIFICATION GRID =====
-            public List<EduQualificationModel> Qualifications { get; set; }
+            //// ===== QUALIFICATION GRID =====
+            //public List<EduQualificationModel> Qualifications { get; set; }
         }
 }

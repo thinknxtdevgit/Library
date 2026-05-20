@@ -1,4 +1,8 @@
-﻿namespace lib.Models
+﻿
+
+using lib.DtoModel.LoginDto;
+
+namespace lib.Models
 {
     public class AssignMenuRequest
     {

@@ -1,11 +1,16 @@
-﻿namespace lib.Models
+﻿namespace lib.DtoModel.LoginDto
 {
     public class MenuNode
     {
+
         public string Id { get; set; }
+
         public string Text { get; set; }
+
         public string Func { get; set; }
+
         public string Hierar { get; set; }
-        public List<MenuNode> Children { get; set; } = new List<MenuNode>();
+
+        public List<MenuNode> Children { get; set; } = new();
     }
 }
