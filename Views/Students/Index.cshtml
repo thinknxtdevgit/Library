@@ -1,0 +1,31 @@
+@{
+    ViewData["Title"] = "Student Management";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="fade-in">
+    <div class="page-header mt-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Student Members</h2>
+            <p class="text-muted">Manage active student credentials, institutional cohorts, and library access logs.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Create" class="btn btn-modern btn-primary-modern text-white text-decoration-none">
+                <i class="fas fa-plus me-2"></i> Register Student
+            </a>
+        </div>
+    </div>
+
+    <div class="modern-card text-center py-5 glass border-0" style="background: rgba(255,255,255,0.02);">
+        <div class="py-4">
+            <div class="bg-primary bg-opacity-10 text-primary rounded-circle mx-auto mb-4 d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; animation: float 3s ease-in-out infinite;">
+                <i class="fas fa-user-graduate fa-3x"></i>
+            </div>
+            <h4 class="fw-bold mb-2">Student Directory Under Construction</h4>
+            <p class="text-muted mx-auto" style="max-width: 480px;">The database synchronization interface for active academic roster cohorts is being finalized and will launch in the next minor system release.</p>
+            <a asp-action="Create" class="btn btn-modern btn-secondary-modern mt-3 border">
+                <i class="fas fa-user-plus me-2 text-primary"></i> Pre-Register New Student
+            </a>
+        </div>
+    </div>
+</div>

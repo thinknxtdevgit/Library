@@ -1,4 +1,4 @@
-﻿using lib.DtoModel.ReturnBookDto;
+using lib.DtoModel.ReturnBookDto;
 using lib.Interface;
 using lib.Models.ReturnBook;
 using Microsoft.AspNetCore.Mvc;
@@ -19,9 +19,9 @@ namespace lib.Controllers
         }
 
         [HttpGet("/ReceiveBook")]
-        public IActionResult ReturnBook()
+        public IActionResult Index()
         {
-            return View();
+            return View("ReturnBook");
         }
 
         [HttpPost("/ReceiveBook")]

@@ -1,200 +1,201 @@
-﻿@{
+@{
     ViewData["Title"] = "Add Stock Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-
-    <h2>Add Stock Register</h2>
-
-    <div class="card p-4 shadow" style="max-width:700px;">
-
-        <!-- COLLEGE -->
-        <div class="mb-3">
-            <label>College Name</label>
-            <input type="text" id="txtCollegeName" class="form-control" />
+<div class="fade-in">
+    <div class="page-header mt-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Book Catalog</h2>
+            <p class="text-muted">Manage your library's inventory, register new titles, and track stock details.</p>
         </div>
-
-        <!-- ACCESSION -->
-        <div class="mb-3">
-            <label>Accession No</label>
-            <input type="number" id="txtAccessionNo" class="form-control" />
+        <div class="d-flex gap-2 w-100-mobile">
+            <button class="btn btn-modern btn-secondary-modern btn-auto-width" onclick="clearForm()">
+                <i class="fas fa-eraser me-2 text-danger"></i> Clear
+            </button>
+            <button class="btn btn-modern btn-primary-modern btn-auto-width text-white" onclick="saveBook()">
+                <i class="fas fa-save me-2"></i> Save Record
+            </button>
         </div>
-
-        <!-- TITLE -->
-        <div class="mb-3">
-            <label>Title</label>
-            <input type="text" id="txtTitle" class="form-control" />
-        </div>
-
-        <!-- AUTHOR -->
-        <div class="mb-3">
-            <label>Author</label>
-            <input type="text" id="txtAuthor" class="form-control" />
-        </div>
-
-        <!-- PUBLISHER -->
-        <div class="mb-3">
-            <label>Publisher</label>
-            <input type="text" id="txtPublisher" class="form-control" />
-        </div>
-
-        <!-- CATEGORY -->
-        <div class="mb-3">
-            <label>Category</label>
-            <input type="text" id="txtCategory" class="form-control" />
-        </div>
-
-        <!-- SOURCE -->
-        <div class="mb-3">
-            <label>Source</label>
-            <input type="text" id="txtSource" class="form-control" />
-        </div>
-
-        <!-- EDITION -->
-        <div class="mb-3">
-            <label>Edition</label>
-            <input type="text" id="txtEdition" class="form-control" />
-        </div>
-
-        <!-- PRICE -->
-        <div class="mb-3">
-            <label>Price</label>
-            <input type="number" id="txtPrice" class="form-control" />
-        </div>
-
-        <!-- YEAR -->
-        <div class="mb-3">
-            <label>Year</label>
-            <input type="text" id="txtYear" class="form-control" />
-        </div>
-
-        <!-- PAGES -->
-        <div class="mb-3">
-            <label>Pages</label>
-            <input type="text" id="txtPages" class="form-control" />
-        </div>
-
-        <!-- BUTTON -->
-        <button class="btn btn-success" onclick="saveBook()">
-            Save Book
-        </button>
-
-        <button class="btn btn-primary" onclick="loadBook()">
-            Get Book
-        </button>
-
     </div>
 
+    <div class="row g-4">
+        <!-- Main Form Section -->
+        <div class="col-lg-8">
+            <div class="modern-card">
+                <h5 class="fw-bold mb-4 border-bottom pb-3"><i class="fas fa-info-circle me-2 text-primary"></i> General Information</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">College Name</label>
+                        <input type="text" id="txtCollegeName" class="form-input-modern" placeholder="Enter college" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Accession No</label>
+                        <div class="input-group">
+                            <input type="number" id="txtAccessionNo" class="form-input-modern" style="border-top-right-radius:0; border-bottom-right-radius:0;" placeholder="0000" />
+                            <button class="btn btn-modern btn-primary-modern input-group-modern-btn px-4" onclick="loadBook()">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold text-muted">Book Title</label>
+                        <input type="text" id="txtTitle" class="form-input-modern" placeholder="Enter full book title" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Author(s)</label>
+                        <input type="text" id="txtAuthor" class="form-input-modern" placeholder="Writer name" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Publisher</label>
+                        <input type="text" id="txtPublisher" class="form-input-modern" placeholder="Publication house" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Category</label>
+                        <input type="text" id="txtCategory" class="form-input-modern" placeholder="e.g. Science, Fiction" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Source</label>
+                        <input type="text" id="txtSource" class="form-input-modern" placeholder="Vendor or Donor" />
+                    </div>
+                </div>
+
+                <h5 class="fw-bold mt-5 mb-4 border-bottom pb-3"><i class="fas fa-tag me-2 text-primary"></i> Technical Details</h5>
+                
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Edition</label>
+                        <input type="text" id="txtEdition" class="form-input-modern" placeholder="1st" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Price</label>
+                        <input type="number" id="txtPrice" class="form-input-modern" placeholder="0.00" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Year</label>
+                        <input type="text" id="txtYear" class="form-input-modern" placeholder="YYYY" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Pages</label>
+                        <input type="text" id="txtPages" class="form-input-modern" placeholder="123" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Actions/Stats -->
+        <div class="col-lg-4">
+            <div class="modern-card glass mb-4">
+                <h6 class="fw-bold mb-3"><i class="fas fa-bolt me-2 text-warning"></i> Quick Operations</h6>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-modern btn-secondary-modern w-100 text-start border bg-white" onclick="loadBook()">
+                        <i class="fas fa-search text-primary me-2"></i> Find Book by Accession
+                    </button>
+                    <button class="btn btn-modern btn-secondary-modern w-100 text-start border bg-white">
+                        <i class="fas fa-print text-muted me-2"></i> Print Label
+                    </button>
+                    <button class="btn btn-modern btn-secondary-modern w-100 text-start border bg-white">
+                        <i class="fas fa-barcode text-muted me-2"></i> Generate Barcode
+                    </button>
+                </div>
+            </div>
+            
+            <div class="modern-card text-white bg-primary bg-opacity-95 shadow-glow" style="border: none;">
+                <h6 class="fw-bold opacity-90 mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i> Cataloging Best Practices</h6>
+                <p class="small mb-0 opacity-85">Always cross-check the ISBN number and ensure all accession identifiers are sequentially correct. Standardizing author names avoids duplication in the global search system.</p>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-
     // ================= SAVE BOOK =================
-
     function saveBook() {
+        let data = {
+            collegeName: $("#txtCollegeName").val(),
+            accessionNo: parseInt($("#txtAccessionNo").val()),
+            title: $("#txtTitle").val(),
+            author: $("#txtAuthor").val(),
+            publisher: $("#txtPublisher").val(),
+            category: $("#txtCategory").val(),
+            source: $("#txtSource").val(),
+            edition: $("#txtEdition").val(),
+            price: parseFloat($("#txtPrice").val()),
+            year: $("#txtYear").val(),
+            pages: $("#txtPages").val(),
+            dateEntry: new Date()
+        };
 
-    let data = {
+        if(!data.accessionNo || !data.title) {
+            alert("Accession No and Title are required");
+            return;
+        }
 
-    collegeName: $("#txtCollegeName").val(),
-    accessionNo: parseInt($("#txtAccessionNo").val()),
-
-    title: $("#txtTitle").val(),
-    author: $("#txtAuthor").val(),
-    publisher: $("#txtPublisher").val(),
-    category: $("#txtCategory").val(),
-    source: $("#txtSource").val(),
-
-    edition: $("#txtEdition").val(),
-    price: parseFloat($("#txtPrice").val()),
-
-    year: $("#txtYear").val(),
-    pages: $("#txtPages").val(),
-
-    dateEntry: new Date()
-    };
-
-    $.ajax({
-
-    url: "/add",
-    type: "POST",
-    contentType: "application/json",
-
-    data: JSON.stringify(data),
-
-    success: function (res) {
-
-    alert(res);
-
-    clearForm();
-    },
-
-    error: function (err) {
-
-    console.log(err);
-
-    alert("Save Failed");
-    }
-    });
+        $.ajax({
+            url: "/add",
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function (res) {
+                alert("Book saved successfully!");
+                clearForm();
+            },
+            error: function (err) {
+                console.error(err);
+                alert("Failed to save book data.");
+            }
+        });
     }
 
     // ================= GET BOOK =================
-
     function loadBook() {
+        let college = $("#txtCollegeName").val();
+        let accession = $("#txtAccessionNo").val();
 
-    let college = $("#txtCollegeName").val();
-    let accession = $("#txtAccessionNo").val();
+        if(!accession) {
+            alert("Please enter Accession No");
+            return;
+        }
 
-    $.ajax({
-
-    url: "/get?collegeName=" + college + "&accessionNo=" + accession,
-
-    type: "GET",
-
-    success: function (res) {
-
-    console.log(res);
-
-    $("#txtTitle").val(res.Title);
-    $("#txtAuthor").val(res.Author);
-    $("#txtPublisher").val(res.Publisher);
-    $("#txtCategory").val(res.Category);
-    $("#txtSource").val(res.Source);
-
-    $("#txtEdition").val(res.Edition);
-    $("#txtPrice").val(res.Price);
-
-    $("#txtYear").val(res.Year);
-    $("#txtPages").val(res.Pages);
-
-    alert("Book Loaded");
-    },
-
-    error: function (err) {
-
-    console.log(err);
-
-    alert("Book Not Found");
-    }
-    });
+        $.ajax({
+            url: "/get?collegeName=" + college + "&accessionNo=" + accession,
+            type: "GET",
+            success: function (res) {
+                if(res) {
+                    $("#txtTitle").val(res.Title);
+                    $("#txtAuthor").val(res.Author);
+                    $("#txtPublisher").val(res.Publisher);
+                    $("#txtCategory").val(res.Category);
+                    $("#txtSource").val(res.Source);
+                    $("#txtEdition").val(res.Edition);
+                    $("#txtPrice").val(res.Price);
+                    $("#txtYear").val(res.Year);
+                    $("#txtPages").val(res.Pages);
+                } else {
+                    alert("Book not found");
+                }
+            },
+            error: function (err) {
+                console.error(err);
+                alert("Error retrieving book data");
+            }
+        });
     }
 
     // ================= CLEAR =================
-
     function clearForm() {
-
-    $("#txtTitle").val("");
-    $("#txtAuthor").val("");
-    $("#txtPublisher").val("");
-    $("#txtCategory").val("");
-    $("#txtSource").val("");
-
-    $("#txtEdition").val("");
-    $("#txtPrice").val("");
-
-    $("#txtYear").val("");
-    $("#txtPages").val("");
+        $("#txtAccessionNo").val("");
+        $("#txtTitle").val("");
+        $("#txtAuthor").val("");
+        $("#txtPublisher").val("");
+        $("#txtCategory").val("");
+        $("#txtSource").val("");
+        $("#txtEdition").val("");
+        $("#txtPrice").val("");
+        $("#txtYear").val("");
+        $("#txtPages").val("");
     }
-
 </script>

@@ -1,4 +1,4 @@
-﻿@{
+@{
     Layout = null;
 }
 
@@ -7,143 +7,154 @@
 }
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8" />
-    <title>Library Login</title>
-
-    <style>
-            body {
-                font-family: Arial;
-                background-color: #f4f4f4;
-            }
-
-            .login-box {
-                width: 350px;
-                margin: 80px auto;
-                background: white;
-                padding: 25px;
-                border-radius: 8px;
-                box-shadow: 0px 0px 10px #ccc;
-            }
-
-            h2 {
-                text-align: center;
-                margin-bottom: 25px;
-            }
-
-            .form-group {
-                margin-bottom: 15px;
-            }
-
-            label {
-                font-weight: bold;
-            }
-
-            input, select {
-                width: 100%;
-                padding: 10px;
-                margin-top: 5px;
-            }
-
-            button {
-                width: 100%;
-                padding: 10px;
-                background: #0078d7;
-                color: white;
-                border: none;
-                cursor: pointer;
-            }
-
-                button:hover {
-                    background: #005fa3;
-                }
-
-            .message {
-                margin-top: 15px;
-                text-align: center;
-                font-weight: bold;
-            }
-
-            .success {
-                color: green;
-            }
-
-            .error {
-                color: red;
-            }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login - LibMaster Pro</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/modern-ui.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 </head>
 <body>
 
-    <div class="login-box">
-
-        <h2>Library Login</h2>
-
-        <div class="form-group">
-            <label>User Name</label>
-            <input type="text" id="txtUserName" />
+    <div class="login-screen">
+        <!-- Left Side: Visuals -->
+        <div class="login-left d-none d-lg-flex">
+            <div class="login-left-content">
+                <div class="badge bg-primary mb-3 px-3 py-2 rounded-pill shadow-glow" style="border: 1px solid rgba(255,255,255,0.15);">Version 2.0</div>
+                <h1 class="display-4 fw-bold mb-4" style="font-family: 'Poppins', sans-serif; letter-spacing: -0.04em;">Manage Your Library <br/><span style="color: var(--accent);">With Precision.</span></h1>
+                <p class="lead mb-5" style="color: rgba(255, 255, 255, 0.7); font-size: 1.1rem; line-height: 1.7;">Professional, efficient, and exceptionally modern SaaS solution built specifically for academic cataloging, resource issuance registries, and institutional records management.</p>
+                
+                <div class="features d-flex gap-4">
+                    <div class="feature-item" style="animation: float 4s ease-in-out infinite;">
+                        <div class="h3 mb-1 fw-bold text-white">10k+</div>
+                        <div class="small" style="color: rgba(255,255,255,0.5);">Books Managed</div>
+                    </div>
+                    <div class="feature-item border-start ps-4" style="animation: float 4.5s ease-in-out infinite;">
+                        <div class="h3 mb-1 fw-bold text-white">2.5k</div>
+                        <div class="small" style="color: rgba(255,255,255,0.5);">Active Cohorts</div>
+                    </div>
+                    <div class="feature-item border-start ps-4" style="animation: float 5s ease-in-out infinite;">
+                        <div class="h3 mb-1 fw-bold text-white">99.9%</div>
+                        <div class="small" style="color: rgba(255,255,255,0.5);">System Uptime</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" id="txtPassword" />
+        <!-- Right Side: Login Form -->
+        <div class="login-right shadow-lg">
+            <div class="login-logo mb-4">
+                <div class="logo-icon">
+                    <i class="fas fa-book-reader fa-lg"></i>
+                </div>
+                <div>
+                    <h3 class="mb-0 fw-bold" style="font-family: 'Poppins', sans-serif; font-size: 1.4rem;">LibMaster Pro</h3>
+                    <p class="text-muted small mb-0">Modern Library Management System</p>
+                </div>
+            </div>
+
+            <div class="login-form-card fade-in">
+                <h4 class="mb-1 fw-bold" style="font-family: 'Poppins', sans-serif; letter-spacing: -0.02em;">Welcome Back</h4>
+                <p class="text-muted mb-4" style="font-size: 0.9rem;">Please enter your administrative credentials to continue.</p>
+
+                <div class="floating-input">
+                    <label>User Name</label>
+                    <input type="text" id="txtUserName" class="form-input-modern" placeholder="Enter username" />
+                </div>
+
+                <div class="floating-input">
+                    <label>Password</label>
+                    <div class="position-relative">
+                        <input type="password" id="txtPassword" class="form-input-modern" placeholder="••••••••" style="padding-right: 3rem;" />
+                        <button class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted" style="outline: none; box-shadow: none; border: none; text-decoration: none;" type="button" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="eyeIcon" style="font-size: 0.95rem;"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="floating-input">
+                    <label>Login Type</label>
+                    <select id="ddlLoginType" class="form-input-modern">
+                        <option value="">Loading...</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="rememberMe" style="cursor: pointer;">
+                        <label class="form-check-label small text-muted" for="rememberMe" style="cursor: pointer;">Remember me</label>
+                    </div>
+                    <a href="#" class="small text-primary text-decoration-none fw-semibold">Forgot Password?</a>
+                </div>
+
+                <button class="btn btn-modern btn-primary-modern w-100 py-3 mb-3 text-white" onclick="login()">
+                    <span>Login to Dashboard</span>
+                    <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+
+                <div id="message" class="message small mt-2"></div>
+
+                <div class="login-footer text-center mt-5">
+                    <p class="mb-0 text-muted small">&copy; 2026 BG Library Solutions &bull; UI Redesign</p>
+                </div>
+            </div>
         </div>
-
-        <div class="form-group">
-            <label>Login Type</label>
-            <select id="ddlLoginType">
-                <option value="">Loading...</option>
-            </select>
-        </div>
-
-        <button onclick="login()">Login</button>
-
-        <div id="message" class="message"></div>
-
     </div>
 
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
     <script>
+        // Password Toggle
+        function togglePassword() {
+            const pwd = document.getElementById('txtPassword');
+            const icon = document.getElementById('eyeIcon');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                pwd.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
 
-            // Load Login Types
-            window.onload = function () {
-                loadLoginTypes();
-            };
+        // Load Login Types
+        window.onload = function () {
+            loadLoginTypes();
+        };
 
-            async function loadLoginTypes() {
-
+        async function loadLoginTypes() {
+            try {
                 let response = await fetch('/api/Login/GetLoginTypes');
-
                 let data = await response.json();
-
                 let ddl = document.getElementById("ddlLoginType");
-
-                ddl.innerHTML = '<option value="">Select</option>';
-
+                ddl.innerHTML = '<option value="">Select Account Type</option>';
                 data.forEach(item => {
-
                     ddl.innerHTML += `<option value="${item}">${item}</option>`;
-
                 });
+            } catch (err) {
+                console.error("Failed to load login types", err);
+            }
+        }
+
+        // Login API Call
+        async function login() {
+            let userName = document.getElementById("txtUserName").value;
+            let password = document.getElementById("txtPassword").value;
+            let loginType = document.getElementById("ddlLoginType").value;
+            let messageDiv = document.getElementById("message");
+            
+            if(!userName || !password || !loginType) {
+                messageDiv.className = "message text-danger fw-bold";
+                messageDiv.innerHTML = "Please fill all fields";
+                return;
             }
 
-            // Login API Call
-            async function login() {
-
-                let userName = document.getElementById("txtUserName").value;
-
-                let password = document.getElementById("txtPassword").value;
-
-                let loginType = document.getElementById("ddlLoginType").value;
-
+            try {
                 let response = await fetch('/api/Login/EnterOk', {
-
                     method: 'POST',
-
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         userName: userName,
                         password: password,
@@ -151,31 +162,26 @@
                     })
                 });
 
-                let messageDiv = document.getElementById("message");
-
                 if (response.ok) {
-
                     let result = await response.json();
-
-                    messageDiv.className = "message success";
-
-                    messageDiv.innerHTML =
-                        "Login Successful : " + result.userName;
-
-                    console.log(result);
-
+                    messageDiv.className = "message text-success fw-bold";
+                    messageDiv.innerHTML = "Login Successful! Redirecting...";
+                    
+                    // Redirect to home after a short delay
+                    setTimeout(() => {
+                        window.location.href = "/Home/Index";
+                    }, 1000);
                 }
                 else {
-
                     let error = await response.text();
-
-                    messageDiv.className = "message error";
-
-                    messageDiv.innerHTML = error;
+                    messageDiv.className = "message text-danger fw-bold";
+                    messageDiv.innerHTML = error || "Invalid credentials. Please try again.";
                 }
+            } catch (err) {
+                messageDiv.className = "message text-danger fw-bold";
+                messageDiv.innerHTML = "Connection error. Please try again later.";
             }
-
+        }
     </script>
-
 </body>
 </html>

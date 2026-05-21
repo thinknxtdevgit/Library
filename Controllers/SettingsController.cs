@@ -2,12 +2,12 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace lib.Controllers
 {
-    public class DashboardController : Controller
+    public class SettingsController : Controller
     {
-        [HttpGet("/Dashboard")]
+        [HttpGet("/Settings")]
         public IActionResult Index()
         {
-            return View("Dashboard");
+            return View();
         }
     }
 }

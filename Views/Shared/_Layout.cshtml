@@ -1,127 +1,163 @@
-﻿@using Newtonsoft.Json
-@using lib.DtoModel.LoginDto
-@using Microsoft.AspNetCore.Http
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Library Management</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/modern-ui.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+</head>
+<body data-theme="light">
+    @using Newtonsoft.Json
+    @using lib.DtoModel.LoginDto
+    @using Microsoft.AspNetCore.Http
 
-@{
-    var menuJson = Context.Session.GetString("MenuData");
-
-    List<MenuItemResponse> menus = new();
-
-    if (!string.IsNullOrEmpty(menuJson))
-    {
-        menus = JsonConvert.DeserializeObject<List<MenuItemResponse>>(menuJson);
+    @{
+        var menuJson = Context.Session.GetString("MenuData");
+        List<MenuItemResponse> menus = new();
+        if (!string.IsNullOrEmpty(menuJson))
+        {
+            menus = JsonConvert.DeserializeObject<List<MenuItemResponse>>(menuJson);
+        }
     }
-}
 
-<body>
+    <div class="app-container">
+        <!-- Reusable Sidebar Partial -->
+        <partial name="_Sidebar" />
 
-    <header>
+        <!-- Sidebar Overlay -->
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-        <nav class="navbar navbar-dark bg-dark px-3">
-
-            <a class="navbar-brand text-white"
-                   asp-controller="Home"
-                   asp-action="Dashboard">
-
-                Library Management
-
-            </a>
-
-            <div class="text-white">
-
-                Welcome :
-                @Context.Session.GetString("UserName")
-
-            </div>
-
-        </nav>
-
-    </header>
-
-    <div class="container-fluid">
-
-        <div class="row">
-
-            <!-- SIDEBAR -->
-
-            <div class="col-md-2 bg-dark text-white min-vh-100 p-0">
-
-                <div class="p-3">
-
-                    <h5 class="text-warning">
-
-                        MENU
-
-                    </h5>
-
-                    <hr />
-
-                    @{
-                        var menuJson =
-                        Context.Session.GetString("MenuData");
-
-                        List<lib.DtoModel.LoginDto.MenuItemResponse>
-                        menus = new();
-
-                        if (!string.IsNullOrEmpty(menuJson))
-                        {
-                            menus =
-                            Newtonsoft.Json.JsonConvert
-                            .DeserializeObject<List<lib.DtoModel.LoginDto.MenuItemResponse>>
-                            (menuJson);
-                        }
-                    }
-
-                    <ul class="nav flex-column">
-
-                        @foreach (var item in menus)
-                        {
-                            <li class="nav-item mb-1">
-
-                                <a class="nav-link text-white"
-                                       href="/Home/MenuPage?func=@item.Func">
-
-                                    @item.Text
-
-                                </a>
-
-                            </li>
-                        }
-
-                    </ul>
-
+        <!-- Main Content Wrapper -->
+        <main class="main-content" id="mainContent">
+            <!-- Top Navbar -->
+            <header class="top-navbar">
+                <div class="nav-left d-flex align-items-center">
+                    <button class="btn btn-link text-muted p-0 me-3" id="toggleSidebar" style="outline: none; box-shadow: none;">
+                        <i class="fas fa-bars-staggered fa-lg"></i>
+                    </button>
+                    <div class="search-box d-none d-md-flex">
+                        <i class="fas fa-search text-muted"></i>
+                        <input type="text" placeholder="Search books, students, catalogs...">
+                    </div>
                 </div>
 
+                <div class="nav-right d-flex align-items-center gap-3">
+                    <button class="btn btn-link text-muted p-2" id="themeToggler" title="Toggle Dark/Light Mode" style="outline: none; box-shadow: none;">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    
+                    <div class="notifications position-relative">
+                        <i class="far fa-bell fa-lg text-muted"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.55rem; padding: 0.25rem 0.4rem; animation: pulseGlow 2s infinite;">
+                            3
+                        </span>
+                    </div>
+
+                    <div class="user-profile d-flex align-items-center gap-2 ms-2">
+                        <div class="text-end d-none d-sm-block">
+                            <div class="fw-semibold small">@Context.Session.GetString("UserName")</div>
+                            <div class="text-muted" style="font-size: 0.7rem;">Administrator</div>
+                        </div>
+                        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-weight: 600; border: 2px solid var(--border-color);">
+                            @Context.Session.GetString("UserName")?[0]
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content Body -->
+            <div class="content-body p-4 p-md-5">
+                @RenderBody()
             </div>
 
-            <!-- MAIN CONTENT -->
-
-            <div class="col-md-10 p-4">
-
-                <main role="main">
-
-                    @RenderBody()
-
-                </main>
-
-            </div>
-
-        </div>
-
+            <footer class="mt-auto p-4 text-center text-muted border-top" style="background: var(--bg-card); border-color: var(--border-color) !important;">
+                <small>&copy; 2026 LibMaster Pro &bull; Designed by Senior UI/UX Architect</small>
+            </footer>
+        </main>
     </div>
 
-    <footer class="border-top footer text-muted text-center p-2">
-
-        © 2026 - Library Management System
-
-    </footer>
-
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    <script>
+        // Sidebar Toggle Logic
+        const toggleBtn = document.getElementById('toggleSidebar');
+        const closeBtn = document.getElementById('closeSidebar');
+        const sidebar = document.getElementById('appSidebar');
+        const mainContent = document.getElementById('mainContent');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebar() {
+            if (window.innerWidth >= 1280) {
+                sidebar.classList.toggle('collapsed');
+                mainContent.classList.toggle('sidebar-collapsed');
+            } else {
+                sidebar.classList.toggle('show');
+                overlay.classList.toggle('show');
+            }
+        }
+
+        toggleBtn.addEventListener('click', toggleSidebar);
+        closeBtn.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // Responsive adjustment on resize
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1280) {
+                overlay.classList.remove('show');
+                sidebar.classList.remove('show');
+            } else {
+                sidebar.classList.remove('collapsed');
+                mainContent.classList.remove('sidebar-collapsed');
+            }
+        });
+
+        // Theme Toggle
+        const themeToggler = document.getElementById('themeToggler');
+        const body = document.body;
+        
+        themeToggler.addEventListener('click', () => {
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            body.setAttribute('data-theme', newTheme);
+            themeToggler.querySelector('i').className = newTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Restore theme on load
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) {
+            body.setAttribute('data-theme', savedTheme);
+            if (themeToggler.querySelector('i')) {
+                themeToggler.querySelector('i').className = savedTheme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            }
+        }
+
+        // Sidebar Dropdown Toggle
+        document.querySelectorAll('.menu-dropdown-toggle').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const sub = btn.nextElementSibling;
+                const isExpanded = btn.getAttribute('aria-expanded') === 'true';
+                
+                // Close other open dropdowns (Accordion style)
+                document.querySelectorAll('.menu-dropdown-toggle').forEach(otherBtn => {
+                    if (otherBtn !== btn) {
+                        otherBtn.setAttribute('aria-expanded', 'false');
+                        otherBtn.nextElementSibling.classList.remove('show');
+                    }
+                });
+
+                btn.setAttribute('aria-expanded', !isExpanded);
+                sub.classList.toggle('show');
+            });
+        });
+    </script>
 
     @await RenderSectionAsync("Scripts", required: false)
-
 </body>
+</html>

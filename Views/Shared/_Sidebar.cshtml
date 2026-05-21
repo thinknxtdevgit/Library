@@ -1,0 +1,135 @@
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
+<aside class="sidebar" id="appSidebar">
+    <div class="sidebar-header">
+        <div class="logo-icon">
+            <i class="fas fa-book-reader fa-lg"></i>
+        </div>
+        <span class="logo-text">LibMaster Pro</span>
+        <button class="mobile-close-sidebar" id="closeSidebar">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <nav class="sidebar-menu">
+        <!-- Dashboard -->
+        <a asp-controller="Dashboard" asp-action="Index"
+               class="menu-item @(currentController == "Dashboard" && currentAction == "Index" ? "active" : "")">
+            <div class="menu-icon"><i class="fas fa-th-large"></i></div>
+            <span>Dashboard</span>
+        </a>
+
+        <!-- Book Management Dropdown -->
+        <div class="menu-dropdown">
+            <button class="menu-dropdown-toggle" type="button" 
+                    aria-expanded="@(currentController == "Books" ? "true" : "false")">
+                <div class="menu-icon"><i class="fas fa-book"></i></div>
+                <span>Book Management</span>
+                <i class="fas fa-chevron-right toggle-icon"></i>
+            </button>
+            <ul class="menu-sub @(currentController == "Books" ? "show" : "")">
+                <li>
+                    <a asp-controller="Books" asp-action="Index" 
+                       class="menu-sub-item @(currentController == "Books" && currentAction == "Index" ? "active" : "")">
+                        All Books
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Books" asp-action="Create" 
+                       class="menu-sub-item @(currentController == "Books" && currentAction == "Create" ? "active" : "")">
+                        Add New Book
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Student Management Dropdown -->
+      @*   <div class="menu-dropdown">
+            <button class="menu-dropdown-toggle" type="button" 
+                    aria-expanded="@(currentController == "Students" ? "true" : "false")">
+                <div class="menu-icon"><i class="fas fa-user-graduate"></i></div>
+                <span>Student Management</span>
+                <i class="fas fa-chevron-right toggle-icon"></i>
+            </button>
+            <ul class="menu-sub @(currentController == "Students" ? "show" : "")">
+                <li>
+                    <a asp-controller="Students" asp-action="Index" 
+                       class="menu-sub-item @(currentController == "Students" && currentAction == "Index" ? "active" : "")">
+                        All Students
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Students" asp-action="Create" 
+                       class="menu-sub-item @(currentController == "Students" && currentAction == "Create" ? "active" : "")">
+                        Add Student
+                    </a>
+                </li>
+            </ul>
+        </div> *@
+
+        <!-- Issue Book -->
+        <a asp-controller="IssueBook" asp-action="Create" 
+           class="menu-item @(currentController == "IssueBook" && currentAction == "Create" ? "active" : "")">
+            <div class="menu-icon"><i class="fas fa-exchange-alt"></i></div>
+            <span>Issue Book</span>
+        </a>
+
+        <!-- Return Book -->
+        <a asp-controller="ReturnBook" asp-action="Index" 
+           class="menu-item @(currentController == "ReturnBook" && currentAction == "Index" ? "active" : "")">
+            <div class="menu-icon"><i class="fas fa-undo-alt"></i></div>
+            <span>Return Book</span>
+        </a>
+
+        <!-- Renew Book -->
+        <a asp-controller="RenewBook" asp-action="Index" 
+           class="menu-item @(currentController == "RenewBook" && currentAction == "Index" ? "active" : "")">
+            <div class="menu-icon"><i class="fas fa-sync-alt"></i></div>
+            <span>Renew Book</span>
+        </a>
+
+        <!-- Reports Dropdown -->
+        <div class="menu-dropdown">
+            <button class="menu-dropdown-toggle" type="button" 
+                    aria-expanded="@(currentController == "Reports" ? "true" : "false")">
+                <div class="menu-icon"><i class="fas fa-chart-line"></i></div>
+                <span>Reports</span>
+                <i class="fas fa-chevron-right toggle-icon"></i>
+            </button>
+            <ul class="menu-sub @(currentController == "Reports" ? "show" : "")">
+                <li>
+                    <a asp-controller="Reports" asp-action="Index" 
+                       class="menu-sub-item @(currentController == "Reports" && currentAction == "Index" ? "active" : "")">
+                        Inventory Report
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Reports" asp-action="IssueReport" 
+                       class="menu-sub-item @(currentController == "Reports" && currentAction == "IssueReport" ? "active" : "")">
+                        Issue Report
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Settings -->
+        <a asp-controller="Settings" asp-action="Index" 
+           class="menu-item @(currentController == "Settings" && currentAction == "Index" ? "active" : "")">
+            <div class="menu-icon"><i class="fas fa-cog"></i></div>
+            <span>Settings</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-footer p-3">
+        <a href="/Login/Logout" class="menu-item text-danger border-0 w-100" style="background: transparent;">
+            <div class="menu-icon"><i class="fas fa-sign-out-alt"></i></div>
+            <span>Sign Out</span>
+        </a>
+    </div>
+</aside>

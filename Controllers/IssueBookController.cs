@@ -1,4 +1,4 @@
-﻿using lib.DtoModel.IssueBook;
+using lib.DtoModel.IssueBook;
 using lib.Interface;
 using lib.Models;
 using lib.Models.IssueBook;
@@ -20,9 +20,15 @@ namespace lib.Controllers
         }
 
         [HttpGet("/IssueBook")]
-        public IActionResult IssueBook()
+        public IActionResult Create()
         {
-            return View();
+            return View("IssueBook");
+        }
+
+        [HttpGet("/IssueBook/List")]
+        public IActionResult Index()
+        {
+            return RedirectToAction("Create");
         }
 
         [HttpPost]

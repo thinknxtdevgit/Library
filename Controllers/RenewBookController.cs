@@ -1,4 +1,4 @@
-﻿using lib.DtoModel.RenewBookDto;
+using lib.DtoModel.RenewBookDto;
 using lib.Interface;
 using lib.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -18,9 +18,9 @@ namespace lib.Controllers
         }
 
         [HttpGet("/RenewBook")]
-        public IActionResult RenewBook()
+        public IActionResult Index()
         {
-            return View();
+            return View("RenewBook");
         }
 
         [HttpPost]

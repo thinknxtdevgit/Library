@@ -1,495 +1,214 @@
-﻿@{
+@{
     ViewData["Title"] = "Return Book";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-
-    <div class="card shadow-lg border-0">
-
-        <div class="card-header bg-danger text-white">
-            <h3 class="mb-0">
-                Return Book
-            </h3>
+<div class="fade-in">
+    <div class="page-header mt-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Return Resource</h2>
+            <p class="text-muted">Process resource returns, verify borrower metadata, and instantly restore stock items to active inventory.</p>
         </div>
-
-        <div class="card-body">
-
-            <!-- ================= TOP SECTION ================= -->
-
-            <div class="row">
-
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">
-                        Accession No
-                    </label>
-
-                    <input type="text"
-                           id="rAccession"
-                           class="form-control"
-                           placeholder="Enter Accession No" />
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">
-                        ID No
-                    </label>
-
-                    <input type="text"
-                           id="rIdNo"
-                           class="form-control"
-                           readonly />
-                </div>
-
-                <div class="col-md-4 text-center">
-
-                    <img id="rImage"
-                         src="/images/noimage.png"
-                         class="img-thumbnail mt-2"
-                         style="width:120px;height:120px;" />
-
-                </div>
-
-            </div>
-
-            <!-- ================= USER DETAIL ================= -->
-
-            <div class="row mt-3">
-
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">
-                        Name
-                    </label>
-
-                    <input type="text"
-                           id="rName"
-                           class="form-control"
-                           readonly />
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">
-                        Type
-                    </label>
-
-                    <input type="text"
-                           id="rType"
-                           class="form-control"
-                           readonly />
-                </div>
-
-                <div class="col-md-4">
-                    <label class="form-label fw-bold">
-                        College Name
-                    </label>
-
-                    <input type="text"
-                           id="rCollegeName"
-                           class="form-control"
-                           readonly />
-                </div>
-
-            </div>
-
-            <!-- ================= COURSE ================= -->
-
-            <div class="row mt-3">
-
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">
-                        Course / Designation
-                    </label>
-
-                    <input type="text"
-                           id="rCourse"
-                           class="form-control"
-                           readonly />
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">
-                        Batch / Department
-                    </label>
-
-                    <input type="text"
-                           id="rBatch"
-                           class="form-control"
-                           readonly />
-                </div>
-
-            </div>
-
-            <hr />
-
-            <!-- ================= BOOK DETAIL ================= -->
-
-            <h5 class="text-primary">
-                Book Detail
-            </h5>
-
-            <div class="row mt-3">
-
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">
-                        Title
-                    </label>
-
-                    <input type="text"
-                           id="rTitle"
-                           class="form-control"
-                           readonly />
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">
-                        Author
-                    </label>
-
-                    <input type="text"
-                           id="rAuthor"
-                           class="form-control"
-                           readonly />
-                </div>
-
-            </div>
-
-            <!-- ================= DATES ================= -->
-
-            <div class="row mt-3">
-
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">
-                        Issue Date
-                    </label>
-
-                    <input type="text"
-                           id="rIssueDate"
-                           class="form-control"
-                           readonly />
-                </div>
-
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">
-                        Last Return Date
-                    </label>
-
-                    <input type="text"
-                           id="rLastDate"
-                           class="form-control"
-                           readonly />
-                </div>
-
-            </div>
-
-            <!-- ================= SIGNATURE ================= -->
-
-            <div class="row mt-4">
-
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">
-                        Signature
-                    </label>
-
-                    <input type="password"
-                           id="rSignature"
-                           class="form-control"
-                           placeholder="Enter Admin Password" />
-                </div>
-
-            </div>
-
-            <!-- ================= BUTTONS ================= -->
-
-            <div class="mt-4 text-center">
-
-                <button class="btn btn-danger px-4"
-                        onclick="returnBook()">
-                    Submit Return
-                </button>
-
-                <a href="/IssueBook"
-                       class="btn btn-primary px-4">
-                    Go To Issue Book
-                </a>
-
-            </div>
-
+        <div class="d-flex gap-2 w-100-mobile">
+            <a href="/IssueBook" class="btn btn-modern btn-secondary-modern btn-auto-width text-decoration-none">
+                <i class="fas fa-arrow-left me-2 text-primary"></i> Back to Issue
+            </a>
         </div>
-
     </div>
 
+    <div class="row g-4">
+        <!-- Left Column: Return Processing -->
+        <div class="col-xl-8">
+            <div class="modern-card mb-4" style="border-top: 4px solid var(--danger);">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-undo-alt me-2 text-danger"></i> Return Details</h5>
+                    <span class="badge badge-modern badge-modern-danger animate-pulse" id="returnStatusBadge">
+                        Awaiting Input
+                    </span>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Accession Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-barcode text-muted"></i></span>
+                            <input type="text" id="rAccession" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" placeholder="Scan or enter Accession No..." />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Borrower ID</label>
+                        <input type="text" id="rIdNo" class="form-input-modern" readonly placeholder="Auto-fills on scan" />
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Borrower Name</label>
+                        <input type="text" id="rName" class="form-input-modern" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Account Type</label>
+                        <input type="text" id="rType" class="form-input-modern" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">College Name</label>
+                        <input type="text" id="rCollegeName" class="form-input-modern" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Course / Designation</label>
+                        <input type="text" id="rCourse" class="form-input-modern" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Batch / Department</label>
+                        <input type="text" id="rBatch" class="form-input-modern" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modern-card">
+                <h5 class="fw-bold mb-4"><i class="fas fa-book me-2 text-primary"></i> Issued Book Metadata</h5>
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label small fw-bold text-muted">Book Title</label>
+                        <input type="text" id="rTitle" class="form-input-modern" readonly />
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label small fw-bold text-muted">Author</label>
+                        <input type="text" id="rAuthor" class="form-input-modern" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Date of Issue</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="far fa-calendar-alt text-muted"></i></span>
+                            <input type="text" id="rIssueDate" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" readonly />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Scheduled Return Date</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="far fa-calendar-check text-muted"></i></span>
+                            <input type="text" id="rLastDate" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" readonly />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Confirmation & Profile -->
+        <div class="col-xl-4">
+            <div class="modern-card glass sticky-lg-top" style="top: 100px;">
+                <div class="text-center mb-4">
+                    <div class="avatar-lg mx-auto mb-3" style="width: 130px; height: 130px; border-radius: var(--radius-lg); overflow: hidden;">
+                        <img id="rImage" src="/images/noimage.png" class="shadow-sm border w-100 h-100" style="object-fit: cover;" />
+                    </div>
+                    <h5 class="fw-bold mb-1">Return Authorization</h5>
+                    <p class="text-muted small">Verify borrower identity & item condition</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted">Admin Signature</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-pen-nib text-muted"></i></span>
+                        <input type="password" id="rSignature" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" placeholder="Type password..." />
+                    </div>
+                </div>
+
+                <button class="btn btn-modern btn-danger-modern w-100 py-3 mb-3 text-white" onclick="returnBook()">
+                    <i class="fas fa-check-double me-2"></i> Process Return
+                </button>
+                
+                <div class="alert alert-info small border-0 bg-info bg-opacity-10 text-dark d-flex align-items-start gap-2">
+                    <i class="fas fa-info-circle text-info mt-1"></i> 
+                    <div>Processing a returned resource clears the active issue record instantly and updates catalog availability globally.</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <script>
-
         // =========================
         // LOAD RETURN DETAIL
         // =========================
-
         $("#rAccession").blur(function () {
+            let acc = $(this).val().trim();
+            if (acc == "") return;
 
-        let acc = $("#rAccession").val().trim();
+            $.ajax({
+                url: "/ReceiveBook",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ accessionNo: acc }),
+                success: function (res) {
+                    if (!res.success) {
+                        alert(res.message);
+                        $("#returnStatusBadge").text("Error").addClass("badge-modern-danger").removeClass("badge-modern-success");
+                        return;
+                    }
 
-        if (acc == "")
-        return;
+                    let d = res.data;
+                    $("#rIdNo").val(d.idNo);
+                    $("#rName").val(d.name);
+                    $("#rType").val(d.type);
+                    $("#rTitle").val(d.title);
+                    $("#rAuthor").val(d.author);
+                    $("#rCollegeName").val(d.college);
+                    $("#rIssueDate").val(formatDate(d.issueDate));
+                    $("#rLastDate").val(formatDate(d.lastReturnDate));
+                    
+                    $("#returnStatusBadge").text("Ready to Process").addClass("badge-modern-success").removeClass("badge-modern-danger");
 
-        $.ajax({
+                    if (d.extraDetail) {
+                        $("#rCourse").val(d.extraDetail.course);
+                        $("#rBatch").val(d.extraDetail.batch);
+                    }
 
-        url: "/ReceiveBook",
-        method: "POST",
-        contentType: "application/json",
-
-        data: JSON.stringify({
-        accessionNo: acc
-        }),
-
-        success: function (res) {
-
-        console.log(res);
-
-        if (!res.success) {
-
-        alert(res.message);
-        return;
-        }
-
-        let d = res.data;
-
-        $("#rIdNo").val(d.idNo);
-        $("#rName").val(d.name);
-        $("#rType").val(d.type);
-        $("#rTitle").val(d.title);
-        $("#rAuthor").val(d.author);
-
-        $("#rCollegeName").val(d.college);
-
-        $("#rIssueDate").val(formatDate(d.issueDate));
-        $("#rLastDate").val(formatDate(d.lastReturnDate));
-
-        // EXTRA DETAIL
-        if (d.extraDetail != null) {
-
-        $("#rCourse").val(d.extraDetail.course);
-        $("#rBatch").val(d.extraDetail.batch);
-        }
-
-        // IMAGE
-        if (d.snap != null) {
-
-        $("#rImage").attr("src", d.snap);
-        }
-        },
-
-        error: function (err) {
-
-        console.log(err);
-
-        if (err.responseText)
-        alert(err.responseText);
-        else
-        alert("Data Load Error");
-        }
-
+                    if (d.snap) {
+                        $("#rImage").attr("src", d.snap);
+                    } else {
+                        $("#rImage").attr("src", "/images/noimage.png");
+                    }
+                },
+                error: function (err) {
+                    let msg = err.responseText || "Data Load Error";
+                    alert(msg);
+                }
+            });
         });
-
-        });
-
 
         // =========================
         // RETURN BOOK
         // =========================
-
         function returnBook() {
+            let data = {
+                accessionNo: $("#rAccession").val().trim(),
+                signature: $("#rSignature").val().trim()
+            };
 
-        let data = {
+            if (!data.accessionNo) { alert("Enter Accession No"); return; }
+            if (!data.signature) { alert("Enter Admin Signature"); return; }
 
-        accessionNo: $("#rAccession").val().trim(),
-        signature: $("#rSignature").val().trim()
-        };
-
-        if (data.accessionNo == "") {
-
-        alert("Enter Accession No");
-        return;
+            $.ajax({
+                url: "/ReceiveBook",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function (res) {
+                    alert(res.message);
+                    location.reload();
+                },
+                error: function (err) {
+                    let msg = err.responseText || "Return Book Error";
+                    alert(msg);
+                }
+            });
         }
-
-        if (data.signature == "") {
-
-        alert("Enter Signature");
-        return;
-        }
-
-        $.ajax({
-
-        url: "/ReceiveBook",
-        method: "POST",
-        contentType: "application/json",
-
-        data: JSON.stringify(data),
-
-        success: function (res) {
-
-        console.log(res);
-
-        alert(res.message);
-
-        location.reload();
-        },
-
-        error: function (err) {
-
-        console.log(err);
-
-        if (err.responseText)
-        alert(err.responseText);
-        else
-        alert("Return Book Error");
-        }
-
-        });
-
-        }
-
-
-        // =========================
-        // FORMAT DATE
-        // =========================
 
         function formatDate(dateString) {
-
-        let d = new Date(dateString);
-
-        return d.toLocaleDateString('en-GB');
+            if(!dateString) return "-";
+            let d = new Date(dateString);
+            return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
         }
-
     </script>
-
 }
-
-@* 
-@{
-    ViewData["Title"] = "Return Book";
-}
-
-<h2>Return Book</h2>
-
-<div style="width:600px">
-
-    <label>Accession No</label>
-    <input type="text" id="rAccession" class="form-control" />
-
-    <label>ID No</label>
-    <input type="text" id="rIdNo" class="form-control" readonly />
-
-    <label>Name</label>
-    <input type="text" id="rName" class="form-control" readonly />
-
-    <label>Type</label>
-    <input type="text" id="rType" class="form-control" readonly />
-
-    <label>Issue Date</label>
-    <input type="text" id="rIssueDate" class="form-control" readonly />
-
-    <label>Last Return Date</label>
-    <input type="text" id="rLastDate" class="form-control" readonly />
-
-    <label>Title</label>
-    <input type="text" id="rTitle" class="form-control" readonly />
-
-    <label>Signature</label>
-    <input type="password" id="rSignature" class="form-control" />
-
-    <label>College Name</label>
-    <input type="text" id="rCollegeName" class="form-control" readonly />
-
-    <label>Course</label>
-    <input type="text" id="rCourse" class="form-control" readonly />
-
-    <label>Batch</label>
-    <input type="text" id="rBatch" class="form-control" readonly />
-
-    <br />
-
-    <button class="btn btn-danger" onclick="returnBook()">
-        Submit Return
-    </button>
-
-    <a href="/IssueBook" class="btn btn-primary">
-        Go To Issue Book
-    </a>
-
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script>
-
-    $("#rAccession").blur(function () {
-
-    let acc = $("#rAccession").val();
-
-    $.ajax({
-    url: "/ReceiveBook",
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify({
-    accessionNo: acc
-    }),
-
-    success: function (res) {
-
-    let d = res.data;
-
-    $("#rIdNo").val(d.idNo);
-    $("#rName").val(d.name);
-    $("#rType").val(d.type);
-    $("#rTitle").val(d.title);
-    $("#rCollegeName").val(d.college);
-
-    $("#rIssueDate").val(d.issueDate);
-    $("#rLastDate").val(d.lastReturnDate);
-
-    if (d.extraDetail) {
-    $("#rCourse").val(d.extraDetail.course);
-    $("#rBatch").val(d.extraDetail.batch);
-    }
-    },
-
-    error: function (err) {
-    alert(err.responseText);
-    }
-    });
-
-    });
-
-    function returnBook() {
-
-    let data = {
-    accessionNo: $("#rAccession").val(),
-    signature: $("#rSignature").val()
-    };
-
-    $.ajax({
-    url: "/ReceiveBook",
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify(data),
-
-    success: function (res) {
-
-    alert(res.message);
-
-    location.reload();
-    },
-
-    error: function (err) {
-    alert(err.responseText);
-    }
-    });
-
-    }
-
-</script> *@

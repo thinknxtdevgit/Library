@@ -1,12 +1,283 @@
-﻿@{
+@{
+    ViewData["Title"] = "Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h2>
-    Dashboard
-</h2>
+<div class="fade-in">
+    <div class="page-header mt-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Library Overview</h2>
+            <p class="text-muted">Welcome back, @Context.Session.GetString("UserName")! Here's the real-time library status overview.</p>
+        </div>
+        <div class="d-flex gap-2 w-100-mobile">
+            <button class="btn btn-modern glass border btn-auto-width">
+                <i class="fas fa-download me-2 text-primary"></i> Export Report
+            </button>
+            <a href="/IssueBook" class="btn btn-modern btn-primary-modern btn-auto-width text-white text-decoration-none">
+                <i class="fas fa-plus me-2"></i> Issue Book
+            </a>
+        </div>
+    </div>
 
-<h3>
-    Welcome :
-    @Context.Session.GetString("UserName")
-</h3>
+    <!-- 8 Premium SaaS KPI Cards -->
+    <div class="row g-3 g-md-4 mb-4">
+        <!-- 1. Total Books -->
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="stat-card card-total-books">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Total Books</div>
+                        <div class="stat-value">12,480</div>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="fas fa-book"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="width: 78%;"></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="stat-trend up"><i class="fas fa-arrow-up"></i> +12%</span>
+                        <span>This month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Issued Books -->
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="stat-card card-issued-books">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Issued Books</div>
+                        <div class="stat-value">3,240</div>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="width: 62%;"></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="stat-trend up"><i class="fas fa-arrow-up"></i> +5%</span>
+                        <span>This week</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Returned Books -->
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="stat-card card-returned-books">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Returned Books</div>
+                        <div class="stat-value">9,120</div>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="fas fa-undo-alt"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="width: 84%;"></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="stat-trend up"><i class="fas fa-arrow-up"></i> +8%</span>
+                        <span>This month</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Overdue Books -->
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="stat-card card-overdue-books">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Overdue Books</div>
+                        <div class="stat-value">142</div>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="width: 12%;"></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="stat-trend down"><i class="fas fa-arrow-down"></i> -2%</span>
+                        <span>Good rate</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Total Students -->
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="stat-card card-total-students">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Total Students</div>
+                        <div class="stat-value">2,450</div>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="width: 70%;"></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="stat-trend up"><i class="fas fa-arrow-up"></i> +15%</span>
+                        <span>Annual growth</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Active Users -->
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="stat-card card-active-users">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Active Users</div>
+                        <div class="stat-value">1,890</div>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="width: 77%;"></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="stat-trend up"><i class="fas fa-arrow-up"></i> +8%</span>
+                        <span>Daily active</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Renewed Books -->
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="stat-card card-renewed-books">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Renewed Books</div>
+                        <div class="stat-value">480</div>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="width: 45%;"></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="stat-trend up"><i class="fas fa-arrow-up"></i> +24%</span>
+                        <span>Renew extension</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Pending Returns -->
+        <div class="col-sm-6 col-md-4 col-xl-3">
+            <div class="stat-card card-pending-returns">
+                <div class="stat-header">
+                    <div>
+                        <div class="stat-title">Pending Returns</div>
+                        <div class="stat-value">210</div>
+                    </div>
+                    <div class="stat-icon-wrapper">
+                        <i class="fas fa-exclamation-circle"></i>
+                    </div>
+                </div>
+                <div>
+                    <div class="stat-progress">
+                        <div class="stat-progress-bar" style="width: 35%;"></div>
+                    </div>
+                    <div class="stat-footer">
+                        <span class="stat-trend down"><i class="fas fa-arrow-down"></i> -10%</span>
+                        <span>Clear progress</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Activity Section -->
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="modern-card h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h5 class="fw-bold mb-0">Borrowing Trends</h5>
+                        <p class="text-muted small mb-0">Detailed statistical overview of book issuances</p>
+                    </div>
+                    <select class="form-select form-select-sm w-auto form-input-modern py-1 px-3 border" style="width: 150px !important;">
+                        <option>Last 7 Days</option>
+                        <option>Last 30 Days</option>
+                    </select>
+                </div>
+                
+                <div class="chart-container-modern p-3" style="height: 300px;">
+                    <svg class="chart-svg-trends" viewBox="0 0 500 200" preserveAspectRatio="none" style="width: 100%; height: 100%;">
+                        <defs>
+                            <linearGradient id="chart-gradient" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stop-color="var(--primary)" stop-opacity="0.25"/>
+                                <stop offset="100%" stop-color="var(--primary)" stop-opacity="0.00"/>
+                            </linearGradient>
+                        </defs>
+                        <!-- Grid lines -->
+                        <line x1="0" y1="50" x2="500" y2="50" stroke="var(--border-color)" stroke-width="1" stroke-dasharray="5 5" />
+                        <line x1="0" y1="100" x2="500" y2="100" stroke="var(--border-color)" stroke-width="1" stroke-dasharray="5 5" />
+                        <line x1="0" y1="150" x2="500" y2="150" stroke="var(--border-color)" stroke-width="1" stroke-dasharray="5 5" />
+                        
+                        <!-- Area path -->
+                        <path class="chart-area" d="M 0,200 L 0,150 Q 50,110 100,130 T 200,90 T 300,70 T 400,60 T 500,40 L 500,200 Z" />
+                        
+                        <!-- Main trend line -->
+                        <path class="chart-line" d="M 0,150 Q 50,110 100,130 T 200,90 T 300,70 T 400,60 T 500,40" />
+                        
+                        <!-- Accent reference line -->
+                        <path class="chart-line-accent" d="M 0,160 L 500,50" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="modern-card h-100">
+                <h5 class="fw-bold mb-4">Recent Activity</h5>
+                <div class="activity-timeline">
+                    <div class="activity-item">
+                        <div class="activity-badge"></div>
+                        <div class="fw-semibold">New Book Added</div>
+                        <p class="text-muted small mb-0">"The Art of Innovation" by Tom Kelley</p>
+                        <span class="text-muted x-small" style="font-size: 0.72rem;">12 mins ago</span>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-badge success"></div>
+                        <div class="fw-semibold">Book Returned</div>
+                        <p class="text-muted small mb-0">John Doe returned "Clean Code"</p>
+                        <span class="text-muted x-small" style="font-size: 0.72rem;">45 mins ago</span>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-badge info"></div>
+                        <div class="fw-semibold">New Membership</div>
+                        <p class="text-muted small mb-0">Sarah Smith registered as a member</p>
+                        <span class="text-muted x-small" style="font-size: 0.72rem;">2 hours ago</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

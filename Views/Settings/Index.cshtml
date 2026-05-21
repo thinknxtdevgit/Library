@@ -1,0 +1,51 @@
+@{
+    ViewData["Title"] = "System Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="fade-in">
+    <div class="page-header mt-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">System Settings</h2>
+            <p class="text-muted">Configure library core policies, administrative access keys, check-out limits, and branding options.</p>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-md-6">
+            <div class="modern-card h-100" style="border-top: 4px solid var(--primary);">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <i class="fas fa-university fa-lg"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0">Library Branding</h5>
+                        <p class="text-muted small mb-0">Contact parameters and institution metadata</p>
+                    </div>
+                </div>
+                <p class="text-muted small mb-4">Update college details, register official branding logos, coordinate department registries, and establish communication rules.</p>
+                <button class="btn btn-modern btn-primary-modern w-100 text-white">
+                    <i class="fas fa-edit me-2"></i> Manage Settings
+                </button>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="modern-card h-100" style="border-top: 4px solid var(--warning);">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                        <i class="fas fa-hand-holding-usd fa-lg"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0">Fine & Grace Period</h5>
+                        <p class="text-muted small mb-0">Daily dues and borrowing timelines</p>
+                    </div>
+                </div>
+                <p class="text-muted small mb-4">Set baseline parameters for check-out extension durations, daily penalty limits, student and faculty grace brackets, and currency units.</p>
+                <button class="btn btn-modern btn-secondary-modern border w-100">
+                    <i class="fas fa-cog me-2 text-warning"></i> Configure Policies
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

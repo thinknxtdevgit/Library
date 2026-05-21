@@ -1,586 +1,209 @@
-﻿@{
+@{
     ViewData["Title"] = "Renew Book";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container mt-4">
-
-    <div class="card shadow-lg border-0 rounded-4">
-
-        <div class="card-header bg-danger text-white rounded-top-4">
-
-            <h3 class="mb-0 text-center">
-                Renew Library Book
-            </h3>
-
+<div class="fade-in">
+    <div class="page-header mt-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Renew Resource</h2>
+            <p class="text-muted">Extend the borrowing duration for active issuances, authorize transactions, and maintain ledger consistency.</p>
         </div>
-
-        <div class="card-body">
-
-            <!-- ================= ACCESSION ================= -->
-
-            <div class="row">
-
-                <div class="col-md-4">
-
-                    <label class="form-label fw-bold">
-                        Accession No
-                    </label>
-
-                    <input type="text"
-                           id="txtAccessionNo"
-                           class="form-control"
-                           placeholder="Enter Accession No" />
-
-                </div>
-
-                <div class="col-md-4">
-
-                    <label class="form-label fw-bold">
-                        Issue Date
-                    </label>
-
-                    <input type="text"
-                           id="txtIssueDate"
-                           class="form-control"
-                           readonly />
-
-                </div>
-
-                <div class="col-md-4">
-
-                    <label class="form-label fw-bold">
-                        Last Return Date
-                    </label>
-
-                    <input type="text"
-                           id="txtLastReturnDate"
-                           class="form-control"
-                           readonly />
-
-                </div>
-
-            </div>
-
-            <hr />
-
-            <!-- ================= USER DETAIL ================= -->
-
-            <div class="row">
-
-                <!-- PHOTO -->
-
-                <div class="col-md-3 text-center">
-
-                    <img id="imgPhoto"
-                         src="/images/noimage.png"
-                         class="img-thumbnail rounded shadow"
-                         style="width:150px;height:170px;object-fit:cover;" />
-
-                </div>
-
-                <!-- DETAILS -->
-                <div class="col-md-9">
-                    <div class="row">
-
-                    <div class="col-md-6">
-                            <label class="form-label fw-bold">College Name</label>
-
-                        <input type="text"
-                               id="txtCollegeName"
-                               class="form-control"
-                               readonly />
-                    </div>
-                    </div>
-                </div>
-
-
-                <div class="col-md-9">
-
-                    <div class="row">
-
-                        <div class="col-md-6">
-
-                            <label class="form-label fw-bold">
-                                Name
-                            </label>
-
-                            <input type="text"
-                                   id="txtName"
-                                   class="form-control"
-                                   readonly />
-
-                        </div>
-
-                        <div class="col-md-6">
-
-                            <label class="form-label fw-bold">
-                                ID No
-                            </label>
-
-                            <input type="text"
-                                   id="txtIDNo"
-                                   class="form-control"
-                                   readonly />
-
-                        </div>
-
-                    </div>
-
-                    <div class="row mt-3">
-
-                        <div class="col-md-4">
-
-                            <label class="form-label fw-bold">
-                                Type
-                            </label>
-
-                            <input type="text"
-                                   id="txtType"
-                                   class="form-control"
-                                   readonly />
-
-                        </div>
-
-                        <div class="col-md-4">
-
-                            <label class="form-label fw-bold">
-                                Discipline
-                            </label>
-
-                            <input type="text"
-                                   id="txtDiscipline"
-                                   class="form-control"
-                                   readonly />
-
-                        </div>
-
-                        <div class="col-md-4">
-
-                            <label class="form-label fw-bold">
-                                Author
-                            </label>
-
-                            <input type="text"
-                                   id="txtAuthor"
-                                   class="form-control"
-                                   readonly />
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-            <hr />
-
-            <!-- ================= BOOK DETAIL ================= -->
-
-            <div class="row">
-
-                <div class="col-md-12">
-
-                    <label class="form-label fw-bold">
-                        Book Title
-                    </label>
-
-                    <input type="text"
-                           id="txtTitle"
-                           class="form-control"
-                           readonly />
-
-                </div>
-
-            </div>
-
-            <hr />
-
-            <!-- ================= SIGNATURE ================= -->
-
-            <div class="row">
-
-                <div class="col-md-6">
-
-                    <label class="form-label fw-bold">
-                        Signature / Password
-                    </label>
-
-                    <input type="password"
-                           id="txtSignature"
-                           class="form-control"
-                           placeholder="Enter Signature" />
-
-                </div>
-
-            </div>
-
-            <br />
-
-            <!-- ================= BUTTONS ================= -->
-
-            <div class="text-center">
-
-                <button class="btn btn-danger px-4"
-                        onclick="renewBook()">
-
-                    <i class="fa fa-refresh"></i>
-                    Renew Book
-
-                </button>
-
-                <a href="/IssueBook"
-                       class="btn btn-primary px-4">
-
-                    <i class="fa fa-book"></i>
-                    Issue Book
-
-                </a>
-
-                <a href="/ReceiveBook"
-                       class="btn btn-success px-4">
-
-                    <i class="fa fa-undo"></i>
-                    Return Book
-
-                </a>
-
-            </div>
-
+        <div class="d-flex gap-2 w-100-mobile">
+            <a href="/IssueBook" class="btn btn-modern btn-secondary-modern btn-auto-width text-decoration-none">
+                <i class="fas fa-exchange-alt me-2 text-primary"></i> Issue Module
+            </a>
+            <a href="/ReceiveBook" class="btn btn-modern btn-secondary-modern btn-auto-width text-decoration-none">
+                <i class="fas fa-undo me-2 text-danger"></i> Return Module
+            </a>
         </div>
-
     </div>
 
+    <div class="row g-4">
+        <!-- Left Column: Renewal Processing -->
+        <div class="col-xl-8">
+            <div class="modern-card mb-4" style="border-top: 4px solid var(--info);">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0"><i class="fas fa-sync-alt me-2 text-info"></i> Renewal Details</h5>
+                    <span class="badge badge-modern badge-modern-warning animate-pulse" id="renewalStatusBadge">
+                        Verify Accession
+                    </span>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Accession No</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-barcode text-muted"></i></span>
+                            <input type="text" id="txtAccessionNo" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" placeholder="Scan Accession No..." />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Current Issue Date</label>
+                        <input type="text" id="txtIssueDate" class="form-input-modern" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Current Return Date</label>
+                        <input type="text" id="txtLastReturnDate" class="form-input-modern text-danger fw-bold" readonly />
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Full Name</label>
+                        <input type="text" id="txtName" class="form-input-modern" readonly />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">Borrower ID</label>
+                        <input type="text" id="txtIDNo" class="form-input-modern" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">College</label>
+                        <input type="text" id="txtCollegeName" class="form-input-modern" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Discipline</label>
+                        <input type="text" id="txtDiscipline" class="form-input-modern" readonly />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Type</label>
+                        <input type="text" id="txtType" class="form-input-modern" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <div class="modern-card">
+                <h5 class="fw-bold mb-4"><i class="fas fa-book-open me-2 text-primary"></i> Resource Info</h5>
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label class="form-label small fw-bold text-muted">Book Title</label>
+                        <input type="text" id="txtTitle" class="form-input-modern" readonly />
+                    </div>
+                    <div class="col-md-12">
+                        <label class="form-label small fw-bold text-muted">Author</label>
+                        <input type="text" id="txtAuthor" class="form-input-modern" readonly />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Confirmation -->
+        <div class="col-xl-4">
+            <div class="modern-card glass sticky-lg-top" style="top: 100px;">
+                <div class="text-center mb-4">
+                    <div class="avatar-lg mx-auto mb-3" style="width: 130px; height: 130px; border-radius: var(--radius-lg); overflow: hidden;">
+                        <img id="imgPhoto" src="/images/noimage.png" class="shadow-sm border w-100 h-100" style="object-fit: cover;" />
+                    </div>
+                    <h5 class="fw-bold mb-1">Verify Identity</h5>
+                    <p class="text-muted small">Cross-check borrower signature & photo</p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted">Security Signature</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-fingerprint text-muted"></i></span>
+                        <input type="password" id="txtSignature" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" placeholder="Required for renewal..." />
+                    </div>
+                </div>
+
+                <button class="btn btn-modern btn-primary-modern w-100 py-3 mb-3 text-white" style="background: linear-gradient(135deg, var(--info) 0%, #0891b2 100%); box-shadow: 0 4px 14px rgba(6, 182, 212, 0.3);" onclick="renewBook()">
+                    <i class="fas fa-sync-alt me-2"></i> Confirm Renewal
+                </button>
+                
+                <div class="alert alert-info small border-0 bg-info bg-opacity-10 text-dark d-flex align-items-start gap-2">
+                    <i class="fas fa-clock text-info mt-1"></i> 
+                    <div>Renewal extensions automatically assign additional borrowing days according to active library policy sets.</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
-
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
     <script>
-
         // =========================================
         // LOAD BOOK DETAIL
         // =========================================
-
         $("#txtAccessionNo").blur(function () {
+            let acc = $(this).val().trim();
+            if (acc == "") return;
 
-        let accessionNo = $("#txtAccessionNo").val().trim();
+            $.ajax({
+                url: "/api/book/renew",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ accessionNo: acc }),
+                success: function (res) {
+                    if (!res.success) {
+                        alert(res.message);
+                        $("#renewalStatusBadge").text("Error").addClass("badge-modern-danger").removeClass("badge-modern-warning");
+                        return;
+                    }
 
-        if (accessionNo == "")
-        return;
+                    let d = res.data;
+                    $("#txtCollegeName").val(d.collegeName);
+                    $("#txtName").val(d.name);
+                    $("#txtIDNo").val(d.idNo);
+                    $("#txtType").val(d.type);
+                    $("#txtDiscipline").val(d.discipline);
+                    $("#txtTitle").val(d.title);
+                    $("#txtAuthor").val(d.author);
+                    $("#txtIssueDate").val(formatDate(d.dateOfIssue));
+                    $("#txtLastReturnDate").val(formatDate(d.lastReturnDate));
+                    
+                    $("#renewalStatusBadge").text("Active Issuance").addClass("badge-modern-success").removeClass("badge-modern-warning");
 
-        $.ajax({
-
-        url: "/api/book/renew",
-        method: "POST",
-        contentType: "application/json",
-
-        data: JSON.stringify({
-        accessionNo: accessionNo
-        }),
-
-        success: function (res) {
-
-        if (!res.success) {
-        alert(res.message);
-        return;
-        }
-
-        let d = res.data;
-        $("#txtCollegeName").val(d.collegeName);
-        $("#txtName").val(d.name);
-        $("#txtIDNo").val(d.idNo);
-        $("#txtType").val(d.type);
-        $("#txtDiscipline").val(d.discipline);
-
-        $("#txtTitle").val(d.title);
-        $("#txtAuthor").val(d.author);
-
-        $("#txtIssueDate").val(formatDate(d.dateOfIssue));
-        $("#txtLastReturnDate").val(formatDate(d.lastReturnDate));
-
-        // PHOTO
-        if (res.snap) {
-
-        $("#imgPhoto").attr("src", res.snap);
-        }
-        else {
-
-        $("#imgPhoto").attr("src", "/images/noimage.png");
-        }
-        },
-
-        error: function (err) {
-
-        console.log(err);
-
-        if (err.responseText) {
-
-        alert(err.responseText);
-        }
-        else {
-
-        alert("Book Detail Load Error");
-        }
-        }
-
+                    if (res.snap) {
+                        $("#imgPhoto").attr("src", res.snap);
+                    } else {
+                        $("#imgPhoto").attr("src", "/images/noimage.png");
+                    }
+                },
+                error: function (err) {
+                    let msg = err.responseText || "Renewal Load Error";
+                    alert(msg);
+                }
+            });
         });
-
-        });
-
 
         // =========================================
         // RENEW BOOK
         // =========================================
-
         function renewBook() {
+            let data = {
+                accessionNo: $("#txtAccessionNo").val().trim(),
+                signature: $("#txtSignature").val().trim()
+            };
 
-        let data = {
+            if (!data.accessionNo || !data.signature) {
+                alert("Accession No and Signature are required.");
+                return;
+            }
 
-        accessionNo: $("#txtAccessionNo").val().trim(),
-        signature: $("#txtSignature").val().trim()
-
-        };
-
-        if (data.accessionNo == "") {
-
-        alert("Enter Accession No");
-        return;
+            $.ajax({
+                url: "/api/book/renew",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (!res.success) { alert(res.message); return; }
+                    alert(res.message);
+                    location.reload();
+                },
+                error: function (err) {
+                    let msg = err.responseText || "Renewal Error";
+                    alert(msg);
+                }
+            });
         }
-
-        if (data.signature == "") {
-
-        alert("Enter Signature");
-        return;
-        }
-
-        $.ajax({
-
-        url: "/api/book/renew",
-        method: "POST",
-        contentType: "application/json",
-
-        data: JSON.stringify(data),
-
-        success: function (res) {
-
-        console.log(res);
-
-        if (!res.success) {
-
-        alert(res.message);
-        return;
-        }
-
-        alert(res.message);
-
-        location.reload();
-        },
-
-        error: function (err) {
-
-        console.log(err);
-
-        if (err.responseText) {
-
-        alert(err.responseText);
-        }
-        else {
-
-        alert("Renew Book Error");
-        }
-        }
-
-        });
-
-        }
-
-
-        // =========================================
-        // DATE FORMAT
-        // =========================================
 
         function formatDate(dateString) {
-
-        let d = new Date(dateString);
-
-        let day = String(d.getDate()).padStart(2, '0');
-
-        let month = String(d.getMonth() + 1).padStart(2, '0');
-
-        let year = d.getFullYear();
-
-        return day + "/" + month + "/" + year;
+            if(!dateString) return "-";
+            let d = new Date(dateString);
+            let day = String(d.getDate()).padStart(2, '0');
+            let month = String(d.getMonth() + 1).padStart(2, '0');
+            let year = d.getFullYear();
+            return day + "/" + month + "/" + year;
         }
-
     </script>
-
 }
-
-
-@* @{
-    ViewData["Title"] = "Renew Book";
-}
-
-<h2>Renew Book</h2>
-
-<div style="width:700px">
-
-    <!-- ACCESSION -->
-    <label>Accession No</label>
-    <input type="text" id="txtAccessionNo" class="form-control" />
-    <br />
-
-    <!-- PHOTO -->
-    <img id="imgPhoto"
-         src=""
-         width="120"
-         height="120"
-         style="border:1px solid gray; margin-bottom:10px;" />
-
-    <!-- USER DETAILS -->
-    <label>Name</label>
-    <input type="text" id="txtName" class="form-control" readonly />
-
-    <label>ID No</label>
-    <input type="text" id="txtIDNo" class="form-control" readonly />
-
-    <label>Type</label>
-    <input type="text" id="txtType" class="form-control" readonly />
-
-    <label>Discipline</label>
-    <input type="text" id="txtDiscipline" class="form-control" readonly />
-
-    <br />
-
-    <!-- BOOK DETAILS -->
-    <label>Title</label>
-    <input type="text" id="txtTitle" class="form-control" readonly />
-
-    <label>Author</label>
-    <input type="text" id="txtAuthor" class="form-control" readonly />
-
-    <label>Issue Date</label>
-    <input type="text" id="txtIssueDate" class="form-control" readonly />
-
-    <label>Last Return Date</label>
-    <input type="text" id="txtLastReturnDate" class="form-control" readonly />
-
-    <br />
-
-    <!-- SIGNATURE -->
-    <label>Signature</label>
-    <input type="password" id="txtSignature" class="form-control" />
-
-    <br />
-
-    <button class="btn btn-danger" onclick="renewBook()">
-        Renew Book
-    </button>
-    
-    <a href="/IssueBook" class="btn btn-primary">
-        Go To Issue Book
-    </a>
-</div>
-
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-<script>
-
-    // =========================
-    // GET BOOK DETAIL
-    // =========================
-    $("#txtAccessionNo").blur(function () {
-
-    let accessionNo = $("#txtAccessionNo").val();
-
-    $.ajax({
-    url: "/api/book/renew",
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify({
-    accessionNo: accessionNo
-    }),
-
-    success: function (res) {
-
-    if (!res.success) {
-    alert(res.message);
-    return;
-    }
-
-    let d = res.data;
-
-    $("#txtName").val(d.name);
-    $("#txtIDNo").val(d.idNo);
-    $("#txtType").val(d.type);
-    $("#txtDiscipline").val(d.discipline);
-
-    $("#txtTitle").val(d.title);
-    $("#txtAuthor").val(d.author);
-
-    $("#txtIssueDate").val(formatDate(d.dateOfIssue));
-    $("#txtLastReturnDate").val(formatDate(d.lastReturnDate));
-
-    // PHOTO
-    $("#imgPhoto").attr(
-    "src",
-    "/IssueBook/GetPhoto?idNo=" + d.idNo
-    );
-    },
-
-    error: function (err) {
-    alert(err.responseText);
-    }
-    });
-
-    });
-
-
-    // =========================
-    // RENEW BOOK
-    // =========================
-    function renewBook() {
-
-    let data = {
-    accessionNo: $("#txtAccessionNo").val(),
-    signature: $("#txtSignature").val()
-    };
-
-    $.ajax({
-    url: "/api/book/renew",
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify(data),
-
-    success: function (res) {
-
-    alert(res.message);
-
-    location.reload();
-    },
-
-    error: function (err) {
-    alert(err.responseText);
-    }
-    });
-
-    }
-
-
-    // =========================
-    // DATE FORMAT
-    // =========================
-    function formatDate(dateString) {
-
-    let d = new Date(dateString);
-
-    let day = String(d.getDate()).padStart(2, '0');
-    let month = String(d.getMonth() + 1).padStart(2, '0');
-    let year = d.getFullYear();
-
-    return day + "/" + month + "/" + year;
-    }
-
-</script> *@

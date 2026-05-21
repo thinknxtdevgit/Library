@@ -1,0 +1,42 @@
+@{
+    ViewData["Title"] = "Add Student";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="fade-in">
+    <div class="page-header mt-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">New Student Registration</h2>
+            <p class="text-muted">Register a new academic cohort member to enable library checkout privileges.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" class="btn btn-modern btn-secondary-modern border text-decoration-none">
+                <i class="fas fa-arrow-left me-2 text-primary"></i> Back to Directory
+            </a>
+        </div>
+    </div>
+
+    <div class="modern-card">
+        <form class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-muted">Student Name</label>
+                <input type="text" class="form-input-modern" placeholder="Full name (e.g. John Doe)">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-muted">ID Number / Roll No</label>
+                <input type="text" class="form-input-modern" placeholder="STU-12345">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-muted">Institution Email</label>
+                <input type="email" class="form-input-modern" placeholder="john.doe@college.edu">
+            </div>
+            <div class="col-md-6">
+                <label class="form-label small fw-bold text-muted">Active Course</label>
+                <input type="text" class="form-input-modern" placeholder="e.g. B.Tech Computer Science">
+            </div>
+            <div class="col-12 text-end mt-4">
+                <button type="button" class="btn btn-modern btn-primary-modern px-5 text-white">Save Student Record</button>
+            </div>
+        </form>
+    </div>
+</div>
