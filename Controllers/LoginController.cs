@@ -5,6 +5,8 @@ using lib.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace lib.Controllers
 {
@@ -17,7 +19,7 @@ namespace lib.Controllers
             _loginService = loginService;
         }
 
-        [HttpGet("/Login")]
+        [HttpGet]
         public IActionResult Login()
         {
             return View();
@@ -39,9 +41,24 @@ namespace lib.Controllers
             if (!result.Success)
                 return Unauthorized(result);
 
+            // Session Save
+            HttpContext.Session.SetString(
+                "MenuData",
+                JsonSerializer.Serialize(result.MenuItems)
+            );
+
+            HttpContext.Session.SetString(
+                "UserName",
+                result.UserName
+            );
+
+            HttpContext.Session.SetString(
+                "LoginType",
+                result.LoginType
+            );
+
             return Ok(result);
         }
-
         [HttpGet("api/Login/GetDynamicMenu")]
         public async Task<IActionResult> GetDynamicMenu()
         {
@@ -49,7 +66,10 @@ namespace lib.Controllers
 
             return Ok(result);
         }
+
+       
     }
+
 }
 
 

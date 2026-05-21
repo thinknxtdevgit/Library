@@ -1,4 +1,424 @@
-﻿
+﻿@{
+    ViewData["Title"] = "Issue Book";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow-lg p-4">
+
+        <h2 class="text-center text-primary mb-4">
+            Library Issue Book
+        </h2>
+
+        <!-- ================= USER DETAIL ================= -->
+
+        <div class="row">
+
+            <div class="col-md-4">
+                <label>ID No</label>
+                <input type="text" id="txtIdNo" class="form-control" placeholder="Enter ID No" />
+            </div>
+
+            <div class="col-md-4">
+                <label>Name</label>
+                <input type="text" id="txtName" class="form-control" readonly />
+            </div>
+
+            <div class="col-md-4">
+                <label>College Name</label>
+                <input type="text" id="txtCollege" class="form-control" readonly />
+            </div>
+
+        </div>
+
+        <div class="row mt-3">
+
+            <div class="col-md-3">
+                <label>Course / Designation</label>
+                <input type="text" id="txtCourse" class="form-control" readonly />
+            </div>
+
+            <div class="col-md-3">
+                <label>Batch / Department</label>
+                <input type="text" id="txtBatch" class="form-control" readonly />
+            </div>
+
+            <div class="col-md-3">
+                <label>Type</label>
+                <input type="text" id="txtType" class="form-control" readonly />
+            </div>
+
+            <div class="col-md-3 text-center">
+                <img id="userImage"
+                     src="/images/noimage.png"
+                     width="120"
+                     height="120"
+                     class="img-thumbnail mt-2" />
+            </div>
+
+        </div>
+
+        <div class="row mt-3">
+
+            <div class="col-md-6">
+                <label>Issue Date</label>
+                <input type="text" id="txtIssueDate" class="form-control" readonly />
+            </div>
+
+            <div class="col-md-6">
+                <label>Last Return Date</label>
+                <input type="text" id="txtReturnDate" class="form-control" readonly />
+            </div>
+
+        </div>
+
+        <hr />
+
+        <!-- ================= BOOK DETAIL ================= -->
+
+        <h4 class="text-success">
+            Book Detail
+        </h4>
+
+        <div class="row">
+
+            <div class="col-md-3">
+                <label>Accession No</label>
+                <input type="text" id="txtAccession" class="form-control" />
+            </div>
+
+            <div class="col-md-3">
+                <label>Title</label>
+                <input type="text" id="txtTitle" class="form-control" readonly />
+            </div>
+
+            <div class="col-md-3">
+                <label>Author</label>
+                <input type="text" id="txtAuthor" class="form-control" readonly />
+            </div>
+
+            <div class="col-md-3">
+                <label>Category</label>
+                <input type="text" id="txtCategory" class="form-control" readonly />
+            </div>
+
+        </div>
+
+        <hr />
+
+        <!-- ================= SIGNATURE ================= -->
+
+        <div class="row">
+
+            <div class="col-md-6">
+                <label>Signature</label>
+                <input type="password"
+                       id="txtSignature"
+                       class="form-control"
+                       placeholder="Enter Admin Password" />
+            </div>
+
+        </div>
+@* 
+        <div class="row">
+
+            <div class="col-md-6">
+                <label>Remark</label>
+                <input type="text"
+                       id="txtSignature"
+                       class="form-control"
+                       placeholder="Remark" />
+            </div>
+                
+        </div> *@
+
+
+        <br />
+
+        <!-- ================= TOTAL ================= -->
+
+        <div class="alert alert-info">
+
+            <span id="lblTotalBooks">
+                Already Book Issued - 0
+            </span>
+
+        </div>
+
+        <!-- ================= PREVIOUS TABLE ================= -->
+
+        <div class="table-responsive">
+
+            <table class="table table-bordered table-striped" id="tblPrevious">
+
+                <thead class="table-dark">
+
+                    <tr>
+                        <th>Title</th>
+                        <th>Accession</th>
+                        <th>Issue Date</th>
+                        <th>Return Date</th>
+                        <th>ID No</th>
+                        <th>Author</th>
+                        <th>Course</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <br />
+
+        <!-- ================= BUTTONS ================= -->
+
+        <div class="text-center">
+
+            <button class="btn btn-success px-4"
+                    onclick="issueBook()">
+                Issue Book
+            </button>
+
+            <button class="btn btn-warning px-4"
+                    onclick="openReturnPage()">
+                Return Book
+            </button>
+
+            <button class="btn btn-danger px-4"
+                    onclick="openRenewPage()">
+                Renew Book
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+
+        // =========================
+        // LOAD USER DETAIL
+        // =========================
+
+        $("#txtIdNo").blur(function () {
+
+        let id = $("#txtIdNo").val().trim();
+
+        if (id == "")
+        return;
+
+        $.ajax({
+
+        url: "/api/IssueBook/checkid",
+        type: "POST",
+        contentType: "application/json",
+
+        data: JSON.stringify({
+        txtidno: id
+        }),
+
+        success: function (res) {
+
+        console.log(res);
+
+        if (!res || res.success == false) {
+
+        alert(res.message);
+        return;
+        }
+
+        let d = res.userDetail;
+
+        $("#txtName").val(d.name);
+        $("#txtCollege").val(d.collegeName);
+        $("#txtCourse").val(d.course || d.designation);
+        $("#txtBatch").val(d.batch || d.department);
+        $("#txtType").val(d.type);
+        $("#txtReturnDate").val(d.lastReturnDate);
+
+        let today =
+        new Date().toLocaleDateString('en-GB');
+
+        $("#txtIssueDate").val(today);
+
+        // IMAGE
+        if (d.image != null) {
+
+        $("#userImage").attr("src", d.image);
+        }
+
+        // TOTAL BOOK
+        $("#lblTotalBooks").text(
+        "Already Book Issued - " +
+        res.totalIssuedBooks
+        );
+
+        // TABLE
+        let rows = "";
+
+        res.previousIssues.forEach(function (x) {
+
+        rows += `
+        <tr>
+        <td>${x.title}</td>
+        <td>${x.accessionNo}</td>
+        <td>${x.issueDate}</td>
+        <td>${x.lastReturnDate}</td>
+        <td>${x.idNo}</td>
+        <td>${x.author}</td>
+        <td>${x.course}</td>
+        </tr>
+        `;
+        });
+
+        $("#tblPrevious tbody").html(rows);
+        },
+
+        error: function (err) {
+
+        console.log(err);
+
+        alert("ID Detail Load Error");
+        }
+
+        });
+
+        });
+
+
+        // =========================
+        // LOAD BOOK DETAIL
+        // =========================
+
+        $("#txtAccession").blur(function () {
+
+        let id = $("#txtIdNo").val().trim();
+
+        let acc = $("#txtAccession").val().trim();
+
+        if (acc == "")
+        return;
+
+        $.ajax({
+
+        url: "/api/IssueBook/checkid",
+        type: "POST",
+        contentType: "application/json",
+
+        data: JSON.stringify({
+
+        txtidno: id,
+        txtaccessionno: acc
+
+        }),
+
+        success: function (res) {
+
+        console.log(res);
+
+        let b = res.bookDetail;
+
+        if (!b || b.success == false) {
+
+        alert("Book not found");
+        return;
+        }
+
+        $("#txtTitle").val(b.title);
+        $("#txtAuthor").val(b.author);
+        $("#txtCategory").val(b.category);
+
+        },
+
+        error: function (err) {
+
+        console.log(err);
+
+        alert("Book Detail Error");
+        }
+
+        });
+
+        });
+
+
+        // =========================
+        // ISSUE BOOK
+        // =========================
+
+        function issueBook() {
+
+        let data = {
+
+        txtidno: $("#txtIdNo").val().trim(),
+        txtaccessionno: $("#txtAccession").val().trim(),
+        signature: $("#txtSignature").val().trim()
+        };
+
+        $.ajax({
+
+        url: "/api/IssueBook/checkid",
+        type: "POST",
+        contentType: "application/json",
+
+        data: JSON.stringify(data),
+
+        success: function (res) {
+
+        console.log(res);
+
+        if (!res.success) {
+
+        alert(res.message);
+        return;
+        }
+
+        alert("Book Issued Successfully");
+
+        location.reload();
+        },
+
+        error: function (err) {
+
+        console.log(err);
+
+        alert("Issue Book Error");
+        }
+
+        });
+
+        }
+
+
+        // =========================
+        // OPEN PAGES
+        // =========================
+
+        function openReturnPage() {
+
+        window.location.href = "/ReceiveBook";
+        }
+
+        function openRenewPage() {
+
+        window.location.href = "/RenewBook";
+        }
+
+    </script>
+
+}
+
+
+@*
 @{
     ViewData["Title"] = "Issue Book";
 }
@@ -292,4 +712,5 @@
     window.location.href = "/RenewBook";
     }
 
-</script>
+</script> *@
+

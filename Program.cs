@@ -14,12 +14,22 @@ builder.Services.AddDbContext<AppDbcontext>(options =>
     options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IIssueBookService,IssueBookService>();
+builder.Services.AddScoped<IReturnBookService, ReturnBookService>();
+builder.Services.AddScoped<IRenewBookService, RenewBookService>();
+
 // 3. MVC + API Support
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 
-var app = builder.Build();
+//Session
+builder.Services.AddSession();
+builder.Services.AddHttpContextAccessor();
 
+
+
+var app = builder.Build();
+app.UseSession();
 // --- Middleware Pipeline ---
 
 if (!app.Environment.IsDevelopment())
@@ -44,6 +54,6 @@ app.MapControllers();
 // 2. Default View Routing (localhost:5065 kholne par Admissions page dikhayega)
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=RenewBook}/{action=StockBooksDetails}/{id?}");
+    pattern: "{controller=Login}/{action=Login}/{id?}");
 
 app.Run();

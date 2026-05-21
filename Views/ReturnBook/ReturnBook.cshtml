@@ -2,6 +2,378 @@
     ViewData["Title"] = "Return Book";
 }
 
+<div class="container mt-4">
+
+    <div class="card shadow-lg border-0">
+
+        <div class="card-header bg-danger text-white">
+            <h3 class="mb-0">
+                Return Book
+            </h3>
+        </div>
+
+        <div class="card-body">
+
+            <!-- ================= TOP SECTION ================= -->
+
+            <div class="row">
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">
+                        Accession No
+                    </label>
+
+                    <input type="text"
+                           id="rAccession"
+                           class="form-control"
+                           placeholder="Enter Accession No" />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">
+                        ID No
+                    </label>
+
+                    <input type="text"
+                           id="rIdNo"
+                           class="form-control"
+                           readonly />
+                </div>
+
+                <div class="col-md-4 text-center">
+
+                    <img id="rImage"
+                         src="/images/noimage.png"
+                         class="img-thumbnail mt-2"
+                         style="width:120px;height:120px;" />
+
+                </div>
+
+            </div>
+
+            <!-- ================= USER DETAIL ================= -->
+
+            <div class="row mt-3">
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">
+                        Name
+                    </label>
+
+                    <input type="text"
+                           id="rName"
+                           class="form-control"
+                           readonly />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">
+                        Type
+                    </label>
+
+                    <input type="text"
+                           id="rType"
+                           class="form-control"
+                           readonly />
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">
+                        College Name
+                    </label>
+
+                    <input type="text"
+                           id="rCollegeName"
+                           class="form-control"
+                           readonly />
+                </div>
+
+            </div>
+
+            <!-- ================= COURSE ================= -->
+
+            <div class="row mt-3">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Course / Designation
+                    </label>
+
+                    <input type="text"
+                           id="rCourse"
+                           class="form-control"
+                           readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Batch / Department
+                    </label>
+
+                    <input type="text"
+                           id="rBatch"
+                           class="form-control"
+                           readonly />
+                </div>
+
+            </div>
+
+            <hr />
+
+            <!-- ================= BOOK DETAIL ================= -->
+
+            <h5 class="text-primary">
+                Book Detail
+            </h5>
+
+            <div class="row mt-3">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Title
+                    </label>
+
+                    <input type="text"
+                           id="rTitle"
+                           class="form-control"
+                           readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Author
+                    </label>
+
+                    <input type="text"
+                           id="rAuthor"
+                           class="form-control"
+                           readonly />
+                </div>
+
+            </div>
+
+            <!-- ================= DATES ================= -->
+
+            <div class="row mt-3">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Issue Date
+                    </label>
+
+                    <input type="text"
+                           id="rIssueDate"
+                           class="form-control"
+                           readonly />
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Last Return Date
+                    </label>
+
+                    <input type="text"
+                           id="rLastDate"
+                           class="form-control"
+                           readonly />
+                </div>
+
+            </div>
+
+            <!-- ================= SIGNATURE ================= -->
+
+            <div class="row mt-4">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">
+                        Signature
+                    </label>
+
+                    <input type="password"
+                           id="rSignature"
+                           class="form-control"
+                           placeholder="Enter Admin Password" />
+                </div>
+
+            </div>
+
+            <!-- ================= BUTTONS ================= -->
+
+            <div class="mt-4 text-center">
+
+                <button class="btn btn-danger px-4"
+                        onclick="returnBook()">
+                    Submit Return
+                </button>
+
+                <a href="/IssueBook"
+                       class="btn btn-primary px-4">
+                    Go To Issue Book
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+
+        // =========================
+        // LOAD RETURN DETAIL
+        // =========================
+
+        $("#rAccession").blur(function () {
+
+        let acc = $("#rAccession").val().trim();
+
+        if (acc == "")
+        return;
+
+        $.ajax({
+
+        url: "/ReceiveBook",
+        method: "POST",
+        contentType: "application/json",
+
+        data: JSON.stringify({
+        accessionNo: acc
+        }),
+
+        success: function (res) {
+
+        console.log(res);
+
+        if (!res.success) {
+
+        alert(res.message);
+        return;
+        }
+
+        let d = res.data;
+
+        $("#rIdNo").val(d.idNo);
+        $("#rName").val(d.name);
+        $("#rType").val(d.type);
+        $("#rTitle").val(d.title);
+        $("#rAuthor").val(d.author);
+
+        $("#rCollegeName").val(d.college);
+
+        $("#rIssueDate").val(formatDate(d.issueDate));
+        $("#rLastDate").val(formatDate(d.lastReturnDate));
+
+        // EXTRA DETAIL
+        if (d.extraDetail != null) {
+
+        $("#rCourse").val(d.extraDetail.course);
+        $("#rBatch").val(d.extraDetail.batch);
+        }
+
+        // IMAGE
+        if (d.snap != null) {
+
+        $("#rImage").attr("src", d.snap);
+        }
+        },
+
+        error: function (err) {
+
+        console.log(err);
+
+        if (err.responseText)
+        alert(err.responseText);
+        else
+        alert("Data Load Error");
+        }
+
+        });
+
+        });
+
+
+        // =========================
+        // RETURN BOOK
+        // =========================
+
+        function returnBook() {
+
+        let data = {
+
+        accessionNo: $("#rAccession").val().trim(),
+        signature: $("#rSignature").val().trim()
+        };
+
+        if (data.accessionNo == "") {
+
+        alert("Enter Accession No");
+        return;
+        }
+
+        if (data.signature == "") {
+
+        alert("Enter Signature");
+        return;
+        }
+
+        $.ajax({
+
+        url: "/ReceiveBook",
+        method: "POST",
+        contentType: "application/json",
+
+        data: JSON.stringify(data),
+
+        success: function (res) {
+
+        console.log(res);
+
+        alert(res.message);
+
+        location.reload();
+        },
+
+        error: function (err) {
+
+        console.log(err);
+
+        if (err.responseText)
+        alert(err.responseText);
+        else
+        alert("Return Book Error");
+        }
+
+        });
+
+        }
+
+
+        // =========================
+        // FORMAT DATE
+        // =========================
+
+        function formatDate(dateString) {
+
+        let d = new Date(dateString);
+
+        return d.toLocaleDateString('en-GB');
+        }
+
+    </script>
+
+}
+
+@* 
+@{
+    ViewData["Title"] = "Return Book";
+}
+
 <h2>Return Book</h2>
 
 <div style="width:600px">
@@ -120,4 +492,4 @@
 
     }
 
-</script>
+</script> *@

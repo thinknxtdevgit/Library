@@ -2,6 +2,427 @@
     ViewData["Title"] = "Renew Book";
 }
 
+<div class="container mt-4">
+
+    <div class="card shadow-lg border-0 rounded-4">
+
+        <div class="card-header bg-danger text-white rounded-top-4">
+
+            <h3 class="mb-0 text-center">
+                Renew Library Book
+            </h3>
+
+        </div>
+
+        <div class="card-body">
+
+            <!-- ================= ACCESSION ================= -->
+
+            <div class="row">
+
+                <div class="col-md-4">
+
+                    <label class="form-label fw-bold">
+                        Accession No
+                    </label>
+
+                    <input type="text"
+                           id="txtAccessionNo"
+                           class="form-control"
+                           placeholder="Enter Accession No" />
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <label class="form-label fw-bold">
+                        Issue Date
+                    </label>
+
+                    <input type="text"
+                           id="txtIssueDate"
+                           class="form-control"
+                           readonly />
+
+                </div>
+
+                <div class="col-md-4">
+
+                    <label class="form-label fw-bold">
+                        Last Return Date
+                    </label>
+
+                    <input type="text"
+                           id="txtLastReturnDate"
+                           class="form-control"
+                           readonly />
+
+                </div>
+
+            </div>
+
+            <hr />
+
+            <!-- ================= USER DETAIL ================= -->
+
+            <div class="row">
+
+                <!-- PHOTO -->
+
+                <div class="col-md-3 text-center">
+
+                    <img id="imgPhoto"
+                         src="/images/noimage.png"
+                         class="img-thumbnail rounded shadow"
+                         style="width:150px;height:170px;object-fit:cover;" />
+
+                </div>
+
+                <!-- DETAILS -->
+                <div class="col-md-9">
+                    <div class="row">
+
+                    <div class="col-md-6">
+                            <label class="form-label fw-bold">College Name</label>
+
+                        <input type="text"
+                               id="txtCollegeName"
+                               class="form-control"
+                               readonly />
+                    </div>
+                    </div>
+                </div>
+
+
+                <div class="col-md-9">
+
+                    <div class="row">
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-bold">
+                                Name
+                            </label>
+
+                            <input type="text"
+                                   id="txtName"
+                                   class="form-control"
+                                   readonly />
+
+                        </div>
+
+                        <div class="col-md-6">
+
+                            <label class="form-label fw-bold">
+                                ID No
+                            </label>
+
+                            <input type="text"
+                                   id="txtIDNo"
+                                   class="form-control"
+                                   readonly />
+
+                        </div>
+
+                    </div>
+
+                    <div class="row mt-3">
+
+                        <div class="col-md-4">
+
+                            <label class="form-label fw-bold">
+                                Type
+                            </label>
+
+                            <input type="text"
+                                   id="txtType"
+                                   class="form-control"
+                                   readonly />
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <label class="form-label fw-bold">
+                                Discipline
+                            </label>
+
+                            <input type="text"
+                                   id="txtDiscipline"
+                                   class="form-control"
+                                   readonly />
+
+                        </div>
+
+                        <div class="col-md-4">
+
+                            <label class="form-label fw-bold">
+                                Author
+                            </label>
+
+                            <input type="text"
+                                   id="txtAuthor"
+                                   class="form-control"
+                                   readonly />
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <hr />
+
+            <!-- ================= BOOK DETAIL ================= -->
+
+            <div class="row">
+
+                <div class="col-md-12">
+
+                    <label class="form-label fw-bold">
+                        Book Title
+                    </label>
+
+                    <input type="text"
+                           id="txtTitle"
+                           class="form-control"
+                           readonly />
+
+                </div>
+
+            </div>
+
+            <hr />
+
+            <!-- ================= SIGNATURE ================= -->
+
+            <div class="row">
+
+                <div class="col-md-6">
+
+                    <label class="form-label fw-bold">
+                        Signature / Password
+                    </label>
+
+                    <input type="password"
+                           id="txtSignature"
+                           class="form-control"
+                           placeholder="Enter Signature" />
+
+                </div>
+
+            </div>
+
+            <br />
+
+            <!-- ================= BUTTONS ================= -->
+
+            <div class="text-center">
+
+                <button class="btn btn-danger px-4"
+                        onclick="renewBook()">
+
+                    <i class="fa fa-refresh"></i>
+                    Renew Book
+
+                </button>
+
+                <a href="/IssueBook"
+                       class="btn btn-primary px-4">
+
+                    <i class="fa fa-book"></i>
+                    Issue Book
+
+                </a>
+
+                <a href="/ReceiveBook"
+                       class="btn btn-success px-4">
+
+                    <i class="fa fa-undo"></i>
+                    Return Book
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+@section Scripts {
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+
+        // =========================================
+        // LOAD BOOK DETAIL
+        // =========================================
+
+        $("#txtAccessionNo").blur(function () {
+
+        let accessionNo = $("#txtAccessionNo").val().trim();
+
+        if (accessionNo == "")
+        return;
+
+        $.ajax({
+
+        url: "/api/book/renew",
+        method: "POST",
+        contentType: "application/json",
+
+        data: JSON.stringify({
+        accessionNo: accessionNo
+        }),
+
+        success: function (res) {
+
+        if (!res.success) {
+        alert(res.message);
+        return;
+        }
+
+        let d = res.data;
+        $("#txtCollegeName").val(d.collegeName);
+        $("#txtName").val(d.name);
+        $("#txtIDNo").val(d.idNo);
+        $("#txtType").val(d.type);
+        $("#txtDiscipline").val(d.discipline);
+
+        $("#txtTitle").val(d.title);
+        $("#txtAuthor").val(d.author);
+
+        $("#txtIssueDate").val(formatDate(d.dateOfIssue));
+        $("#txtLastReturnDate").val(formatDate(d.lastReturnDate));
+
+        // PHOTO
+        if (res.snap) {
+
+        $("#imgPhoto").attr("src", res.snap);
+        }
+        else {
+
+        $("#imgPhoto").attr("src", "/images/noimage.png");
+        }
+        },
+
+        error: function (err) {
+
+        console.log(err);
+
+        if (err.responseText) {
+
+        alert(err.responseText);
+        }
+        else {
+
+        alert("Book Detail Load Error");
+        }
+        }
+
+        });
+
+        });
+
+
+        // =========================================
+        // RENEW BOOK
+        // =========================================
+
+        function renewBook() {
+
+        let data = {
+
+        accessionNo: $("#txtAccessionNo").val().trim(),
+        signature: $("#txtSignature").val().trim()
+
+        };
+
+        if (data.accessionNo == "") {
+
+        alert("Enter Accession No");
+        return;
+        }
+
+        if (data.signature == "") {
+
+        alert("Enter Signature");
+        return;
+        }
+
+        $.ajax({
+
+        url: "/api/book/renew",
+        method: "POST",
+        contentType: "application/json",
+
+        data: JSON.stringify(data),
+
+        success: function (res) {
+
+        console.log(res);
+
+        if (!res.success) {
+
+        alert(res.message);
+        return;
+        }
+
+        alert(res.message);
+
+        location.reload();
+        },
+
+        error: function (err) {
+
+        console.log(err);
+
+        if (err.responseText) {
+
+        alert(err.responseText);
+        }
+        else {
+
+        alert("Renew Book Error");
+        }
+        }
+
+        });
+
+        }
+
+
+        // =========================================
+        // DATE FORMAT
+        // =========================================
+
+        function formatDate(dateString) {
+
+        let d = new Date(dateString);
+
+        let day = String(d.getDate()).padStart(2, '0');
+
+        let month = String(d.getMonth() + 1).padStart(2, '0');
+
+        let year = d.getFullYear();
+
+        return day + "/" + month + "/" + year;
+        }
+
+    </script>
+
+}
+
+
+@* @{
+    ViewData["Title"] = "Renew Book";
+}
+
 <h2>Renew Book</h2>
 
 <div style="width:700px">
@@ -162,4 +583,4 @@
     return day + "/" + month + "/" + year;
     }
 
-</script>
+</script> *@
