@@ -6,7 +6,7 @@
 <div class="fade-in">
     <div class="page-header mt-2 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Renew Resource</h2>
+            <h2 class="fw-bold mb-1">Renew Book</h2>
             <p class="text-muted">Extend the borrowing duration for active issuances, authorize transactions, and maintain ledger consistency.</p>
         </div>
         <div class="d-flex gap-2 w-100-mobile">
@@ -124,44 +124,172 @@
         // =========================================
         // LOAD BOOK DETAIL
         // =========================================
-        $("#txtAccessionNo").blur(function () {
-            let acc = $(this).val().trim();
-            if (acc == "") return;
+            $("#txtAccessionNo").blur(function () {
 
+            let acc = $("#txtAccessionNo").val().trim();
+
+            // ================= EMPTY CHECK =================
+            if (acc == "") {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Accession No Required',
+                    text: 'Please enter accession number.',
+                    confirmButtonColor: '#f59e0b'
+                });
+
+                return;
+            }
+
+            // ================= LOADING =================
+            Swal.fire({
+                title: 'Searching Book...',
+                text: 'Please wait while loading renewal details',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // ================= AJAX =================
             $.ajax({
+
                 url: "/api/book/renew",
+
                 method: "POST",
+
                 contentType: "application/json",
-                data: JSON.stringify({ accessionNo: acc }),
+
+                data: JSON.stringify({
+                    accessionNo: acc
+                }),
+
+                // ================= SUCCESS =================
                 success: function (res) {
+
+                    Swal.close();
+
+                    // ========= VALIDATION =========
                     if (!res.success) {
-                        alert(res.message);
-                        $("#renewalStatusBadge").text("Error").addClass("badge-modern-danger").removeClass("badge-modern-warning");
+
+                        $("#renewalStatusBadge")
+                            .text("Error")
+                            .addClass("badge-modern-danger")
+                            .removeClass("badge-modern-success");
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Renewal Failed',
+                            text: res.message,
+                            confirmButtonColor: '#d33',
+                            footer: 'Library Management System'
+                        });
+
                         return;
                     }
 
+                    // ================= DATA BIND =================
                     let d = res.data;
-                    $("#txtCollegeName").val(d.collegeName);
-                    $("#txtName").val(d.name);
-                    $("#txtIDNo").val(d.idNo);
-                    $("#txtType").val(d.type);
-                    $("#txtDiscipline").val(d.discipline);
-                    $("#txtTitle").val(d.title);
-                    $("#txtAuthor").val(d.author);
-                    $("#txtIssueDate").val(formatDate(d.dateOfIssue));
-                    $("#txtLastReturnDate").val(formatDate(d.lastReturnDate));
-                    
-                    $("#renewalStatusBadge").text("Active Issuance").addClass("badge-modern-success").removeClass("badge-modern-warning");
 
+                    $("#txtCollegeName").val(d.collegeName);
+
+                    $("#txtName").val(d.name);
+
+                    $("#txtIDNo").val(d.idNo);
+
+                    $("#txtType").val(d.type);
+
+                    $("#txtDiscipline").val(d.discipline);
+
+                    $("#txtTitle").val(d.title);
+
+                    $("#txtAuthor").val(d.author);
+
+                    $("#txtIssueDate")
+                        .val(formatDate(d.dateOfIssue));
+
+                    $("#txtLastReturnDate")
+                        .val(formatDate(d.lastReturnDate));
+
+                    // ================= STATUS BADGE =================
+                    $("#renewalStatusBadge")
+                        .text("Active Issuance")
+                        .addClass("badge-modern-success")
+                        .removeClass("badge-modern-danger");
+
+                    // ================= IMAGE =================
                     if (res.snap) {
+
                         $("#imgPhoto").attr("src", res.snap);
+
                     } else {
-                        $("#imgPhoto").attr("src", "/images/noimage.png");
+
+                        $("#imgPhoto")
+                            .attr("src", "/images/noimage.png");
                     }
+
+                    // ================= SUCCESS ALERT =================
+                    Swal.fire({
+
+                        icon: 'success',
+
+                        title: 'Book Details Loaded',
+
+                        text: 'Renewal information loaded successfully.',
+
+                        timer: 1800,
+
+                        showConfirmButton: false
+                    });
                 },
+
+                // ================= ERROR =================
                 error: function (err) {
-                    let msg = err.responseText || "Renewal Load Error";
-                    alert(msg);
+
+                    Swal.close();
+
+                    $("#renewalStatusBadge")
+                        .text("Expired")
+                        .addClass("badge-modern-danger")
+                        .removeClass("badge-modern-success");
+
+                    let msg =
+                        err.responseJSON?.message ||
+                        err.responseText ||
+                        "Last Return Date Expired";
+
+                    // ================= CLEAR FIELDS =================
+                    $("#txtCollegeName").val('');
+
+                    $("#txtName").val('');
+
+                    $("#txtIDNo").val('');
+
+                    $("#txtType").val('');
+
+                    $("#txtDiscipline").val('');
+
+                    $("#txtTitle").val('');
+
+                    $("#txtAuthor").val('');
+
+                    $("#txtIssueDate").val('');
+
+                    $("#txtLastReturnDate").val('');
+
+                    // ================= ERROR ALERT =================
+                    Swal.fire({
+
+                        icon: 'warning',
+
+                        title: 'Renewal Not Allowed',
+
+                        text: msg,
+
+                        confirmButtonColor: '#f59e0b',
+
+                        footer: 'Last return date has expired'
+                    });
                 }
             });
         });
@@ -169,14 +297,22 @@
         // =========================================
         // RENEW BOOK
         // =========================================
-        function renewBook() {
+             function renewBook() {
+
             let data = {
                 accessionNo: $("#txtAccessionNo").val().trim(),
                 signature: $("#txtSignature").val().trim()
             };
 
             if (!data.accessionNo || !data.signature) {
-                alert("Accession No and Signature are required.");
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Required Fields',
+                    text: 'Accession No and Signature are required.',
+                    confirmButtonColor: '#3085d6'
+                });
+
                 return;
             }
 
@@ -185,14 +321,44 @@
                 method: "POST",
                 contentType: "application/json",
                 data: JSON.stringify(data),
+
                 success: function (res) {
-                    if (!res.success) { alert(res.message); return; }
-                    alert(res.message);
-                    location.reload();
+
+                    if (!res.success) {
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Renew Failed',
+                            text: res.message,
+                            confirmButtonColor: '#d33'
+                        });
+
+                        return;
+                    }
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Book Renewed',
+                        text: res.message,
+                        confirmButtonColor: '#28a745'
+                    }).then(() => {
+                        location.reload();
+                    });
                 },
+
                 error: function (err) {
-                    let msg = err.responseText || "Renewal Error";
-                    alert(msg);
+
+                    let msg = err.responseJSON?.message ||
+                              err.responseText ||
+                              "Renewal Error";
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Last Return Date Expired',
+                        text: msg,
+                        confirmButtonColor: '#d33',
+                        footer: 'Please contact library administrator'
+                    });
                 }
             });
         }

@@ -13,5 +13,6 @@
         public List<PreviousIssueDto> PreviousIssues { get; set; }
 
         public int TotalIssuedBooks { get; set; }
+        public decimal TotalFine { get; set; }
     }
 }

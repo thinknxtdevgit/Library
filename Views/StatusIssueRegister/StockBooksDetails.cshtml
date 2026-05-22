@@ -94,92 +94,318 @@
 
 @section Scripts {
     <script>
-        async function loadReport() {
-            const collegeName = document.getElementById("collegeName").value;
-            if (!collegeName) { alert("Please enter a College Name to filter."); return; }
 
-            $("#currentFilterDisplay").text(collegeName);
-            
-            try {
-                const response = await fetch('/api/report/college', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ collegeName: collegeName })
+        // ================= LOAD REPORT =================
+
+        async function loadReport() {
+
+            const collegeName =
+                document.getElementById("collegeName").value;
+
+            // ========= VALIDATION =========
+
+            if (!collegeName) {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'College Name Required',
+                    text: 'Please enter a college name to filter report.',
+                    confirmButtonColor: '#f59e0b'
                 });
 
+                return;
+            }
+
+            $("#currentFilterDisplay").text(collegeName);
+
+            // ========= LOADING =========
+
+            Swal.fire({
+                title: 'Loading Report...',
+                text: 'Please wait while report is generated',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+
+                const response =
+                    await fetch('/api/report/college', {
+
+                        method: 'POST',
+
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+
+                        body: JSON.stringify({
+                            collegeName: collegeName
+                        })
+                    });
+
+                // ========= ERROR RESPONSE =========
+
                 if (!response.ok) {
+
+                    Swal.close();
+
                     const error = await response.text();
-                    alert(error);
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Report Load Failed',
+                        text: error,
+                        confirmButtonColor: '#d33'
+                    });
+
                     return;
                 }
 
                 const data = await response.json();
-                document.getElementById("totalBooks").innerText = data.totalBooks;
-                document.getElementById("issuedBooks").innerText = data.issuedBooks;
-                document.getElementById("unissuedBooks").innerText = data.unissuedBooks;
 
-                const tableHead = document.getElementById("tableHead");
-                const tableBody = document.getElementById("tableBody");
+                // ========= SUMMARY =========
+
+                document.getElementById("totalBooks")
+                    .innerText = data.totalBooks;
+
+                document.getElementById("issuedBooks")
+                    .innerText = data.issuedBooks;
+
+                document.getElementById("unissuedBooks")
+                    .innerText = data.unissuedBooks;
+
+                const tableHead =
+                    document.getElementById("tableHead");
+
+                const tableBody =
+                    document.getElementById("tableBody");
+
                 tableHead.innerHTML = "";
+
                 tableBody.innerHTML = "";
 
-                if (!data.issueBooks || data.issueBooks.length === 0) {
-                    tableBody.innerHTML = `<tr><td class="text-center py-5 text-muted">No data found for this filter.</td></tr>`;
-                    $("#rowCountDisplay").text("0 records found");
+                // ========= NO DATA =========
+
+                if (!data.issueBooks ||
+                    data.issueBooks.length === 0) {
+
+                    Swal.close();
+
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td class="text-center py-5 text-muted">
+                                No data found for this filter.
+                            </td>
+                        </tr>`;
+
+                    $("#rowCountDisplay")
+                        .text("0 records found");
+
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'No Records Found',
+                        text: 'No issue books found for selected college.',
+                        confirmButtonColor: '#0ea5e9'
+                    });
+
                     return;
                 }
 
-                // Header
+                // ========= HEADER =========
+
                 let headerLine = "<tr>";
-                Object.keys(data.issueBooks[0]).forEach(key => {
-                    headerLine += `<th class="border-0 text-uppercase small fw-bold p-3">${key.replace(/([A-Z])/g, ' $1').trim()}</th>`;
-                });
+
+                Object.keys(data.issueBooks[0])
+                    .forEach(key => {
+
+                        headerLine += `
+                            <th class="border-0 text-uppercase small fw-bold p-3">
+                                ${key.replace(/([A-Z])/g, ' $1').trim()}
+                            </th>`;
+                    });
+
                 headerLine += "</tr>";
+
                 tableHead.innerHTML = headerLine;
 
-                // Body
+                // ========= BODY =========
+
                 let rows = "";
+
                 data.issueBooks.forEach(item => {
+
                     rows += "<tr>";
+
                     Object.values(item).forEach(value => {
-                        rows += `<td class="p-3 small text-muted">${value ?? "-"}</td>`;
+
+                        rows += `
+                            <td class="p-3 small text-muted">
+                                ${value ?? "-"}
+                            </td>`;
                     });
+
                     rows += "</tr>";
                 });
+
                 tableBody.innerHTML = rows;
-                $("#rowCountDisplay").text(data.issueBooks.length + " records loaded");
 
-            } catch (error) {
-                console.error(error);
-                alert("An error occurred while fetching the report.");
-            }
-        }
+                $("#rowCountDisplay")
+                    .text(data.issueBooks.length + " records loaded");
 
-        async function downloadExcel() {
-            const collegeName = document.getElementById("collegeName").value;
-            if (!collegeName) { alert("Specify a College Name before exporting."); return; }
+                Swal.close();
 
-            try {
-                const response = await fetch('/api/report/college/export', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ collegeName: collegeName })
+                // ========= SUCCESS =========
+
+                Swal.fire({
+
+                    icon: 'success',
+
+                    title: 'Report Generated',
+
+                    text: `${data.issueBooks.length} records loaded successfully.`,
+
+                    timer: 1800,
+
+                    showConfirmButton: false
                 });
 
-                if (!response.ok) { alert("Download Failed"); return; }
-
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `${collegeName}_Inventory_Report_${new Date().toLocaleDateString()}.xlsx`;
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
             } catch (error) {
+
                 console.error(error);
-                alert("Excel Export failed.");
+
+                Swal.close();
+
+                Swal.fire({
+
+                    icon: 'error',
+
+                    title: 'System Error',
+
+                    text: 'An error occurred while fetching the report.',
+
+                    confirmButtonColor: '#d33'
+                });
             }
         }
+
+        // ================= EXPORT EXCEL =================
+
+        async function downloadExcel() {
+
+            const collegeName =
+                document.getElementById("collegeName").value;
+
+            // ========= VALIDATION =========
+
+            if (!collegeName) {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'College Name Required',
+                    text: 'Specify a college name before exporting.',
+                    confirmButtonColor: '#f59e0b'
+                });
+
+                return;
+            }
+
+            // ========= LOADING =========
+
+            Swal.fire({
+                title: 'Preparing Excel...',
+                text: 'Generating Excel report',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+
+                const response =
+                    await fetch('/api/report/college/export', {
+
+                        method: 'POST',
+
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+
+                        body: JSON.stringify({
+                            collegeName: collegeName
+                        })
+                    });
+
+                // ========= ERROR =========
+
+                if (!response.ok) {
+
+                    Swal.close();
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Download Failed',
+                        text: 'Unable to export Excel report.',
+                        confirmButtonColor: '#d33'
+                    });
+
+                    return;
+                }
+
+                const blob = await response.blob();
+
+                const url =
+                    window.URL.createObjectURL(blob);
+
+                const a =
+                    document.createElement('a');
+
+                a.href = url;
+
+                a.download =
+                    `${collegeName}_Inventory_Report_${new Date().toLocaleDateString()}.xlsx`;
+
+                document.body.appendChild(a);
+
+                a.click();
+
+                a.remove();
+
+                Swal.close();
+
+                // ========= SUCCESS =========
+
+                Swal.fire({
+
+                    icon: 'success',
+
+                    title: 'Excel Downloaded',
+
+                    text: 'Inventory report exported successfully.',
+
+                    confirmButtonColor: '#28a745'
+                });
+
+            } catch (error) {
+
+                console.error(error);
+
+                Swal.close();
+
+                Swal.fire({
+
+                    icon: 'error',
+
+                    title: 'Export Failed',
+
+                    text: 'Excel export failed.',
+
+                    confirmButtonColor: '#d33'
+                });
+            }
+        }
+
     </script>
 }

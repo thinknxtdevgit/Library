@@ -7,7 +7,7 @@ namespace lib.Controllers
         [HttpGet("/Dashboard")]
         public IActionResult Index()
         {
-            return View("Dashboard");
+            return View();
         }
     }
 }

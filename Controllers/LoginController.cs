@@ -67,7 +67,16 @@ namespace lib.Controllers
             return Ok(result);
         }
 
-       
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            HttpContext.Session.Clear();
+
+            Response.Cookies.Delete(".AspNetCore.Session");
+
+            return RedirectToAction("Login", "Login");
+        }
+
     }
 
 }

@@ -19,9 +19,14 @@
 
     <nav class="sidebar-menu">
         <!-- Dashboard -->
-        <a asp-controller="Dashboard" asp-action="Index"
-               class="menu-item @(currentController == "Dashboard" && currentAction == "Index" ? "active" : "")">
-            <div class="menu-icon"><i class="fas fa-th-large"></i></div>
+        <a asp-controller="Dashboard"
+               asp-action="Index"
+               class="menu-item">
+
+            <div class="menu-icon">
+                <i class="fas fa-th-large"></i>
+            </div>
+
             <span>Dashboard</span>
         </a>
 
@@ -127,9 +132,18 @@
     </nav>
 
     <div class="sidebar-footer p-3">
-        <a href="/Login/Logout" class="menu-item text-danger border-0 w-100" style="background: transparent;">
-            <div class="menu-icon"><i class="fas fa-sign-out-alt"></i></div>
+
+        <a asp-controller="Login"
+               asp-action="Logout"
+               class="menu-item text-danger border-0 w-100"
+               style="background: transparent;">
+
+            <div class="menu-icon">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+
             <span>Sign Out</span>
         </a>
+
     </div>
 </aside>

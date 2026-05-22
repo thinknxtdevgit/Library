@@ -19,6 +19,10 @@ namespace lib.Controllers
             _issueBookService = issueBookService;
         }
 
+        // =====================================================
+        // VIEW
+        // =====================================================
+
         [HttpGet("/IssueBook")]
         public IActionResult Create()
         {
@@ -28,23 +32,62 @@ namespace lib.Controllers
         [HttpGet("/IssueBook/List")]
         public IActionResult Index()
         {
-            return RedirectToAction("Create");
+            return RedirectToAction(nameof(Create));
         }
 
-        [HttpPost]
-        [Route("api/IssueBook/checkid")]
+        // =====================================================
+        // CHECK USER + BOOK DETAIL
+        // =====================================================
+
+        [HttpPost("api/IssueBook/checkid")]
         public async Task<IActionResult> CheckId(
             [FromBody] IssueBookRequestDto request)
         {
+            if (request == null)
+            {
+                return BadRequest(new IssueBookResponseDto
+                {
+                    Success = false,
+                    Message = "Invalid request"
+                });
+            }
+
             var result =
-                await _issueBookService.CheckIdAsync(request);
+                await _issueBookService
+                .CheckIdAsync(request);
 
-            if (!result.Success)
-                return BadRequest(result);
+            return result.Success
+                ? Ok(result)
+                : BadRequest(result);
+        }
 
-            return Ok(result);
+        // =====================================================
+        // ISSUE BOOK
+        // =====================================================
+
+        [HttpPost("api/IssueBook/issue")]
+        public async Task<IActionResult> IssueBook(
+            [FromBody] IssueBookRequestDto request)
+        {
+            if (request == null)
+            {
+                return BadRequest(new IssueBookResponseDto
+                {
+                    Success = false,
+                    Message = "Invalid request"
+                });
+            }
+
+            var result =
+                await _issueBookService
+                .IssueBookAsync(request);
+
+            return result.Success
+                ? Ok(result)
+                : BadRequest(result);
         }
     }
+
 
     //private readonly string _connectionString;
 

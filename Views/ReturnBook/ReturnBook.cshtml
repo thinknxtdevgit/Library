@@ -6,7 +6,7 @@
 <div class="fade-in">
     <div class="page-header mt-2 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Return Resource</h2>
+            <h2 class="fw-bold mb-1">Return Book</h2>
             <p class="text-muted">Process resource returns, verify borrower metadata, and instantly restore stock items to active inventory.</p>
         </div>
         <div class="d-flex gap-2 w-100-mobile">
@@ -131,48 +131,184 @@
         // =========================
         // LOAD RETURN DETAIL
         // =========================
-        $("#rAccession").blur(function () {
-            let acc = $(this).val().trim();
-            if (acc == "") return;
+               $("#rAccession").blur(function () {
 
+            let acc = $(this).val().trim();
+
+            // ================= EMPTY CHECK =================
+            if (acc == "") {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Accession No Required',
+                    text: 'Please enter accession number.',
+                    confirmButtonColor: '#f59e0b'
+                });
+
+                return;
+            }
+
+            // ================= LOADING =================
+            Swal.fire({
+                title: 'Searching Record...',
+                text: 'Loading issued book details',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            // ================= AJAX =================
             $.ajax({
+
                 url: "/ReceiveBook",
+
                 method: "POST",
+
                 contentType: "application/json",
-                data: JSON.stringify({ accessionNo: acc }),
+
+                data: JSON.stringify({
+                    accessionNo: acc
+                }),
+
+                // ================= SUCCESS =================
                 success: function (res) {
+
+                    Swal.close();
+
+                    // ================= FAILED RESPONSE =================
                     if (!res.success) {
-                        alert(res.message);
-                        $("#returnStatusBadge").text("Error").addClass("badge-modern-danger").removeClass("badge-modern-success");
+
+                        $("#returnStatusBadge")
+                            .text("Error")
+                            .addClass("badge-modern-danger")
+                            .removeClass("badge-modern-success");
+
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Book Not Found',
+                            text: res.message,
+                            confirmButtonColor: '#d33',
+                            footer: 'Library Management System'
+                        });
+
                         return;
                     }
 
+                    // ================= DATA BIND =================
                     let d = res.data;
+
                     $("#rIdNo").val(d.idNo);
+
                     $("#rName").val(d.name);
+
                     $("#rType").val(d.type);
+
                     $("#rTitle").val(d.title);
+
                     $("#rAuthor").val(d.author);
+
                     $("#rCollegeName").val(d.college);
-                    $("#rIssueDate").val(formatDate(d.issueDate));
-                    $("#rLastDate").val(formatDate(d.lastReturnDate));
-                    
-                    $("#returnStatusBadge").text("Ready to Process").addClass("badge-modern-success").removeClass("badge-modern-danger");
 
+                    $("#rIssueDate")
+                        .val(formatDate(d.issueDate));
+
+                    $("#rLastDate")
+                        .val(formatDate(d.lastReturnDate));
+
+                    // ================= STATUS BADGE =================
+                    $("#returnStatusBadge")
+                        .text("Ready to Process")
+                        .addClass("badge-modern-success")
+                        .removeClass("badge-modern-danger");
+
+                    // ================= EXTRA DETAIL =================
                     if (d.extraDetail) {
-                        $("#rCourse").val(d.extraDetail.course);
-                        $("#rBatch").val(d.extraDetail.batch);
+
+                        $("#rCourse")
+                            .val(d.extraDetail.course);
+
+                        $("#rBatch")
+                            .val(d.extraDetail.batch);
                     }
 
+                    // ================= IMAGE =================
                     if (d.snap) {
+
                         $("#rImage").attr("src", d.snap);
+
                     } else {
-                        $("#rImage").attr("src", "/images/noimage.png");
+
+                        $("#rImage")
+                            .attr("src", "/images/noimage.png");
                     }
+
+                    // ================= SUCCESS ALERT =================
+                    Swal.fire({
+
+                        icon: 'success',
+
+                        title: 'Book Record Loaded',
+
+                        text: 'Book return details loaded successfully.',
+
+                        timer: 1800,
+
+                        showConfirmButton: false
+                    });
                 },
+
+                // ================= ERROR =================
                 error: function (err) {
-                    let msg = err.responseText || "Data Load Error";
-                    alert(msg);
+
+                    Swal.close();
+
+                    $("#returnStatusBadge")
+                        .text("Error")
+                        .addClass("badge-modern-danger")
+                        .removeClass("badge-modern-success");
+
+                    let msg =
+                        err.responseJSON?.message ||
+                        err.responseText ||
+                        "Unable to load data";
+
+                    // ================= CLEAR FIELDS =================
+                    $("#rIdNo").val('');
+
+                    $("#rName").val('');
+
+                    $("#rType").val('');
+
+                    $("#rTitle").val('');
+
+                    $("#rAuthor").val('');
+
+                    $("#rCollegeName").val('');
+
+                    $("#rIssueDate").val('');
+
+                    $("#rLastDate").val('');
+
+                    $("#rCourse").val('');
+
+                    $("#rBatch").val('');
+
+                    $("#rImage").attr("src", "/images/noimage.png");
+
+                    // ================= ERROR ALERT =================
+                    Swal.fire({
+
+                        icon: 'error',
+
+                        title: 'Data Load Failed',
+
+                        text: msg,
+
+                        confirmButtonColor: '#d33',
+
+                        footer: 'Please verify accession number'
+                    });
                 }
             });
         });
@@ -180,35 +316,169 @@
         // =========================
         // RETURN BOOK
         // =========================
-        function returnBook() {
+               function returnBook() {
+
             let data = {
+
                 accessionNo: $("#rAccession").val().trim(),
+
                 signature: $("#rSignature").val().trim()
             };
 
-            if (!data.accessionNo) { alert("Enter Accession No"); return; }
-            if (!data.signature) { alert("Enter Admin Signature"); return; }
+            // ================= VALIDATION =================
 
-            $.ajax({
-                url: "/ReceiveBook",
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(data),
-                success: function (res) {
-                    alert(res.message);
-                    location.reload();
-                },
-                error: function (err) {
-                    let msg = err.responseText || "Return Book Error";
-                    alert(msg);
-                }
+            if (!data.accessionNo) {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Accession No Required',
+                    text: 'Please enter accession number.',
+                    confirmButtonColor: '#f59e0b'
+                });
+
+                return;
+            }
+
+            if (!data.signature) {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Admin Signature Required',
+                    text: 'Please enter admin signature.',
+                    confirmButtonColor: '#f59e0b'
+                });
+
+                return;
+            }
+
+            // ================= CONFIRMATION =================
+
+            Swal.fire({
+
+                title: 'Confirm Book Return',
+
+                text: 'Are you sure you want to return this book?',
+
+                icon: 'question',
+
+                showCancelButton: true,
+
+                confirmButtonColor: '#28a745',
+
+                cancelButtonColor: '#d33',
+
+                confirmButtonText: 'Yes, Return Book'
+            })
+
+            .then((result) => {
+
+                if (!result.isConfirmed) return;
+
+                // ================= LOADING =================
+
+                Swal.fire({
+
+                    title: 'Processing Return...',
+
+                    text: 'Please wait while book return is processing',
+
+                    allowOutsideClick: false,
+
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                // ================= AJAX =================
+
+                $.ajax({
+
+                    url: "/ReceiveBook",
+
+                    method: "POST",
+
+                    contentType: "application/json",
+
+                    data: JSON.stringify(data),
+
+                    // ================= SUCCESS =================
+
+                    success: function (res) {
+
+                        Swal.close();
+
+                        // ===== SUCCESS STATUS =====
+
+                        $("#returnStatusBadge")
+                            .text("Book Returned")
+                            .addClass("badge-modern-success")
+                            .removeClass("badge-modern-danger");
+
+                        Swal.fire({
+
+                            icon: 'success',
+
+                            title: 'Book Returned Successfully',
+
+                            text: res.message,
+
+                            confirmButtonColor: '#28a745'
+
+                        }).then(() => {
+
+                            location.reload();
+                        });
+                    },
+
+                    // ================= ERROR =================
+
+                    error: function (err) {
+
+                        Swal.close();
+
+                        $("#returnStatusBadge")
+                            .text("Return Failed")
+                            .addClass("badge-modern-danger")
+                            .removeClass("badge-modern-success");
+
+                        let msg =
+                            err.responseJSON?.message ||
+                            err.responseText ||
+                            "Return Book Error";
+
+                        Swal.fire({
+
+                            icon: 'error',
+
+                            title: 'Return Failed',
+
+                            text: msg,
+
+                            confirmButtonColor: '#d33',
+
+                            footer: 'Library Management System'
+                        });
+                    }
+                });
             });
         }
 
+        // ================= DATE FORMAT =================
+
         function formatDate(dateString) {
-            if(!dateString) return "-";
+
+            if (!dateString) return "-";
+
             let d = new Date(dateString);
-            return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+            return d.toLocaleDateString('en-GB', {
+
+                day: '2-digit',
+
+                month: '2-digit',
+
+                year: 'numeric'
+            });
         }
     </script>
 }

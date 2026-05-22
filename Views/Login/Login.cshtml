@@ -104,84 +104,231 @@
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // Password Toggle
-        function togglePassword() {
-            const pwd = document.getElementById('txtPassword');
-            const icon = document.getElementById('eyeIcon');
-            if (pwd.type === 'password') {
-                pwd.type = 'text';
-                icon.className = 'fas fa-eye-slash';
-            } else {
-                pwd.type = 'password';
-                icon.className = 'fas fa-eye';
-            }
-        }
 
-        // Load Login Types
-        window.onload = function () {
-            loadLoginTypes();
-        };
+            // ================= PASSWORD TOGGLE =================
 
-        async function loadLoginTypes() {
-            try {
-                let response = await fetch('/api/Login/GetLoginTypes');
-                let data = await response.json();
-                let ddl = document.getElementById("ddlLoginType");
-                ddl.innerHTML = '<option value="">Select Account Type</option>';
-                data.forEach(item => {
-                    ddl.innerHTML += `<option value="${item}">${item}</option>`;
-                });
-            } catch (err) {
-                console.error("Failed to load login types", err);
-            }
-        }
+            function togglePassword() {
 
-        // Login API Call
-        async function login() {
-            let userName = document.getElementById("txtUserName").value;
-            let password = document.getElementById("txtPassword").value;
-            let loginType = document.getElementById("ddlLoginType").value;
-            let messageDiv = document.getElementById("message");
-            
-            if(!userName || !password || !loginType) {
-                messageDiv.className = "message text-danger fw-bold";
-                messageDiv.innerHTML = "Please fill all fields";
-                return;
-            }
+                const pwd =
+                    document.getElementById('txtPassword');
 
-            try {
-                let response = await fetch('/api/Login/EnterOk', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        userName: userName,
-                        password: password,
-                        loginType: loginType
-                    })
-                });
+                const icon =
+                    document.getElementById('eyeIcon');
 
-                if (response.ok) {
-                    let result = await response.json();
-                    messageDiv.className = "message text-success fw-bold";
-                    messageDiv.innerHTML = "Login Successful! Redirecting...";
-                    
-                    // Redirect to home after a short delay
-                    setTimeout(() => {
-                        window.location.href = "/Home/Index";
-                    }, 1000);
+                if (pwd.type === 'password') {
+
+                    pwd.type = 'text';
+
+                    icon.className = 'fas fa-eye-slash';
+
+                } else {
+
+                    pwd.type = 'password';
+
+                    icon.className = 'fas fa-eye';
                 }
-                else {
-                    let error = await response.text();
-                    messageDiv.className = "message text-danger fw-bold";
-                    messageDiv.innerHTML = error || "Invalid credentials. Please try again.";
-                }
-            } catch (err) {
-                messageDiv.className = "message text-danger fw-bold";
-                messageDiv.innerHTML = "Connection error. Please try again later.";
             }
-        }
+
+            // ================= PAGE LOAD =================
+
+            window.onload = function () {
+
+                loadLoginTypes();
+            };
+
+            // ================= LOAD LOGIN TYPES =================
+
+            async function loadLoginTypes() {
+
+                try {
+
+                    let response =
+                        await fetch('/api/Login/GetLoginTypes');
+
+                    let data = await response.json();
+
+                    let ddl =
+                        document.getElementById("ddlLoginType");
+
+                    ddl.innerHTML =
+                        '<option value="">Select Account Type</option>';
+
+                    data.forEach(item => {
+
+                        ddl.innerHTML += `
+                            <option value="${item}">
+                                ${item}
+                            </option>`;
+                    });
+
+                } catch (err) {
+
+                    console.error(
+                        "Failed to load login types",
+                        err
+                    );
+
+                    Swal.fire({
+
+                        icon: 'error',
+
+                        title: 'System Error',
+
+                        text: 'Unable to load login types.',
+
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            }
+
+            // ================= LOGIN FUNCTION =================
+
+            async function login() {
+
+                let userName =
+                    document.getElementById("txtUserName").value;
+
+                let password =
+                    document.getElementById("txtPassword").value;
+
+                let loginType =
+                    document.getElementById("ddlLoginType").value;
+
+                // ================= VALIDATION =================
+
+                if (!userName || !password || !loginType) {
+
+                    Swal.fire({
+
+                        icon: 'warning',
+
+                        title: 'Required Fields',
+
+                        text: 'Please fill all login fields.',
+
+                        confirmButtonColor: '#f59e0b'
+                    });
+
+                    return;
+                }
+
+                // ================= LOADING =================
+
+                Swal.fire({
+
+                    title: 'Authenticating...',
+
+                    text: 'Please wait while verifying credentials',
+
+                    allowOutsideClick: false,
+
+                    didOpen: () => {
+
+                        Swal.showLoading();
+                    }
+                });
+
+                try {
+
+                    let response =
+                        await fetch('/api/Login/EnterOk', {
+
+                            method: 'POST',
+
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+
+                            body: JSON.stringify({
+
+                                userName: userName,
+
+                                password: password,
+
+                                loginType: loginType
+                            })
+                        });
+
+                    // ================= SUCCESS =================
+
+                    if (response.ok) {
+
+                        let result =
+                            await response.json();
+
+                        Swal.fire({
+
+                            icon: 'success',
+
+                            title: 'Login Successful',
+
+                            text: `Welcome ${result.userName}`,
+
+                            timer: 1800,
+
+                            showConfirmButton: false
+                        });
+
+                        // ========= REDIRECT =========
+
+                        setTimeout(() => {
+
+                            window.location.href =
+                                "/Home/Index";
+
+                        }, 1800);
+                    }
+
+                    // ================= INVALID LOGIN =================
+
+                    else {
+                    let errorData = await response.json();
+
+                    Swal.fire({
+
+                      icon: 'error',
+
+                      title: 'Login Failed',
+
+                    html: `
+                           <div style="font-size:14px;">
+                           Invalid Username, Password, or Login Type.
+                            <br><br>
+                              Please check your credentials and try again.
+                              </div>
+                                   `,
+
+                       confirmButtonText: 'Try Again',
+
+                       confirmButtonColor: '#dc3545',
+
+                       footer: 'Library Management System',
+
+                      backdrop: true
+                    });
+                    }
+
+                } catch (err) {
+
+                    // ================= SERVER ERROR =================
+
+                    Swal.fire({
+
+                        icon: 'error',
+
+                        title: 'Connection Error',
+
+                        text:
+                            'Unable to connect to server. Please try again later.',
+
+                        confirmButtonColor: '#d33'
+                    });
+                }
+            }
+
     </script>
 </body>
 </html>

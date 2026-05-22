@@ -6,8 +6,8 @@
 <div class="fade-in">
     <div class="page-header mt-2 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Issue Resource</h2>
-            <p class="text-muted">Register a new resource issuance, associate borrower credentials, and confirm security authorization.</p>
+            <h2 class="fw-bold mb-1">Issue Book</h2>
+            <p class="text-muted">Register a new Book issuance, associate borrower credentials, and confirm security authorization.</p>
         </div>
         <div class="d-flex gap-2 w-100-mobile">
             <button class="btn btn-modern btn-secondary-modern btn-auto-width" onclick="openReturnPage()">
@@ -18,7 +18,54 @@
             </button>
         </div>
     </div>
+    <!-- ========================= -->
+    <!-- SUMMARY SECTION ADDITION -->
+    <!-- Add ABOVE table section -->
+    <!-- ========================= -->
 
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="modern-card py-3 px-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="small text-muted fw-semibold">Total Issued</div>
+                        <h4 class="fw-bold mb-0" id="summaryTotalBooks">0</h4>
+                    </div>
+                    <div class="badge-modern badge-modern-primary px-3 py-2">
+                        <i class="fas fa-book"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="modern-card py-3 px-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="small text-muted fw-semibold">Total Fine</div>
+                        <h4 class="fw-bold mb-0 text-danger" id="summaryTotalFine">₹0</h4>
+                    </div>
+                    <div class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3 py-2">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="modern-card py-3 px-3 h-100">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="small text-muted fw-semibold">Overdue Books</div>
+                        <h4 class="fw-bold mb-0 text-warning" id="summaryOverdueBooks">0</h4>
+                    </div>
+                    <div class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-2">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row g-4">
         <!-- Left Column: Borrower & Book Details -->
         <div class="col-xl-8">
@@ -104,15 +151,20 @@
                 <h5 class="fw-bold mb-4"><i class="fas fa-history me-2 text-info"></i> Active Issued & Unreturned Books</h5>
                 <div class="table-responsive-modern">
                     <table class="table custom-table mb-0" id="tblPrevious">
-                        <thead>
-                            <tr>
-                                <th class="border-0">Title</th>
-                                <th class="border-0">Accession</th>
-                                <th class="border-0">Issue Date</th>
-                                <th class="border-0">Return Date</th>
-                                <th class="border-0">Author</th>
-                            </tr>
-                        </thead>
+                       <thead>
+    <tr>
+        <th class="border-0">Title</th>
+        <th class="border-0">Accession</th>
+        <th class="border-0">Issue Date</th>
+        <th class="border-0">Return Date</th>
+        <th class="border-0">Author</th>
+        <th class="border-0">Course</th>
+        <th class="border-0">Days</th>
+        <th class="border-0">Fine</th>
+        <th class="border-0">Status</th>
+        <th class="border-0">ID No.</th>
+    </tr>
+</thead>
                         <tbody class="border-top-0">
                             <tr>
                                 <td colspan="5" class="text-center text-muted py-4">No unreturned books found. Try loading a borrower.</td>
@@ -157,296 +209,456 @@
 </div>
 
 @section Scripts {
+
     <script>
-        // ==========================================
-        // SweetAlert2 Helper — Themed Popup Factory
-        // ==========================================
+
+        // =========================================
+        // Cached Elements
+        // =========================================
+
+        const elements = {
+
+            txtIdNo: $("#txtIdNo"),
+            txtAccession: $("#txtAccession"),
+
+            txtName: $("#txtName"),
+            txtCollege: $("#txtCollege"),
+            txtCourse: $("#txtCourse"),
+            txtBatch: $("#txtBatch"),
+            txtType: $("#txtType"),
+
+            txtIssueDate: $("#txtIssueDate"),
+            txtReturnDate: $("#txtReturnDate"),
+
+            txtTitle: $("#txtTitle"),
+            txtAuthor: $("#txtAuthor"),
+            txtCategory: $("#txtCategory"),
+
+            txtSignature: $("#txtSignature"),
+
+            userImage: $("#userImage"),
+            userNameDisplay: $("#userNameDisplay"),
+
+            lblTotalBooks: $("#lblTotalBooks"),
+
+            tblBody: $("#tblPrevious tbody"),
+
+            summaryTotalBooks: $("#summaryTotalBooks"),
+            summaryTotalFine: $("#summaryTotalFine"),
+            summaryOverdueBooks: $("#summaryOverdueBooks")
+        };
+
+        // =========================================
+        // SweetAlert
+        // =========================================
+
         const SwalThemed = Swal.mixin({
+
             customClass: {
                 popup: 'swal-themed',
-                confirmButton: 'swal2-confirm',
-                cancelButton: 'swal2-cancel'
+                confirmButton: 'swal2-confirm'
             },
-            buttonsStyling: false,
-            showClass: { popup: 'swal-animate-in' },
-            hideClass: { popup: 'swal-animate-out' },
-            backdrop: 'rgba(0,0,0,0.55)',
-            allowOutsideClick: true,
-            focusConfirm: true
+
+            buttonsStyling: false
         });
 
-        // Detect "already issued" or "unavailable" keywords
-        function isAlreadyIssuedMessage(msg) {
-            if (!msg) return false;
-            let lower = msg.toLowerCase();
-            return lower.includes('already issued') ||
-                   lower.includes('unavailable') ||
-                   lower.includes('currently issued') ||
-                   lower.includes('not available');
+        // =========================================
+        // Helpers
+        // =========================================
+
+        const safe = (value) => value ?? '';
+
+        const formatCurrency =
+            (value) => `₹${parseFloat(value || 0).toFixed(2)}`;
+
+        const currentDate = () =>
+            new Date().toLocaleDateString('en-GB');
+
+        function showAlert(icon, title, html) {
+
+            SwalThemed.fire({
+                icon,
+                title,
+                html
+            });
         }
 
-        // Show/hide the unavailable badge near accession input
-        function showUnavailableBadge(show) {
-            $('#bookUnavailableBadge').remove();
-            if (show) {
-                $('#txtAccession').closest('.col-md-4')
-                    .find('.form-label')
-                    .after('<span id="bookUnavailableBadge" class="book-unavailable-badge ms-2"><i class="fas fa-exclamation-circle"></i> Unavailable</span>');
-                $('#txtAccession').addClass('accession-unavailable');
-            } else {
-                $('#txtAccession').removeClass('accession-unavailable');
+        function clearBookFields() {
+
+            elements.txtTitle.val('');
+            elements.txtAuthor.val('');
+            elements.txtCategory.val('');
+        }
+
+        function resetUnavailable() {
+
+            $("#bookUnavailableBadge").remove();
+
+            elements.txtAccession
+                .removeClass("accession-unavailable");
+        }
+
+        function showUnavailable() {
+
+            resetUnavailable();
+
+            elements.txtAccession
+                .addClass("accession-unavailable");
+
+            elements.txtAccession
+                .closest('.col-md-4')
+                .find('.form-label')
+                .after(`
+                    <span id="bookUnavailableBadge"
+                    class="book-unavailable-badge ms-2">
+                        <i class="fas fa-exclamation-circle"></i>
+                        Unavailable
+                    </span>
+                `);
+        }
+
+        // =========================================
+        // Load Borrower
+        // =========================================
+
+        async function loadBorrower() {
+
+            const id = elements.txtIdNo.val().trim();
+
+            if (!id) return;
+
+            try {
+
+                const response = await $.ajax({
+
+                    url: "/api/IssueBook/checkid",
+
+                    type: "POST",
+
+                    contentType: "application/json",
+
+                    data: JSON.stringify({
+                        txtidno: id
+                    })
+                });
+
+                bindBorrower(response);
+
+                renderPreviousIssues(response.previousIssues);
+
+            }
+            catch (err) {
+
+                showAlert(
+                    "error",
+                    "Borrower Error",
+                    err.responseJSON?.message ||
+                    "Unable to load borrower"
+                );
             }
         }
 
-        // =========================
-        // LOAD USER DETAIL
-        // =========================
-        $("#txtIdNo").blur(function () {
-            let id = $("#txtIdNo").val().trim();
-            if (id == "") return;
+        // =========================================
+        // Bind Borrower
+        // =========================================
 
-            $.ajax({
-                url: "/api/IssueBook/checkid",
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({ txtidno: id }),
-                success: function (res) {
-                    if (!res || res.success == false) {
-                        SwalThemed.fire({
-                            icon: 'error',
-                            title: 'ID Not Found',
-                            html: res.message || 'The entered ID could not be found in the system. Please verify and try again.',
-                            confirmButtonText: '<i class="fas fa-redo me-1"></i> Try Again'
-                        });
-                        return;
-                    }
+        function bindBorrower(data) {
 
-                    let d = res.userDetail;
-                    $("#txtName").val(d.name);
-                    $("#userNameDisplay").text(d.name);
-                    $("#txtCollege").val(d.collegeName);
-                    $("#txtCourse").val(d.course || d.designation);
-                    $("#txtBatch").val(d.batch || d.department);
-                    $("#txtType").val(d.type);
-                    $("#txtReturnDate").val(d.lastReturnDate);
-                    
-                    let today = new Date().toLocaleDateString('en-GB');
-                    $("#txtIssueDate").val(today);
+            const user = data.userDetail;
 
-                    if (d.image) {
-                        $("#userImage").attr("src", d.image);
-                    } else {
-                        $("#userImage").attr("src", "/images/noimage.png");
-                    }
+            elements.txtName.val(
+                safe(user.name)
+            );
 
-                    $("#lblTotalBooks").text("Already Issued: " + res.totalIssuedBooks);
+            elements.txtCollege.val(
+                safe(user.collegeName)
+            );
 
-                    let rows = "";
-                    if(res.previousIssues && res.previousIssues.length > 0) {
-                        res.previousIssues.forEach(function (x) {
-                            rows += `
-                            <tr>
-                                <td class="fw-semibold text-primary">${x.title}</td>
-                                <td><span class="badge-modern badge-modern-primary">${x.accessionNo}</span></td>
-                                <td class="small text-muted">${x.issueDate}</td>
-                                <td class="small text-danger fw-bold">${x.lastReturnDate}</td>
-                                <td class="small text-muted">${x.author}</td>
-                            </tr>
-                            `;
-                        });
-                    } else {
-                        rows = '<tr><td colspan="5" class="text-center text-muted py-4">No unreturned books found.</td></tr>';
-                    }
-                    $("#tblPrevious tbody").html(rows);
-                },
-                error: function (err) {
-                    console.error(err);
-                    let errMsg = 'Unable to load borrower details. Please check the ID and try again.';
-                    if (err.responseJSON && err.responseJSON.message) {
-                        errMsg = err.responseJSON.message;
-                    }
-                    SwalThemed.fire({
-                        icon: 'error',
-                        title: 'ID Load Error',
-                        html: errMsg,
-                        confirmButtonText: '<i class="fas fa-check me-1"></i> OK'
-                    });
-                }
-            });
-        });
+            elements.txtCourse.val(
+                safe(user.course || user.designation)
+            );
 
-        // =========================
-        // LOAD BOOK DETAIL
-        // =========================
-        $("#txtAccession").blur(function () {
-            let id = $("#txtIdNo").val().trim();
-            let acc = $("#txtAccession").val().trim();
-            if (acc == "") return;
+            elements.txtBatch.val(
+                safe(user.batch || user.department)
+            );
 
-            // Reset unavailable state
-            showUnavailableBadge(false);
+            elements.txtType.val(
+                safe(user.type)
+            );
 
-            $.ajax({
-                url: "/api/IssueBook/checkid",
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({ txtidno: id, txtaccessionno: acc }),
-                success: function (res) {
-                    let b = res.bookDetail;
-                    if (!b || b.success == false) {
-                        // Show unavailable badge and highlight
-                        showUnavailableBadge(true);
+            elements.txtIssueDate.val(
+                currentDate()
+            );
 
-                        SwalThemed.fire({
-                            icon: 'warning',
-                            title: 'Book Already Issued',
-                            html: 'This book is already issued to another user. Please select another book or wait until the book is returned.',
-                            confirmButtonText: '<i class="fas fa-exchange-alt me-1"></i> Choose Another Book',
-                            showCancelButton: true,
-                            cancelButtonText: 'OK'
-                        }).then(function (result) {
-                            if (result.isConfirmed) {
-                                $('#txtAccession').val('').focus();
-                                $('#txtTitle').val('');
-                                $('#txtAuthor').val('');
-                                $('#txtCategory').val('');
-                                showUnavailableBadge(false);
-                            }
-                        });
-                        return;
-                    }
+            elements.txtReturnDate.val(
+                safe(user.lastReturnDate)
+            );
 
-                    // Book found — clear any previous unavailable state
-                    showUnavailableBadge(false);
-                    $("#txtTitle").val(b.title);
-                    $("#txtAuthor").val(b.author);
-                    $("#txtCategory").val(b.category);
-                },
-                error: function (err) {
-                    showUnavailableBadge(true);
-                    let errMsg = 'Unable to retrieve book details. Please verify the accession number.';
-                    if (err.responseJSON && err.responseJSON.message) {
-                        errMsg = err.responseJSON.message;
-                    }
-                    // Check if the error message indicates already issued
-                    if (isAlreadyIssuedMessage(errMsg)) {
-                        SwalThemed.fire({
-                            icon: 'warning',
-                            title: 'Book Already Issued',
-                            html: 'This book is already issued to another user. Please select another book or wait until the book is returned.',
-                            confirmButtonText: '<i class="fas fa-exchange-alt me-1"></i> Choose Another Book',
-                            showCancelButton: true,
-                            cancelButtonText: 'OK'
-                        });
-                    } else {
-                        SwalThemed.fire({
-                            icon: 'error',
-                            title: 'Book Detail Error',
-                            html: errMsg,
-                            confirmButtonText: '<i class="fas fa-check me-1"></i> OK'
-                        });
-                    }
-                }
-            });
-        });
+            elements.userNameDisplay.text(
+                safe(user.name)
+            );
 
-        // =========================
-        // ISSUE BOOK
-        // =========================
-        function issueBook() {
-            let data = {
-                txtidno: $("#txtIdNo").val().trim(),
-                txtaccessionno: $("#txtAccession").val().trim(),
-                signature: $("#txtSignature").val().trim()
-            };
+            elements.userImage.attr(
+                "src",
+                user.image || "/images/noimage.png"
+            );
 
-            if(!data.txtidno || !data.txtaccessionno || !data.signature) {
-                SwalThemed.fire({
-                    icon: 'warning',
-                    title: 'Missing Information',
-                    html: 'Please fill in the <strong>Borrower ID</strong>, <strong>Accession Number</strong>, and <strong>Admin Signature</strong> before issuing.',
-                    confirmButtonText: '<i class="fas fa-edit me-1"></i> Fill Details'
-                });
+            elements.lblTotalBooks.html(`
+                Already Issued :
+                ${safe(data.totalIssuedBooks)}
+            `);
+
+            elements.summaryTotalBooks.text(
+                safe(data.totalIssuedBooks)
+            );
+
+            elements.summaryTotalFine.text(
+                formatCurrency(data.totalFine)
+            );
+        }
+
+        // =========================================
+        // Render Previous Issues
+        // =========================================
+
+        function renderPreviousIssues(issues) {
+
+            if (!issues || issues.length === 0) {
+
+                elements.tblBody.html(`
+                    <tr>
+                        <td colspan="10"
+                            class="text-center py-5 text-muted">
+
+                            No issued books found
+
+                        </td>
+                    </tr>
+                `);
+
                 return;
             }
 
-            $.ajax({
-                url: "/api/IssueBook/checkid",
-                type: "POST",
-                contentType: "application/json",
-                data: JSON.stringify(data),
-                success: function (res) {
-                    if (!res.success) {
-                        // Smart detection: "already issued" vs generic failure
-                        if (isAlreadyIssuedMessage(res.message)) {
-                            showUnavailableBadge(true);
-                            SwalThemed.fire({
-                                icon: 'warning',
-                                title: 'Book Already Issued',
-                                html: 'This book is already issued to another user. Please select another book or wait until the book is returned.',
-                                confirmButtonText: '<i class="fas fa-exchange-alt me-1"></i> Choose Another Book',
-                                showCancelButton: true,
-                                cancelButtonText: 'OK'
-                            }).then(function (result) {
-                                if (result.isConfirmed) {
-                                    $('#txtAccession').val('').focus();
-                                    $('#txtTitle').val('');
-                                    $('#txtAuthor').val('');
-                                    $('#txtCategory').val('');
-                                    showUnavailableBadge(false);
-                                }
-                            });
-                        } else {
-                            SwalThemed.fire({
-                                icon: 'error',
-                                title: 'Issue Failed',
-                                html: res.message || 'The book could not be issued. Please check the details and try again.',
-                                confirmButtonText: '<i class="fas fa-check me-1"></i> OK'
-                            });
-                        }
-                        return;
-                    }
+            let overdue = 0;
 
-                    // Success!
-                    SwalThemed.fire({
-                        icon: 'success',
-                        title: 'Book Issued Successfully!',
-                        html: 'The book has been issued and recorded in the system. The borrower can now collect the resource.',
-                        confirmButtonText: '<i class="fas fa-thumbs-up me-1"></i> Great!',
-                        timer: 4000,
-                        timerProgressBar: true
-                    }).then(function () {
-                        location.reload();
-                    });
-                },
-                error: function (err) {
-                    let errMsg = 'An unexpected error occurred while issuing the book. Please try again.';
-                    if (err.responseJSON && err.responseJSON.message) {
-                        errMsg = err.responseJSON.message;
-                    }
-                    if (isAlreadyIssuedMessage(errMsg)) {
-                        showUnavailableBadge(true);
-                        SwalThemed.fire({
-                            icon: 'warning',
-                            title: 'Book Already Issued',
-                            html: 'This book is already issued to another user. Please select another book or wait until the book is returned.',
-                            confirmButtonText: '<i class="fas fa-exchange-alt me-1"></i> Choose Another Book',
-                            showCancelButton: true,
-                            cancelButtonText: 'OK'
-                        });
-                    } else {
-                        SwalThemed.fire({
-                            icon: 'error',
-                            title: 'Issue Book Error',
-                            html: errMsg,
-                            confirmButtonText: '<i class="fas fa-check me-1"></i> OK'
-                        });
-                    }
-                }
+            let rows = issues.map(issue => {
+
+                if (issue.isOverDue)
+                    overdue++;
+
+                return `
+                    <tr class="${issue.isOverDue ? 'bg-danger bg-opacity-10' : ''}">
+
+                        <td>${safe(issue.title)}</td>
+
+                        <td>${safe(issue.accessionNo)}</td>
+
+                        <td>${safe(issue.issueDate)}</td>
+
+                        <td>${safe(issue.lastReturnDate)}</td>
+
+                        <td>${safe(issue.author)}</td>
+
+                        <td>${safe(issue.course)}</td>
+
+                        <td>${safe(issue.days)}</td>
+
+                        <td>
+                            ${formatCurrency(issue.fine)}
+                        </td>
+
+                        <td>
+
+                            ${
+                                issue.isOverDue
+                                ?
+                                `<span class="badge bg-danger">
+                                    Overdue
+                                 </span>`
+                                :
+                                `<span class="badge bg-success">
+                                    Active
+                                 </span>`
+                            }
+
+                        </td>
+
+                        <td>${safe(issue.idNo)}</td>
+
+                    </tr>
+                `;
             });
+
+            elements.tblBody.html(rows.join(''));
+
+            elements.summaryOverdueBooks.text(overdue);
         }
 
-        function openReturnPage() { window.location.href = "/ReceiveBook"; }
-        function openRenewPage() { window.location.href = "/RenewBook"; }
+        // =========================================
+        // Load Book Detail
+        // =========================================
+
+        async function loadBook() {
+
+            resetUnavailable();
+
+            const id =
+                elements.txtIdNo.val().trim();
+
+            const accession =
+                elements.txtAccession.val().trim();
+
+            if (!accession) return;
+
+            try {
+
+                const response = await $.ajax({
+
+                    url: "/api/IssueBook/checkid",
+
+                    type: "POST",
+
+                    contentType: "application/json",
+
+                    data: JSON.stringify({
+
+                        txtidno: id,
+
+                        txtaccessionno: accession
+                    })
+                });
+
+                const book = response.bookDetail;
+
+                if (!book || book.success === false) {
+
+                    showUnavailable();
+
+                    clearBookFields();
+
+                    showAlert(
+                        "warning",
+                        "Book Not Available",
+                        book?.message || "Book unavailable"
+                    );
+
+                    return;
+                }
+
+                elements.txtTitle.val(
+                    safe(book.title)
+                );
+
+                elements.txtAuthor.val(
+                    safe(book.author)
+                );
+
+                elements.txtCategory.val(
+                    safe(book.category)
+                );
+            }
+            catch (err) {
+
+                showUnavailable();
+
+                clearBookFields();
+
+                showAlert(
+                    "error",
+                    "Book Error",
+                    err.responseJSON?.message ||
+                    "Unable to load book"
+                );
+            }
+        }
+
+        // =========================================
+        // Issue Book
+        // =========================================
+
+        async function issueBook() {
+
+            const data = {
+
+                txtidno:
+                    elements.txtIdNo.val().trim(),
+
+                txtaccessionno:
+                    elements.txtAccession.val().trim(),
+
+                signature:
+                    elements.txtSignature.val().trim()
+            };
+
+            if (!data.txtidno ||
+                !data.txtaccessionno ||
+                !data.signature) {
+
+                showAlert(
+                    "warning",
+                    "Missing Fields",
+                    "Please fill all required fields"
+                );
+
+                return;
+            }
+
+            try {
+
+                const response = await $.ajax({
+
+                    url: "/api/IssueBook/issue",
+
+                    type: "POST",
+
+                    contentType: "application/json",
+
+                    data: JSON.stringify(data)
+                });
+
+                showAlert(
+                    "success",
+                    "Success",
+                    response.message
+                );
+
+                setTimeout(() => {
+                    location.reload();
+                }, 1500);
+            }
+            catch (err) {
+
+                showAlert(
+                    "error",
+                    "Issue Failed",
+                    err.responseJSON?.message ||
+                    "Unable to issue book"
+                );
+            }
+        }
+
+        // =========================================
+        // Events
+        // =========================================
+
+        elements.txtIdNo.on("blur", loadBorrower);
+
+        elements.txtAccession.on("blur", loadBook);
+
+        // =========================================
+        // Navigation
+        // =========================================
+
+        function openReturnPage() {
+
+            window.location.href = "/ReceiveBook";
+        }
+
+        function openRenewPage() {
+
+            window.location.href = "/RenewBook";
+        }
+
     </script>
 }
+
