@@ -346,20 +346,19 @@
                     });
                 },
 
-                error: function (err) {
+                       error: function (err) {
 
-                    let msg = err.responseJSON?.message ||
-                              err.responseText ||
-                              "Renewal Error";
+            let msg = err.responseJSON?.message
+                   || err.responseText
+                   || "Renewal Error";
 
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Last Return Date Expired',
-                        text: msg,
-                        confirmButtonColor: '#d33',
-                        footer: 'Please contact library administrator'
-                    });
-                }
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',   
+                text: msg,
+                confirmButtonColor: '#d33'
+            });
+        }
             });
         }
 

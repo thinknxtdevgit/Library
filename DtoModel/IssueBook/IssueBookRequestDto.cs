@@ -7,5 +7,6 @@
         public string txtaccessionno { get; set; }
 
         public string signature { get; set; }
+        public string CollegeName { get; set; }
     }
 }

@@ -10,7 +10,6 @@ namespace lib.Controllers
 {
     public class IssueBookController : Controller
     {
-
         private readonly IIssueBookService _issueBookService;
 
         public IssueBookController(
@@ -52,6 +51,10 @@ namespace lib.Controllers
                 });
             }
 
+            request.CollegeName =
+                HttpContext.Session.GetString(
+                    "CollegeName");
+
             var result =
                 await _issueBookService
                 .CheckIdAsync(request);
@@ -77,6 +80,10 @@ namespace lib.Controllers
                     Message = "Invalid request"
                 });
             }
+
+            request.CollegeName =
+                HttpContext.Session.GetString(
+                    "CollegeName");
 
             var result =
                 await _issueBookService

@@ -4,11 +4,11 @@ using Microsoft.Data.SqlClient;
 
 namespace lib.Service
 {
-    public class RenewBookService : IRenewBookService
+    public class RenewBookService :BaseService, IRenewBookService
     {
         private readonly string _connectionString;
 
-        public RenewBookService(IConfiguration configuration)
+        public RenewBookService(IConfiguration configuration,IHttpContextAccessor httpContextAccessor) :base(httpContextAccessor)
         {
             _connectionString =
                 configuration.GetConnectionString("DefaultConnection");
@@ -127,7 +127,7 @@ namespace lib.Service
             using SqlConnection con =
                 new SqlConnection(_connectionString);
 
-            string sql = @"SELECT
+            string sql = $@"SELECT
                            WhomIssued,
                            IDNo,
                            Title,
@@ -139,7 +139,7 @@ namespace lib.Service
                            Author,
                            Discipline
                            FROM IssueRegister
-                           WHERE AccessionNo=@AccessionNo";
+                           WHERE AccessionNo=@AccessionNo AND CollegeName IN ({GetCollegeFilter()})";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
 
@@ -229,9 +229,9 @@ namespace lib.Service
             using SqlConnection con =
                 new SqlConnection(_connectionString);
 
-            string sql = @"UPDATE IssueRegister
+            string sql = $@"UPDATE IssueRegister
                            SET LastReturnDate=@LastReturnDate
-                           WHERE AccessionNo=@AccessionNo";
+                           WHERE AccessionNo=@AccessionNo AND CollegeName IN ({GetCollegeFilter()})";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
 
@@ -259,7 +259,7 @@ namespace lib.Service
                 new SqlConnection(_connectionString);
 
             string sql =
-                "SELECT COUNT(*) FROM UserMaster WHERE Password=@Password";
+                $@"SELECT COUNT(*) FROM UserMaster WHERE Password=@Password AND CollegeName IN ({GetCollegeFilter()})";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
 
@@ -287,12 +287,12 @@ namespace lib.Service
 
             await con.OpenAsync();
 
-            string sql = @"SELECT TOP 1 UserName
+            string sql = $@"SELECT TOP 1 UserName
                            FROM UserMaster
                            WHERE Password=@Password
                            AND LoginType IN ('Admin','Staff')
                            AND ApplicationType='Windows'
-                           AND ApplicationName='Library'";
+                           AND ApplicationName='Library'AND CollegeName IN ({GetCollegeFilter()})";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
 

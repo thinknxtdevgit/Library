@@ -76,10 +76,21 @@ namespace lib.Service
                 };
             }
 
-            var userRow = ds.Tables["UserMaster"].Rows[0];
+            var userRows = ds.Tables["UserMaster"]
+         .AsEnumerable()
+         .ToList();
 
-            string rememberPSW = userRow["RememberPSW"] != DBNull.Value
-                ? userRow["RememberPSW"].ToString()
+            var colleges = userRows
+                .Select(x => x["CollegeName"]?.ToString())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Distinct()
+                .ToList();
+
+            var firstUser = userRows.FirstOrDefault();
+
+            string rememberPSW =
+                firstUser?["RememberPSW"] != DBNull.Value
+                ? firstUser["RememberPSW"].ToString()
                 : "";
 
             string menuSql = @"SELECT LibMenuITEMS.ID_ITEM,
@@ -126,7 +137,8 @@ namespace lib.Service
                 UserName = model.UserName,
                 LoginType = model.LoginType,
                 RememberPSW = rememberPSW,
-                MenuItems = menuItems
+                MenuItems = menuItems,
+                Colleges = colleges
             };
         }
 

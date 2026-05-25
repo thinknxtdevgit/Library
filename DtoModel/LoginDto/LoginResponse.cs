@@ -12,6 +12,8 @@ namespace lib.DtoModel.LoginDto
         public string LoginType { get; set; }
 
         public string RememberPSW { get; set; }
+        public List<string> Colleges { get; set; }
+        public string CollegeName { get; set; }
 
         public List<MenuItemResponse> MenuItems { get; set; }
     }
