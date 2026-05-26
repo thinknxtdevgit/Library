@@ -1,0 +1,263 @@
+﻿@{
+    ViewData["Title"] = "Stock Register Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="fade-in">
+
+    <!-- HEADER -->
+    <div class="page-header mt-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Stock Register Report</h2>
+            <p class="text-muted">
+                Analyze library stock inventory, track availability and export reports.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-modern btn-primary-modern text-white"
+                    style="background: linear-gradient(135deg, #22c55e, #15803d);"
+                    onclick="exportExcel()">
+                <i class="fas fa-file-excel me-2"></i> Export Excel
+            </button>
+        </div>
+    </div>
+
+    <!-- FILTER CARD -->
+    <div class="modern-card mb-4 glass border-0">
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-5">
+                <label class="form-label small fw-bold text-muted">College Filter</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0">
+                        <i class="fas fa-university text-muted"></i>
+                    </span>
+                    <select id="collegeName" class="form-input-modern">
+                        <option value="">-- Select College --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <button class="btn btn-modern btn-primary-modern w-100 text-white"
+                        onclick="loadReport()">
+                    <i class="fas fa-filter me-2"></i> Apply Filter
+                </button>
+            </div>
+
+            <div class="col-md-4 text-end d-none d-md-block">
+                <div class="text-muted small">
+                    Showing: <span class="fw-bold text-primary" id="currentFilter">Global Stock</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+            <div class="modern-card text-center bg-white"
+                 style="border-top: 4px solid var(--primary);">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                     style="width:50px;height:50px;">
+                    <i class="fas fa-book fa-lg"></i>
+                </div>
+                <p class="text-muted small fw-bold text-uppercase">Total Books</p>
+                <h2 class="fw-bold text-primary" id="totalBooks">0</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="modern-card text-center bg-white"
+                 style="border-top: 4px solid var(--warning);">
+                <div class="bg-warning bg-opacity-10 text-warning rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                     style="width:50px;height:50px;">
+                    <i class="fas fa-layer-group fa-lg"></i>
+                </div>
+                <p class="text-muted small fw-bold text-uppercase">Total Titles</p>
+                <h2 class="fw-bold text-warning" id="totalTitles">0</h2>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="modern-card text-center bg-white"
+                 style="border-top: 4px solid var(--success);">
+                <div class="bg-success bg-opacity-10 text-success rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                     style="width:50px;height:50px;">
+                    <i class="fas fa-check-circle fa-lg"></i>
+                </div>
+                <p class="text-muted small fw-bold text-uppercase">Available Books</p>
+                <h2 class="fw-bold text-success" id="unusedBooks">0</h2>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="modern-card">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0">Stock Details</h5>
+            <div class="small badge bg-primary" id="rowCount">0 Records</div>
+        </div>
+
+        <div class="table-responsive-modern">
+            <table class="table custom-table" id="stockTable">
+
+                <thead id="tableHead"></thead>
+
+                <tbody id="tableBody">
+                    <tr>
+                        <td class="text-center py-5 text-muted">
+                            <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                            <p>Apply filter to load stock data</p>
+                        </td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+
+</div>
+@section Scripts {
+    <script>
+
+        document.addEventListener("DOMContentLoaded", loadColleges);
+
+        // ================= COLLEGES =================
+        async function loadColleges() {
+            const res = await fetch('/api/report/colleges');
+            const data = await res.json();
+
+            let ddl = document.getElementById("collegeName");
+            ddl.innerHTML = `<option value="">-- Select College --</option>`;
+
+            data.forEach(x => {
+                ddl.innerHTML += `<option value="${x}">${x}</option>`;
+            });
+        }
+
+        // ================= LOAD REPORT =================
+        async function loadReport() {
+
+            const collegeName = document.getElementById("collegeName").value;
+
+            if (!collegeName) {
+                Swal.fire({ icon: 'warning', title: 'College Required' });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Loading Stock Data...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+
+                // SUMMARY
+                const summary = await fetch('/StockBook/GetSummary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ collegeName })
+                });
+
+                const s = await summary.json();
+
+                document.getElementById("totalBooks").innerText = s.totalBooks ?? 0;
+                document.getElementById("totalTitles").innerText = s.totalTitles ?? 0;
+                document.getElementById("unusedBooks").innerText = s.unusedBooks ?? 0;
+
+                // TABLE DATA
+                const res = await fetch('/StockBook/GetStock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ collegeName })
+                });
+
+                const data = await res.json();
+
+                renderTable(data);
+
+                document.getElementById("rowCount").innerText = data.length + " Records";
+
+            }
+            catch (err) {
+                Swal.fire({ icon: 'error', title: 'Error', text: err.message });
+            }
+            finally {
+                Swal.close();
+            }
+        }
+
+        // ================= TABLE =================
+        function renderTable(data) {
+
+            const head = document.getElementById("tableHead");
+            const body = document.getElementById("tableBody");
+
+            head.innerHTML = "";
+            body.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                body.innerHTML = `<tr><td class="text-center py-4">No Data Found</td></tr>`;
+                return;
+            }
+
+            const keys = Object.keys(data[0]);
+
+            let h = "<tr>";
+            keys.forEach(k => {
+                h += `<th>${k}</th>`;
+            });
+            h += "</tr>";
+
+            head.innerHTML = h;
+
+            let rows = "";
+
+            data.forEach(row => {
+                rows += "<tr>";
+                keys.forEach(k => {
+                    rows += `<td>${row[k] ?? '-'}</td>`;
+                });
+                rows += "</tr>";
+            });
+
+            body.innerHTML = rows;
+        }
+
+        // ================= EXPORT =================
+        async function exportExcel() {
+
+            const collegeName = document.getElementById("collegeName").value;
+
+            if (!collegeName) {
+                Swal.fire({ icon: 'warning', title: 'College Required' });
+                return;
+            }
+
+            const res = await fetch('/StockBook/ExportExcel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ collegeName })
+            });
+
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "StockRegister.xlsx";
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+    </script>
+}

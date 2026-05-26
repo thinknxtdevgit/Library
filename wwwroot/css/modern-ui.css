@@ -726,53 +726,154 @@ h1, h2, h3, h4, h5, h6 {
     border-top-right-radius: var(--radius-md) !important;
     border-bottom-right-radius: var(--radius-md) !important;
 }
+/* =========================================================
+   PROFESSIONAL REPORT TABLE
+========================================================= */
 
-/* ==========================================================================
-   TABLES & ACCESSIBLE VIEWS
-   ========================================================================== */
 .table-responsive-modern {
     overflow-x: auto;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow-sm);
-    background: var(--bg-card);
+    overflow-y: auto;
+    border: 1px solid #d6dbe1;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    max-height: 650px;
 }
 
+/* TABLE */
 .custom-table {
-    width: 100%;
-    margin-bottom: 0;
-    background: transparent;
-    border-collapse: separate;
-    border-spacing: 0;
+    width: max-content;
+    min-width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+    background: white;
 }
 
-.custom-table thead th {
-    background-color: rgba(100, 116, 139, 0.03);
-    color: var(--text-muted);
-    font-size: 0.75rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    padding: 1.15rem 1rem;
-    border-bottom: 2px solid var(--border-color);
+    /* HEADER */
+    .custom-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #f3f6f9;
+        color: #4b5563;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        padding: 10px 14px;
+        border-bottom: 2px solid #cfd8e3;
+        border-right: 1px solid #e5e7eb;
+        white-space: nowrap;
+        text-align: left;
+    }
+
+    /* BODY */
+    .custom-table tbody td {
+        padding: 10px 14px;
+        font-size: 14px;
+        color: #1f2937;
+        border-bottom: 1px solid #edf0f2;
+        border-right: 1px solid #edf0f2;
+        vertical-align: top;
+        line-height: 1.5;
+        white-space: normal;
+        word-break: keep-all;
+        overflow-wrap: break-word;
+    }
+
+    /* ROW HOVER */
+    .custom-table tbody tr:hover {
+        background: #f9fbff;
+    }
+
+    /* ZEBRA */
+    .custom-table tbody tr:nth-child(even) {
+        background: #fafafa;
+    }
+
+    /* LAST COLUMN */
+    .custom-table th:last-child,
+    .custom-table td:last-child {
+        border-right: none;
+    }
+
+    /* DATE */
+    .custom-table td:nth-child(1),
+    .custom-table td:nth-child(8),
+    .custom-table th:nth-child(1),
+    .custom-table th:nth-child(8) {
+        white-space: nowrap;
+        min-width: 130px;
+    }
+
+    /* IDNO */
+    .custom-table td:nth-child(2),
+    .custom-table th:nth-child(2) {
+        min-width: 120px;
+        white-space: nowrap;
+    }
+
+    /* NAME */
+    .custom-table td:nth-child(3),
+    .custom-table th:nth-child(3) {
+        min-width: 180px;
+    }
+
+    /* DISCIPLINE */
+    .custom-table td:nth-child(4),
+    .custom-table th:nth-child(4) {
+        min-width: 100px;
+        white-space: nowrap;
+    }
+
+    /* ACCESSION */
+    .custom-table td:nth-child(5),
+    .custom-table th:nth-child(5) {
+        min-width: 120px;
+        white-space: nowrap;
+    }
+
+    /* TITLE */
+    .custom-table td:nth-child(6),
+    .custom-table th:nth-child(6) {
+        min-width: 420px;
+    }
+
+    /* AUTHOR */
+    .custom-table td:nth-child(7),
+    .custom-table th:nth-child(7) {
+        min-width: 220px;
+    }
+
+    /* TYPE */
+    .custom-table td:nth-child(10),
+    .custom-table th:nth-child(10) {
+        min-width: 120px;
+        white-space: nowrap;
+    }
+
+    /* CATEGORY */
+    .custom-table td:nth-child(11),
+    .custom-table th:nth-child(11) {
+        min-width: 180px;
+    }
+
+/* MOBILE */
+@media(max-width:768px) {
+
+    .custom-table {
+        min-width: 1400px;
+    }
+
+        .custom-table thead th,
+        .custom-table tbody td {
+            padding: 8px 10px;
+            font-size: 12px;
+        }
 }
 
-.custom-table tbody td {
-    padding: 1.15rem 1rem;
-    vertical-align: middle;
-    color: var(--text-main);
-    border-bottom: 1px solid var(--border-color);
-    font-size: 0.875rem;
-    transition: background-color var(--transition-fast);
-}
 
-.custom-table tbody tr:last-child td {
-    border-bottom: none;
-}
 
-.custom-table tbody tr:hover td {
-    background-color: rgba(37, 99, 235, 0.02);
-}
 
 /* Glass Badge Badging System */
 .badge-modern {
@@ -1161,20 +1262,118 @@ h1, h2, h3, h4, h5, h6 {
         max-width: 95vw;
         font-size: 0.9rem;
     }
-    .swal2-popup.swal-themed .swal2-title {
-        font-size: 1.15rem;
-    }
-    .swal2-popup.swal-themed .swal2-html-container {
-        font-size: 0.85rem;
-    }
-    .swal2-popup.swal-themed .swal2-confirm,
-    .swal2-popup.swal-themed .swal2-cancel {
-        padding: 0.6rem 1.25rem !important;
-        font-size: 0.85rem !important;
-        width: 100%;
-    }
-    .swal2-popup.swal-themed .swal2-actions {
-        flex-direction: column;
-        width: 100%;
-    }
+
+        .swal2-popup.swal-themed .swal2-title {
+            font-size: 1.15rem;
+        }
+
+        .swal2-popup.swal-themed .swal2-html-container {
+            font-size: 0.85rem;
+        }
+
+        .swal2-popup.swal-themed .swal2-confirm,
+        .swal2-popup.swal-themed .swal2-cancel {
+            padding: 0.6rem 1.25rem !important;
+            font-size: 0.85rem !important;
+            width: 100%;
+        }
+
+        .swal2-popup.swal-themed .swal2-actions {
+            flex-direction: column;
+            width: 100%;
+        }
 }
+/* =========================================
+   ISSUE TABLE FINAL FIX
+========================================= */
+
+.issue-books-table .table-responsive-modern {
+    overflow-x: auto;
+}
+
+.issue-books-table .custom-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    min-width: 900px !important;
+}
+
+    /* TITLE COLUMN */
+    .issue-books-table .custom-table td:nth-child(1),
+    .issue-books-table .custom-table th:nth-child(1) {
+        width: 220px !important;
+        min-width: 220px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ACCESSION */
+    .issue-books-table .custom-table td:nth-child(2),
+    .issue-books-table .custom-table th:nth-child(2) {
+        width: 110px !important;
+        min-width: 110px !important;
+    }
+
+    /* ISSUE DATE */
+    .issue-books-table .custom-table td:nth-child(3),
+    .issue-books-table .custom-table th:nth-child(3) {
+        width: 120px !important;
+        min-width: 120px !important;
+    }
+
+    /* RETURN DATE */
+    .issue-books-table .custom-table td:nth-child(4),
+    .issue-books-table .custom-table th:nth-child(4) {
+        width: 120px !important;
+        min-width: 120px !important;
+    }
+
+    /* AUTHOR */
+    .issue-books-table .custom-table td:nth-child(5),
+    .issue-books-table .custom-table th:nth-child(5) {
+        width: 180px !important;
+        min-width: 180px !important;
+    }
+
+    /* COURSE */
+    .issue-books-table .custom-table td:nth-child(6),
+    .issue-books-table .custom-table th:nth-child(6) {
+        width: 90px !important;
+        min-width: 90px !important;
+        max-width: 90px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }
+
+    /* DAYS */
+    .issue-books-table .custom-table td:nth-child(7),
+    .issue-books-table .custom-table th:nth-child(7) {
+        width: 70px !important;
+        min-width: 70px !important;
+        text-align: center;
+    }
+
+    /* FINE */
+    .issue-books-table .custom-table td:nth-child(8),
+    .issue-books-table .custom-table th:nth-child(8) {
+        width: 90px !important;
+        min-width: 90px !important;
+    }
+
+    /* STATUS */
+    .issue-books-table .custom-table td:nth-child(9),
+    .issue-books-table .custom-table th:nth-child(9) {
+        width: 110px !important;
+        min-width: 110px !important;
+    }
+
+    /* ID */
+    .issue-books-table .custom-table td:nth-child(10),
+    .issue-books-table .custom-table th:nth-child(10) {
+        width: 120px !important;
+        min-width: 120px !important;
+    }
+    
+    
+

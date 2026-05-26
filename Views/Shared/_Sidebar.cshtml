@@ -19,7 +19,7 @@
 
     <nav class="sidebar-menu">
         <!-- Dashboard -->
-        <a asp-controller="Dashboard"
+      @*   <a asp-controller="Dashboard"
                asp-action="Index"
                class="menu-item">
 
@@ -29,7 +29,7 @@
 
             <span>Dashboard</span>
         </a>
-
+ *@
         <!-- Book Management Dropdown -->
         <div class="menu-dropdown">
             <button class="menu-dropdown-toggle" type="button" 
@@ -109,9 +109,9 @@
             </button>
             <ul class="menu-sub @(currentController == "Reports" ? "show" : "")">
                 <li>
-                    <a asp-controller="Reports" asp-action="Index" 
-                       class="menu-sub-item @(currentController == "Reports" && currentAction == "Index" ? "active" : "")">
-                        Inventory Report
+                    <a asp-controller="StockBook" asp-action="Index"
+                           class="menu-sub-item @(currentController == "StockBook" && currentAction == "Index" ? "active" : "")">
+                        Book Stock
                     </a>
                 </li>
                 <li>
@@ -124,11 +124,11 @@
         </div>
 
         <!-- Settings -->
-        <a asp-controller="Settings" asp-action="Index" 
+       @*  <a asp-controller="Settings" asp-action="Index" 
            class="menu-item @(currentController == "Settings" && currentAction == "Index" ? "active" : "")">
             <div class="menu-icon"><i class="fas fa-cog"></i></div>
             <span>Settings</span>
-        </a>
+        </a> *@
     </nav>
 
     <div class="sidebar-footer p-3">

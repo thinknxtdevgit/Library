@@ -152,44 +152,81 @@
                 document.getElementById("issuedBooks").innerText = data.issuedBooks ?? 0;
                 document.getElementById("unissuedBooks").innerText = data.unissuedBooks ?? 0;
 
-                // ================= TABLE =================
-                const tableHead = document.getElementById("tableHead");
-                const tableBody = document.getElementById("tableBody");
+                      // ================= TABLE =================
 
-                tableHead.innerHTML = "";
-                tableBody.innerHTML = "";
+        const tableHead = document.getElementById("tableHead");
+        const tableBody = document.getElementById("tableBody");
 
-                if (!data.issueBooks || data.issueBooks.length === 0) {
-                    tableBody.innerHTML = `
-                        <tr>
-                            <td class="text-center py-4 text-muted">
-                                No records found
-                            </td>
-                        </tr>`;
-                    return;
-                }
+        tableHead.innerHTML = "";
+        tableBody.innerHTML = "";
 
-                // HEADER
-                let header = "<tr>";
-                Object.keys(data.issueBooks[0]).forEach(key => {
-                    header += `<th class="p-2 text-uppercase small">${key}</th>`;
-                });
-                header += "</tr>";
-                tableHead.innerHTML = header;
+        if (!data.issueBooks || data.issueBooks.length === 0) {
 
-                // BODY
-                let rows = "";
-                data.issueBooks.forEach(item => {
-                    rows += "<tr>";
+            tableBody.innerHTML = `
+                <tr>
+                    <td class="text-center py-4 text-muted">
+                        No records found
+                    </td>
+                </tr>`;
 
-                    Object.values(item).forEach(val => {
-                        rows += `<td class="p-2">${val ?? '-'}</td>`;
-                    });
+            return;
+        }
 
-                    rows += "</tr>";
-                });
+        /* COLUMN TITLES */
+        const columnMap = {
+            issueDate: "Issue Date",
+            idNo: "ID No",
+            whomIssued: "Whom Issued",
+            discipline: "Discipline",
+            accessionNo: "Accession No",
+            title: "Book Title",
+            author: "Author",
+            lastReturnDate: "Return Date",
+            condition: "Condition",
+            type: "Type",
+            category: "Category",
+            receiveDate: "Receive Date",
+            remarks: "Remarks"
+        };
 
-                tableBody.innerHTML = rows;
+        // ================= HEADER =================
+
+        let header = "<tr>";
+
+        Object.keys(data.issueBooks[0]).forEach(key => {
+
+            header += `
+                <th>
+                    ${columnMap[key] || key}
+                </th>
+            `;
+        });
+
+        header += "</tr>";
+
+        tableHead.innerHTML = header;
+
+        // ================= BODY =================
+
+        let rows = "";
+
+        data.issueBooks.forEach(item => {
+
+            rows += "<tr>";
+
+            Object.values(item).forEach(val => {
+
+                rows += `
+                    <td>
+                        ${val ?? '-'}
+                    </td>
+                `;
+            });
+
+            rows += "</tr>";
+        });
+
+        tableBody.innerHTML = rows;
 
             }
             catch (err) {

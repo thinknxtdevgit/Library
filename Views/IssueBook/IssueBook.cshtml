@@ -149,7 +149,8 @@
             <!-- Previous Issues Table -->
             <div class="modern-card">
                 <h5 class="fw-bold mb-4"><i class="fas fa-history me-2 text-info"></i> Active Issued & Unreturned Books</h5>
-                <div class="table-responsive-modern">
+                <div class="table-responsive-modern issue-books-table">
+                 
                     <table class="table custom-table mb-0" id="tblPrevious">
                        <thead>
     <tr>
@@ -167,7 +168,7 @@
 </thead>
                         <tbody class="border-top-0">
                             <tr>
-                                <td colspan="5" class="text-center text-muted py-4">No unreturned books found. Try loading a borrower.</td>
+                                <td colspan="10" class="text-center text-muted py-4">No unreturned books found. Try loading a borrower.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -416,21 +417,28 @@
                 formatCurrency(data.totalFine)
             );
         }
-
         // =========================================
-        // Render Previous Issues
+        // PREVIOUS ISSUED BOOKS
         // =========================================
 
         function renderPreviousIssues(issues) {
 
+            // EMPTY STATE
             if (!issues || issues.length === 0) {
 
                 elements.tblBody.html(`
                     <tr>
-                        <td colspan="10"
-                            class="text-center py-5 text-muted">
+                        <td colspan="10" class="text-center py-5 text-muted">
 
-                            No issued books found
+                            <div class="d-flex flex-column align-items-center">
+
+                                <i class="fas fa-book-open fa-2x mb-3 text-secondary opacity-50"></i>
+
+                                <span class="fw-semibold">
+                                    No issued books found
+                                </span>
+
+                            </div>
 
                         </td>
                     </tr>
@@ -447,43 +455,84 @@
                     overdue++;
 
                 return `
-                    <tr class="${issue.isOverDue ? 'bg-danger bg-opacity-10' : ''}">
 
-                        <td>${safe(issue.title)}</td>
+                    <tr class="${issue.isOverDue ? 'table-danger-subtle' : ''}">
 
-                        <td>${safe(issue.accessionNo)}</td>
+                        <!-- TITLE -->
+                        <td class="fw-semibold text-dark">
+                            ${safe(issue.title)}
+                        </td>
 
-                        <td>${safe(issue.issueDate)}</td>
-
-                        <td>${safe(issue.lastReturnDate)}</td>
-
-                        <td>${safe(issue.author)}</td>
-
-                        <td>${safe(issue.course)}</td>
-
-                        <td>${safe(issue.days)}</td>
-
+                        <!-- ACCESSION -->
                         <td>
+                            ${safe(issue.accessionNo)}
+                        </td>
+
+                        <!-- ISSUE DATE -->
+                        <td class="text-nowrap">
+                            ${safe(issue.issueDate)}
+                        </td>
+
+                        <!-- RETURN DATE -->
+                        <td class="text-nowrap">
+
+                            ${
+                                issue.isOverDue
+                                ?
+                                `<span class="text-danger fw-semibold">
+                                    ${safe(issue.lastReturnDate)}
+                                 </span>`
+                                :
+                                safe(issue.lastReturnDate)
+                            }
+
+                        </td>
+
+                        <!-- AUTHOR -->
+                        <td>
+                            ${safe(issue.author)}
+                        </td>
+
+                        <!-- COURSE -->
+                        <td>
+                            ${safe(issue.course)}
+                        </td>
+
+                        <!-- DAYS -->
+                        <td class="text-center fw-semibold">
+                            ${safe(issue.days)}
+                        </td>
+
+                        <!-- FINE -->
+                        <td class="text-end fw-bold text-danger">
                             ${formatCurrency(issue.fine)}
                         </td>
 
+                        <!-- STATUS -->
                         <td>
 
                             ${
                                 issue.isOverDue
                                 ?
-                                `<span class="badge bg-danger">
+                                `
+                                <span class="badge rounded-pill bg-danger px-3 py-2">
                                     Overdue
-                                 </span>`
+                                </span>
+                                `
                                 :
-                                `<span class="badge bg-success">
+                                `
+                                <span class="badge rounded-pill bg-success px-3 py-2">
                                     Active
-                                 </span>`
+                                </span>
+                                `
                             }
 
                         </td>
 
-                        <td>${safe(issue.idNo)}</td>
+                        <!-- ID -->
+                        <td class="text-nowrap">
+                            ${safe(issue.idNo)}
+                        </td>
 
                     </tr>
                 `;
@@ -491,6 +540,7 @@
 
             elements.tblBody.html(rows.join(''));
 
+            // SUMMARY
             elements.summaryOverdueBooks.text(overdue);
         }
 

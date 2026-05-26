@@ -39,10 +39,10 @@
                     <button class="btn btn-link text-muted p-0 me-3" id="toggleSidebar" style="outline: none; box-shadow: none;">
                         <i class="fas fa-bars-staggered fa-lg"></i>
                     </button>
-                    <div class="search-box d-none d-md-flex">
+                  @*   <div class="search-box d-none d-md-flex">
                         <i class="fas fa-search text-muted"></i>
                         <input type="text" placeholder="Search books, students, catalogs...">
-                    </div>
+                    </div> *@
                 </div>
 
                 <div class="nav-right d-flex align-items-center gap-3">
@@ -50,13 +50,13 @@
                         <i class="fas fa-moon"></i>
                     </button>
                     
-                    <div class="notifications position-relative">
+                  @*   <div class="notifications position-relative">
                         <i class="far fa-bell fa-lg text-muted"></i>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.55rem; padding: 0.25rem 0.4rem; animation: pulseGlow 2s infinite;">
                             3
                         </span>
                     </div>
-
+ *@
                     <div class="user-profile d-flex align-items-center gap-2 ms-2">
                         <div class="text-end d-none d-sm-block">
                             <div class="fw-semibold small">@Context.Session.GetString("UserName")</div>
