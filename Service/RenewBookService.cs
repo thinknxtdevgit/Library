@@ -254,7 +254,7 @@ namespace lib.Service
 
         private async Task<bool> CheckSignatureAsync(
             string signature)
-        {
+            {
             using SqlConnection con =
                 new SqlConnection(_connectionString);
 

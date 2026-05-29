@@ -20,9 +20,10 @@ namespace lib.Service
             var list = new List<StockBookDto>();
 
             using SqlConnection con = new SqlConnection(_connectionString);
-            string sql = @"SELECT
+            string sql = @"
+SELECT
     DateEntry,
-    CAST(AccessionNo AS INT) AS AccessionNo,
+    AccessionNo,
     Title,
     Author,
     Edition,
@@ -42,17 +43,14 @@ namespace lib.Service
     BookNo,
     Remarks,
     Location,
-
     FirstName,
     SirName,
-
     FirstAuthorForeName,
     FirstAuthorSirName,
     SecondAuthorForeName,
     SecondAuthorSirName,
     ThirdAuthorForeName,
     ThirdAuthorSirName,
-
     MoreThanThreeAuthors,
     SubTitle,
     ISBN,
@@ -61,10 +59,8 @@ namespace lib.Service
     BookSize,
     Subject1,
     Subject2
-
 FROM StockRegister
-WHERE CollegeName = @CollegeName
-ORDER BY AccessionNo";
+WHERE LTRIM(RTRIM(CollegeName)) = LTRIM(RTRIM(@CollegeName))";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
             cmd.Parameters.AddWithValue("@CollegeName", collegeName);
@@ -80,7 +76,7 @@ ORDER BY AccessionNo";
     ? (DateTime?)null
     : Convert.ToDateTime(reader["DateEntry"]),
 
-                    AccessionNo = Convert.ToInt64(reader["AccessionNo"]),
+                    AccessionNo = reader["AccessionNo"]?.ToString(),
 
                     Title = reader["Title"]?.ToString(),
                     Author = reader["Author"]?.ToString(),

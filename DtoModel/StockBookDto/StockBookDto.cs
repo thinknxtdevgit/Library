@@ -3,7 +3,7 @@
     public class StockBookDto
     {
         public DateTime ?DateEntry { get; set; }
-        public long AccessionNo { get; set; }
+        public string? AccessionNo { get; set; }
         public string Title { get; set; }
         public string Author { get; set; }
         public string Edition { get; set; }

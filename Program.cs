@@ -33,6 +33,7 @@ builder.Services.AddScoped<IReturnBookService, ReturnBookService>();
 builder.Services.AddScoped<IRenewBookService, RenewBookService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IStockBookService, StockBookService>();
+builder.Services.AddScoped<IStockRegisterService, StockRegisterService>();
 
 
 // =====================================================

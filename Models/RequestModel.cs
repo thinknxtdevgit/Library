@@ -4,7 +4,7 @@
     {
         public string Action { get; set; } // init | get | add | update | autocomplete | bookdetail
         public string CollegeName { get; set; }
-        public int? AccessionNo { get; set; }
+        public string? AccessionNo { get; set; }
         public DateTime? DateEntry { get; set; }
         public string? BillDate { get; set; }
 

@@ -4,16 +4,25 @@
 }
 
 <div class="fade-in">
+    <!-- ========== ADDED: Hidden state fields ========== -->
+    <input type="hidden" id="hdnCollegeId" value="0" />
+    <input type="hidden" id="hdnAccessionId" value="0" />
+    <input type="hidden" id="hdnEditMode" value="false" />
+
     <div class="page-header mt-2 mb-4">
         <div>
             <h2 class="fw-bold mb-1">Book Catalog</h2>
             <p class="text-muted">Manage your library's inventory, register new titles, and track stock details.</p>
         </div>
         <div class="d-flex gap-2 w-100-mobile">
+            <!-- ========== ADDED: Add New Button ========== -->
+            <button class="btn btn-modern btn-secondary-modern btn-auto-width" onclick="resetForm()" id="btnAddNew">
+                <i class="fas fa-plus-circle me-2 text-success"></i> Add New
+            </button>
             <button class="btn btn-modern btn-secondary-modern btn-auto-width" onclick="clearForm()">
                 <i class="fas fa-eraser me-2 text-danger"></i> Clear
             </button>
-            <button class="btn btn-modern btn-primary-modern btn-auto-width text-white" onclick="saveBook()">
+            <button class="btn btn-modern btn-primary-modern btn-auto-width text-white" onclick="saveBook()" id="btnSave">
                 <i class="fas fa-save me-2"></i> Save Record
             </button>
         </div>
@@ -22,55 +31,137 @@
     <div class="row g-4">
         <!-- Main Form Section -->
         <div class="col-lg-8">
+
+            <!-- ===== General Information ===== -->
             <div class="modern-card">
                 <h5 class="fw-bold mb-4 border-bottom pb-3"><i class="fas fa-info-circle me-2 text-primary"></i> General Information</h5>
-                
                 <div class="row g-3">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">College Name</label>
                         <input type="text" id="txtCollegeName" class="form-input-modern" placeholder="Enter college" />
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Accession No</label>
                         <div class="input-group">
-                            <input type="number" id="txtAccessionNo" class="form-input-modern" style="border-top-right-radius:0; border-bottom-right-radius:0;" placeholder="0000" />
+                            <input type="text" id="txtAccessionNo" class="form-input-modern" style="border-top-right-radius:0; border-bottom-right-radius:0;" @* placeholder="ACET101"  *@/>
                             <button class="btn btn-modern btn-primary-modern input-group-modern-btn px-4" onclick="loadBook()">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="col-12">
+                    <div class="col-md-4">
+                        <!-- ========== ADDED: Date of Entry ========== -->
+                        <label class="form-label small fw-bold text-muted">Date of Entry</label>
+                        <input type="date" id="txtDateEntry" class="form-input-modern" />
+                    </div>
+                    <div class="col-md-8">
                         <label class="form-label small fw-bold text-muted">Book Title</label>
-                        <input type="text" id="txtTitle" class="form-input-modern" placeholder="Enter full book title" />
+                        <!-- ========== ADDED: datalist for title autocomplete ========== -->
+                        <input type="text" id="txtTitle" class="form-input-modern" placeholder="Enter full book title" list="titleList" autocomplete="off" />
+                        <datalist id="titleList"></datalist>
+                    </div>
+                    <div class="col-md-4">
+                        <!-- ========== ADDED: SubTitle field ========== -->
+                        <label class="form-label small fw-bold text-muted">Sub Title</label>
+                        <input type="text" id="txtSubTitle" class="form-input-modern" placeholder="Optional" />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label small fw-bold text-muted">Author(s)</label>
-                        <input type="text" id="txtAuthor" class="form-input-modern" placeholder="Writer name" />
+                        <input type="text" id="txtAuthor" class="form-input-modern" @* placeholder="Auto-built from author details below" *@ readonly />
                     </div>
                     <div class="col-md-6">
                         <label class="form-label small fw-bold text-muted">Publisher</label>
-                        <input type="text" id="txtPublisher" class="form-input-modern" placeholder="Publication house" />
+                        <!-- ========== ADDED: datalist for publisher auto-bind ========== -->
+                        <input type="text" id="txtPublisher" class="form-input-modern" @* placeholder="Publication house" *@ list="publisherList" />
+                        <datalist id="publisherList"></datalist>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Category</label>
-                        <input type="text" id="txtCategory" class="form-input-modern" placeholder="e.g. Science, Fiction" />
+                        <!-- ========== ADDED: datalist for category auto-bind ========== -->
+                        <input type="text" id="txtCategory" class="form-input-modern"@*  placeholder="e.g. Science, Fiction" *@ list="categoryList" />
+                        <datalist id="categoryList"></datalist>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Source</label>
-                        <input type="text" id="txtSource" class="form-input-modern" placeholder="Vendor or Donor" />
+                        <!-- ========== ADDED: datalist for source auto-bind ========== -->
+                        <input type="text" id="txtSource" class="form-input-modern"@*  placeholder="Vendor or Donor" *@ list="sourceList" />
+                        <datalist id="sourceList"></datalist>
+                    </div>
+                    <div class="col-md-4">
+                        <!-- ========== ADDED: Type field ========== -->
+                        <label class="form-label small fw-bold text-muted">Type</label>
+                        <select id="txtType" class="form-input-modern">
+                            <option value="">-- Select Type --</option>
+                            <option value="Book">Book</option>
+                            <option value="Journal">Journal</option>
+                            <option value="Magazine">Magazine</option>
+                            <option value="CD/DVD">CD/DVD</option>
+                            <option value="Other">Other</option>
+                        </select>
                     </div>
                 </div>
+            </div>
 
-                <h5 class="fw-bold mt-5 mb-4 border-bottom pb-3"><i class="fas fa-tag me-2 text-primary"></i> Technical Details</h5>
-                
+            <!-- ========== ADDED: Author Details Section ========== -->
+            <div class="modern-card mt-4">
+                <h5 class="fw-bold mb-4 border-bottom pb-3"><i class="fas fa-user-edit me-2 text-primary"></i> Author Details</h5>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">1st Author Forename</label>
+                        <input type="text" id="txtFirstAuthorForeName" class="form-input-modern author-field" placeholder="Forename" list="firstAuthorList" autocomplete="off" />
+                        <datalist id="firstAuthorList"></datalist>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">1st Author Surname</label>
+                        <input type="text" id="txtFirstAuthorSirName" class="form-input-modern author-field" placeholder="Surname" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">2nd Author Forename</label>
+                        <input type="text" id="txtSecondAuthorForeName" class="form-input-modern author-field" placeholder="Forename" list="secondAuthorList" autocomplete="off" />
+                        <datalist id="secondAuthorList"></datalist>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">2nd Author Surname</label>
+                        <input type="text" id="txtSecondAuthorSirName" class="form-input-modern author-field" placeholder="Surname" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">3rd Author Forename</label>
+                        <input type="text" id="txtThirdAuthorForeName" class="form-input-modern author-field" placeholder="Forename" list="thirdAuthorList" autocomplete="off" />
+                        <datalist id="thirdAuthorList"></datalist>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-bold text-muted">3rd Author Surname</label>
+                        <input type="text" id="txtThirdAuthorSirName" class="form-input-modern author-field" placeholder="Surname" />
+                    </div>
+                    <div class="col-12">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="chkMoreAuthors" />
+                            <label class="form-check-label small text-muted" for="chkMoreAuthors">More than 3 authors</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Technical Details (existing structure, enhanced with new fields) ===== -->
+            <div class="modern-card mt-4">
+                <h5 class="fw-bold mb-4 border-bottom pb-3"><i class="fas fa-tag me-2 text-primary"></i> Technical Details</h5>
                 <div class="row g-3">
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted">Edition</label>
-                        <input type="text" id="txtEdition" class="form-input-modern" placeholder="1st" />
+                        <input type="text" id="txtEdition" class="form-input-modern" @* placeholder="1st" *@ />
                     </div>
                     <div class="col-md-3">
-                        <label class="form-label small fw-bold text-muted">Price</label>
-                        <input type="number" id="txtPrice" class="form-input-modern" placeholder="0.00" />
+                        <label class="form-label small fw-bold text-muted">Price (₹)</label>
+                        <input type="number" id="txtPrice" class="form-input-modern" placeholder="0.00" step="0.01" />
+                    </div>
+                    <!-- ========== ADDED: Discount & NetPrice ========== -->
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Discount (%)</label>
+                        <input type="number" id="txtDiscount" class="form-input-modern" placeholder="0" step="0.01" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Net Price (₹)</label>
+                        <input type="number" id="txtNetPrice" class="form-input-modern" placeholder="Auto" readonly />
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted">Year</label>
@@ -78,15 +169,78 @@
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted">Pages</label>
-                        <input type="text" id="txtPages" class="form-input-modern" placeholder="123" />
+                        <input type="text" id="txtPages" class="form-input-modern" placeholder="000" />
+                    </div>
+                    <!-- ========== ADDED: Volume, Size ========== -->
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Volume</label>
+                        <input type="text" id="txtVolume" class="form-input-modern" placeholder="Vol." />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Size</label>
+                        <input type="text" id="txtSize" class="form-input-modern" placeholder="e.g. 00cm" />
+                    </div>
+                    <!-- ========== ADDED: ISBN, Place, Series ========== -->
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">ISBN</label>
+                        <input type="text" id="txtISBN" class="form-input-modern" placeholder="ISBN number" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Place</label>
+                        <input type="text" id="txtPlace" class="form-input-modern"@*  placeholder="Publication place *@" list="placeList" autocomplete="off" />
+                        <datalist id="placeList"></datalist>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Series</label>
+                        <input type="text" id="txtSeries" class="form-input-modern" placeholder="Series name" />
                     </div>
                 </div>
             </div>
+
+            <!-- ========== ADDED: Billing & Classification Section ========== -->
+            <div class="modern-card mt-4">
+                <h5 class="fw-bold mb-4 border-bottom pb-3"><i class="fas fa-receipt me-2 text-primary"></i> Billing & Classification</h5>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Bill No</label>
+                        <input type="text" id="txtBillNo" class="form-input-modern" placeholder="Invoice No" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Bill Date</label>
+                        <input type="text" id="txtBillDate" class="form-input-modern" placeholder="DD/MM/YYYY" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Location</label>
+                        <input type="text" id="txtLocation" class="form-input-modern" @* placeholder="Shelf / Rack *@" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Class No</label>
+                        <input type="text" id="txtClassNo" class="form-input-modern"@*  placeholder="DDC"  *@/>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Book No</label>
+                        <input type="text" id="txtBookNo" class="form-input-modern" placeholder="Book No" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Subject 1</label>
+                        <input type="text" id="txtSubject1" class="form-input-modern" placeholder="Primary" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-bold text-muted">Subject 2</label>
+                        <input type="text" id="txtSubject2" class="form-input-modern" placeholder="Secondary" />
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label small fw-bold text-muted">Remarks</label>
+                        <textarea id="txtRemarks" class="form-input-modern" rows="2" placeholder="Additional notes..."></textarea>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- Sidebar Actions/Stats -->
         <div class="col-lg-4">
-            <div class="modern-card glass mb-4">
+            <div class="modern-card glass mb-4 sticky-lg-top" style="top: 100px;">
                 <h6 class="fw-bold mb-3"><i class="fas fa-bolt me-2 text-warning"></i> Quick Operations</h6>
                 <div class="d-grid gap-2">
                     <button class="btn btn-modern btn-secondary-modern w-100 text-start border bg-white" onclick="loadBook()">
@@ -99,6 +253,23 @@
                         <i class="fas fa-barcode text-muted me-2"></i> Generate Barcode
                     </button>
                 </div>
+
+                <!-- ========== ADDED: Accession Info Panel ========== -->
+              @*   <div class="mt-4 p-3 rounded-3" style="background: var(--bg-main); border: 1px solid var(--border-color);">
+                    <h6 class="fw-bold small mb-2"><i class="fas fa-hashtag me-2 text-primary"></i> Accession Info</h6>
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>College ID:</span>
+                        <span class="fw-bold" id="lblCollegeId">&mdash;</span>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted mb-1">
+                        <span>Next Accession ID:</span>
+                        <span class="fw-bold text-primary" id="lblAccessionId">&mdash;</span>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span>Accession Code:</span>
+                        <span class="fw-bold text-success" id="lblAccessionCode">&mdash;</span>
+                    </div>
+                </div> *@
             </div>
             
             <div class="modern-card text-white bg-primary bg-opacity-95 shadow-glow" style="border: none;">
@@ -109,93 +280,633 @@
     </div>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+@section Scripts {
+    <script>
 
-<script>
-    // ================= SAVE BOOK =================
-    function saveBook() {
-        let data = {
-            collegeName: $("#txtCollegeName").val(),
-            accessionNo: parseInt($("#txtAccessionNo").val()),
-            title: $("#txtTitle").val(),
-            author: $("#txtAuthor").val(),
-            publisher: $("#txtPublisher").val(),
-            category: $("#txtCategory").val(),
-            source: $("#txtSource").val(),
-            edition: $("#txtEdition").val(),
-            price: parseFloat($("#txtPrice").val()),
-            year: $("#txtYear").val(),
-            pages: $("#txtPages").val(),
-            dateEntry: new Date()
-        };
+        let _collegeId = 0;
+        let _accessionId = 0;
+        let _titles = [];
+        let _isEditMode = false;
 
-        if(!data.accessionNo || !data.title) {
-            alert("Accession No and Title are required");
-            return;
-        }
+        $(document).ready(function () {
 
-        $.ajax({
-            url: "/add",
-            type: "POST",
-            contentType: "application/json",
-            data: JSON.stringify(data),
-            success: function (res) {
-                alert("Book saved successfully!");
-                clearForm();
-            },
-            error: function (err) {
-                console.error(err);
-                alert("Failed to save book data.");
-            }
-        });
-    }
+            let today = new Date().toISOString().split('T')[0];
+            $('#txtDateEntry').val(today);
 
-    // ================= GET BOOK =================
-    function loadBook() {
-        let college = $("#txtCollegeName").val();
-        let accession = $("#txtAccessionNo").val();
+            $('#txtCollegeName').on('change blur', function () {
 
-        if(!accession) {
-            alert("Please enter Accession No");
-            return;
-        }
+                let college = $(this).val().trim();
 
-        $.ajax({
-            url: "/get?collegeName=" + college + "&accessionNo=" + accession,
-            type: "GET",
-            success: function (res) {
-                if(res) {
-                    $("#txtTitle").val(res.Title);
-                    $("#txtAuthor").val(res.Author);
-                    $("#txtPublisher").val(res.Publisher);
-                    $("#txtCategory").val(res.Category);
-                    $("#txtSource").val(res.Source);
-                    $("#txtEdition").val(res.Edition);
-                    $("#txtPrice").val(res.Price);
-                    $("#txtYear").val(res.Year);
-                    $("#txtPages").val(res.Pages);
-                } else {
-                    alert("Book not found");
+                if (college !== '') {
+                    loadCollegeData();
                 }
-            },
-            error: function (err) {
-                console.error(err);
-                alert("Error retrieving book data");
-            }
-        });
-    }
+            });
 
-    // ================= CLEAR =================
-    function clearForm() {
-        $("#txtAccessionNo").val("");
-        $("#txtTitle").val("");
-        $("#txtAuthor").val("");
-        $("#txtPublisher").val("");
-        $("#txtCategory").val("");
-        $("#txtSource").val("");
-        $("#txtEdition").val("");
-        $("#txtPrice").val("");
-        $("#txtYear").val("");
-        $("#txtPages").val("");
-    }
-</script>
+            $('#txtTitle').on('change', function () {
+
+                let title = $(this).val().trim();
+                let college = $('#txtCollegeName').val().trim();
+
+                if (title && college && _titles.includes(title)) {
+                    loadBookDetail(college, title);
+                }
+            });
+
+            $('#txtPrice,#txtDiscount').on('keyup change', function () {
+                autoCalculateNetPrice();
+            });
+
+            $('.author-field').on('keyup change', function () {
+                buildAuthorField();
+            });
+
+            setupAutocomplete('txtFirstAuthorForeName', 'first');
+            setupAutocomplete('txtSecondAuthorForeName', 'second');
+            setupAutocomplete('txtThirdAuthorForeName', 'third');
+            setupAutocomplete('txtPlace', 'place');
+        });
+
+        // =====================================================
+        // LOAD INITIAL COLLEGE DATA
+        // =====================================================
+
+        function loadCollegeData() {
+
+            let collegeName = $('#txtCollegeName').val().trim();
+
+            if (!collegeName)
+                return;
+
+            $.ajax({
+
+                url: '/init',
+                type: 'GET',
+
+                data: {
+                    collegeName: collegeName
+                },
+
+                success: function (res) {
+
+                    _collegeId = res.collegeId ?? res.CollegeId ?? 0;
+                    _accessionId = res.accessionId ?? res.AccessionId ?? 0;
+
+                    let accessionNo =
+                        res.accessionNo ??
+                        res.AccessionNo ??
+                        '';
+
+                    $('#hdnCollegeId').val(_collegeId);
+                    $('#hdnAccessionId').val(_accessionId);
+
+                    if (!_isEditMode) {
+                        $('#txtAccessionNo').val(accessionNo);
+                    }
+
+                    $('#lblCollegeId').text(_collegeId);
+                    $('#lblAccessionId').text(_accessionId);
+                    $('#lblAccessionCode').text(accessionNo);
+
+                    let publishers =
+                        res.publishers ??
+                        res.Publishers ??
+                        [];
+
+                    let sources =
+                        res.sources ??
+                        res.Sources ??
+                        [];
+
+                    let categories =
+                        res.categories ??
+                        res.Categories ??
+                        [];
+
+                    _titles =
+                        res.titles ??
+                        res.Titles ??
+                        [];
+
+                    bindDatalist('publisherList', publishers);
+                    bindDatalist('sourceList', sources);
+                    bindDatalist('categoryList', categories);
+                    bindDatalist('titleList', _titles);
+                },
+
+                error: function (err) {
+
+                    console.log(err);
+
+                    alert('College data load failed');
+                }
+            });
+        }
+
+        // =====================================================
+        // BIND DATALIST
+        // =====================================================
+
+        function bindDatalist(datalistId, items) {
+
+            let dl = $('#' + datalistId);
+
+            dl.empty();
+
+            if (!items || items.length === 0)
+                return;
+
+            items.forEach(function (item) {
+
+                if (item) {
+
+                    dl.append(
+                        `<option value="${item}"></option>`
+                    );
+                }
+            });
+        }
+
+        // =====================================================
+        // AUTOCOMPLETE
+        // =====================================================
+
+        let _autocompleteTimers = {};
+
+        function setupAutocomplete(fieldId, fieldType) {
+
+            let datalistId = fieldId + 'List';
+
+            if ($('#' + datalistId).length === 0) {
+
+                $('<datalist id="' + datalistId + '"></datalist>')
+                    .insertAfter('#' + fieldId);
+            }
+
+            $('#' + fieldId).attr('list', datalistId);
+
+            $('#' + fieldId).on('input', function () {
+
+                let search = $(this).val().trim();
+
+                let collegeName =
+                    $('#txtCollegeName').val().trim();
+
+                if (search.length < 2 || !collegeName)
+                    return;
+
+                clearTimeout(_autocompleteTimers[fieldId]);
+
+                _autocompleteTimers[fieldId] = setTimeout(function () {
+
+                    $.ajax({
+
+                        url: '/autocomplete',
+
+                        type: 'GET',
+
+                        data: {
+                            collegeName: collegeName,
+                            field: fieldType,
+                            search: search
+                        },
+
+                        success: function (res) {
+
+                            bindDatalist(datalistId, res);
+                        }
+                    });
+
+                }, 300);
+            });
+        }
+
+        // =====================================================
+        // LOAD BOOK DETAIL
+        // =====================================================
+
+        function loadBookDetail(collegeName, title) {
+
+            $.ajax({
+
+                url: '/book-detail',
+
+                type: 'GET',
+
+                data: {
+                    collegeName: collegeName,
+                    title: title
+                },
+
+                success: function (res) {
+
+                    $('#txtAuthor').val(res.Author ?? '');
+                    $('#txtPublisher').val(res.Publisher ?? '');
+                    $('#txtSource').val(res.Source ?? '');
+                    $('#txtEdition').val(res.Edition ?? '');
+                    $('#txtPrice').val(res.Price ?? '');
+                    $('#txtCategory').val(res.Category ?? '');
+
+                    autoCalculateNetPrice();
+                }
+            });
+        }
+
+        // =====================================================
+        // NET PRICE
+        // =====================================================
+
+        function autoCalculateNetPrice() {
+
+            let price =
+                parseFloat($('#txtPrice').val()) || 0;
+
+            let discount =
+                parseFloat($('#txtDiscount').val()) || 0;
+
+            let netPrice =
+                price - ((price * discount) / 100);
+
+            $('#txtNetPrice').val(netPrice.toFixed(2));
+        }
+
+        // =====================================================
+        // BUILD AUTHOR FIELD
+        // =====================================================
+
+        function buildAuthorField() {
+
+            let authors = [];
+
+            let fn1 =
+                $('#txtFirstAuthorForeName').val().trim();
+
+            let sn1 =
+                $('#txtFirstAuthorSirName').val().trim();
+
+            if (fn1 || sn1) {
+
+                authors.push(
+                    [sn1, fn1]
+                        .filter(Boolean)
+                        .join(', ')
+                );
+            }
+
+            let fn2 =
+                $('#txtSecondAuthorForeName').val().trim();
+
+            let sn2 =
+                $('#txtSecondAuthorSirName').val().trim();
+
+            if (fn2 || sn2) {
+
+                authors.push(
+                    [sn2, fn2]
+                        .filter(Boolean)
+                        .join(', ')
+                );
+            }
+
+            let fn3 =
+                $('#txtThirdAuthorForeName').val().trim();
+
+            let sn3 =
+                $('#txtThirdAuthorSirName').val().trim();
+
+            if (fn3 || sn3) {
+
+                authors.push(
+                    [sn3, fn3]
+                        .filter(Boolean)
+                        .join(', ')
+                );
+            }
+
+            $('#txtAuthor').val(authors.join(' ; '));
+        }
+
+        // =====================================================
+        // SAVE BOOK
+        // =====================================================
+
+        function saveBook() {
+
+            let data = {
+                 collegeId: parseInt($('#hdnCollegeId').val()) || 0,
+                accessionId: parseInt($('#hdnAccessionId').val()) || 0,
+                collegeName: $('#txtCollegeName').val(),
+                accessionNo: $('#txtAccessionNo').val(),
+                dateEntry: $('#txtDateEntry').val(),
+
+                title: $('#txtTitle').val(),
+                subtitle: $('#txtSubTitle').val(),
+
+                author: $('#txtAuthor').val(),
+
+                publisher: $('#txtPublisher').val(),
+                source: $('#txtSource').val(),
+                edition: $('#txtEdition').val(),
+
+                type: $('#txtType').val(),
+                category: $('#txtCategory').val(),
+
+                year: $('#txtYear').val(),
+                pages: $('#txtPages').val(),
+                volume: $('#txtVolume').val(),
+
+                price: parseFloat($('#txtPrice').val()) || 0,
+                discount: parseFloat($('#txtDiscount').val()) || 0,
+                netPrice: parseFloat($('#txtNetPrice').val()) || 0,
+
+                billNo: $('#txtBillNo').val(),
+                billDate: $('#txtBillDate').val(),
+
+                classNo: $('#txtClassNo').val(),
+                bookNo: $('#txtBookNo').val(),
+
+                isbn: $('#txtISBN').val(),
+                size: $('#txtSize').val(),
+
+                place: $('#txtPlace').val(),
+                location: $('#txtLocation').val(),
+
+                subject1: $('#txtSubject1').val(),
+                subject2: $('#txtSubject2').val(),
+
+                series: $('#txtSeries').val(),
+                remarks: $('#txtRemarks').val(),
+
+                firstAuthorForename:
+                    $('#txtFirstAuthorForeName').val(),
+
+                firstAuthorSirName:
+                    $('#txtFirstAuthorSirName').val(),
+
+                secondAuthorForename:
+                    $('#txtSecondAuthorForeName').val(),
+
+                secondAuthorSurname:
+                    $('#txtSecondAuthorSirName').val(),
+
+                thirdAuthorForename:
+                    $('#txtThirdAuthorForeName').val(),
+
+                thirdAuthorSurname:
+                    $('#txtThirdAuthorSirName').val(),
+
+                moreThanThreeAuthors:
+                    $('#chkMoreAuthors').is(':checked')
+                        ? 'True'
+                        : 'False'
+            };
+
+            if (!data.collegeName) {
+
+                alert('College Name required');
+                return;
+            }
+
+            if (!data.accessionNo) {
+
+                alert('Accession No required');
+                return;
+            }
+
+            if (!data.title) {
+
+                alert('Title required');
+                return;
+            }
+
+            let url =
+                _isEditMode
+                    ? '/update'
+                    : '/add';
+
+            let method =
+                _isEditMode
+                    ? 'PUT'
+                    : 'POST';
+
+            $.ajax({
+
+                url: url,
+
+                type: method,
+
+                contentType: 'application/json',
+
+                data: JSON.stringify(data),
+
+                success: function (res) {
+
+                    alert(res);
+
+                    if (!_isEditMode) {
+
+                        resetForm();
+                    }
+                },
+
+                error: function (err) {
+
+                    console.log(err);
+
+                    alert(
+                        err.responseText ||
+                        'Save failed'
+                    );
+                }
+            });
+        }
+
+        // =====================================================
+        // LOAD BOOK
+        // =====================================================
+
+        function loadBook() {
+
+            let collegeName =
+                $('#txtCollegeName').val();
+
+            let accessionNo =
+                $('#txtAccessionNo').val();
+
+            if (!accessionNo) {
+
+                alert('Enter Accession No');
+                return;
+            }
+
+            $.ajax({
+
+                url: '/get',
+
+                type: 'GET',
+
+                data: {
+                    collegeName: collegeName,
+                    accessionNo: accessionNo
+                },
+
+                success: function (res) {
+
+                    _isEditMode = true;
+
+                    $('#hdnEditMode').val('true');
+
+                    $('#btnSave').html(
+                        '<i class="fas fa-pen me-2"></i> Update Record'
+                    );
+
+                    $('#txtDateEntry').val(
+                        formatDate(res.DateEntry)
+                    );
+
+                    $('#txtTitle').val(res.Title ?? '');
+                    $('#txtSubTitle').val(res.SubTitle ?? '');
+
+                    $('#txtAuthor').val(res.Author ?? '');
+
+                    $('#txtPublisher').val(res.Publisher ?? '');
+                    $('#txtSource').val(res.Source ?? '');
+                    $('#txtEdition').val(res.Edition ?? '');
+
+                    $('#txtCategory').val(res.Category ?? '');
+                    $('#txtType').val(res.Type ?? '');
+
+                    $('#txtPrice').val(res.Price ?? '');
+                    $('#txtDiscount').val(res.Discount ?? '');
+                    $('#txtNetPrice').val(res.NetPrice ?? '');
+
+                    $('#txtYear').val(res.Year ?? '');
+                    $('#txtPages').val(res.Pages ?? '');
+                    $('#txtVolume').val(res.Volume ?? '');
+
+                    $('#txtISBN').val(res.ISBN ?? '');
+                    $('#txtPlace').val(res.Place ?? '');
+                    $('#txtSeries').val(res.Series ?? '');
+                    $('#txtSize').val(res.BookSize ?? '');
+
+                    $('#txtBillNo').val(res.BillNo ?? '');
+                    $('#txtBillDate').val(res.BillDate ?? '');
+
+                    $('#txtClassNo').val(res.ClassNo ?? '');
+                    $('#txtBookNo').val(res.BookNo ?? '');
+
+                    $('#txtLocation').val(res.Location ?? '');
+
+                    $('#txtSubject1').val(res.Subject1 ?? '');
+                    $('#txtSubject2').val(res.Subject2 ?? '');
+
+                    $('#txtRemarks').val(res.Remarks ?? '');
+
+                    $('#txtFirstAuthorForeName').val(res.FirstAuthorForeName ?? '');
+                    $('#txtFirstAuthorSirName').val(res.FirstAuthorSirName ?? '');
+
+                    $('#txtSecondAuthorForeName').val(res.SecondAuthorForeName ?? '');
+                    $('#txtSecondAuthorSirName').val(res.SecondAuthorSirName ?? '');
+
+                    $('#txtThirdAuthorForeName').val(res.ThirdAuthorForeName ?? '');
+                    $('#txtThirdAuthorSirName').val(res.ThirdAuthorSirName ?? '');
+
+                    $('#chkMoreAuthors').prop(
+                        'checked',
+                        (res.MoreThanThreeAuthors ?? '') === 'True'
+                    );
+                },
+
+                error: function (err) {
+
+                    console.log(err);
+
+                    alert(
+                        err.responseText ||
+                        'Book not found'
+                    );
+                }
+            });
+        }
+
+        // =====================================================
+        // RESET FORM
+        // =====================================================
+
+        function resetForm() {
+
+            let college =
+                $('#txtCollegeName').val();
+
+            clearForm();
+
+            $('#txtCollegeName').val(college);
+
+            if (college && college.trim()) {
+
+                loadCollegeData();
+            }
+
+            let today =
+                new Date()
+                    .toISOString()
+                    .split('T')[0];
+
+            $('#txtDateEntry').val(today);
+
+            _isEditMode = false;
+
+            $('#hdnEditMode').val('false');
+
+            $('#btnSave').html(
+                '<i class="fas fa-save me-2"></i> Save Record'
+            );
+        }
+
+        // =====================================================
+        // CLEAR FORM
+        // =====================================================
+
+        function clearForm() {
+
+            $('input[type=text]').val('');
+            $('input[type=number]').val('');
+            $('textarea').val('');
+
+            $('#txtDateEntry').val('');
+            $('#txtType').val('');
+
+            $('#chkMoreAuthors').prop('checked', false);
+
+            _isEditMode = false;
+
+            $('#hdnEditMode').val('false');
+
+            $('#btnSave').html(
+                '<i class="fas fa-save me-2"></i> Save Record'
+            );
+
+            $('#lblCollegeId').text('—');
+            $('#lblAccessionId').text('—');
+            $('#lblAccessionCode').text('—');
+        }
+
+        // =====================================================
+        // FORMAT DATE
+        // =====================================================
+
+        function formatDate(dateValue) {
+
+            if (!dateValue)
+                return '';
+
+            let date = new Date(dateValue);
+
+            if (isNaN(date))
+                return '';
+
+            return date.toISOString().split('T')[0];
+        }
+
+    </script>
+}
+
