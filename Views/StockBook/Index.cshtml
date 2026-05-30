@@ -117,17 +117,28 @@
                         </td>
                     </tr>
                 </tbody>
-
+                
             </table>
         </div>
+        <!-- ✅ PAGINATION (CORRECT PLACE) -->
+        <div id="pagination" class="mt-3 d-flex justify-content-center gap-2"></div>
 
     </div>
 
 </div>
 @section Scripts {
+
     <script>
 
-        document.addEventListener("DOMContentLoaded", loadColleges);
+        let currentPage = 1;
+        let pageSize = 20;
+        let totalPages = 0;
+
+        // ================= INIT =================
+        document.addEventListener("DOMContentLoaded", () => {
+            loadColleges();
+            loadReport(1); // optional auto load
+        });
 
         // ================= COLLEGES =================
         async function loadColleges() {
@@ -143,7 +154,9 @@
         }
 
         // ================= LOAD REPORT =================
-        async function loadReport() {
+        async function loadReport(page = 1) {
+
+            currentPage = page;
 
             const collegeName = document.getElementById("collegeName").value;
 
@@ -151,48 +164,42 @@
                 Swal.fire({ icon: 'warning', title: 'College Required' });
                 return;
             }
+                    const summaryRes = await fetch('/StockBook/GetSummary', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ collegeName })
+        });
 
-            Swal.fire({
-                title: 'Loading Stock Data...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
+        const summary = await summaryRes.json();
+
+        document.getElementById("totalBooks").innerText = summary.totalBooks ?? 0;
+        document.getElementById("totalTitles").innerText = summary.totalTitles ?? 0;
+        document.getElementById("unusedBooks").innerText = summary.unusedBooks ?? 0;
+
+
+            const res = await fetch('/StockBook/GetStockPaged', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    search: collegeName,
+                    pageNumber: currentPage,
+                    pageSize: pageSize
+                })
             });
 
-            try {
+            const result = await res.json();
 
-                // SUMMARY
-                const summary = await fetch('/StockBook/GetSummary', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ collegeName })
-                });
+            renderTable(result.data);
 
-                const s = await summary.json();
+            document.getElementById("rowCount").innerText =
+                result.totalRecords + " Records";
 
-                document.getElementById("totalBooks").innerText = s.totalBooks ?? 0;
-                document.getElementById("totalTitles").innerText = s.totalTitles ?? 0;
-                document.getElementById("unusedBooks").innerText = s.unusedBooks ?? 0;
+            // ================= SAFE PAGINATION =================
+            totalPages = Math.ceil(result.totalRecords / pageSize);
 
-                // TABLE DATA
-                const res = await fetch('/StockBook/GetStock', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ collegeName })
-                });
+            if (totalPages === 0) totalPages = 1;
 
-                const data = await res.json();
-
-                renderTable(data);
-
-                document.getElementById("rowCount").innerText = data.length + " Records";
-
-            }
-            catch (err) {
-                Swal.fire({ icon: 'error', title: 'Error', text: err.message });
-            }
-            finally {
-                Swal.close();
-            }
+            renderPagination();
         }
 
         // ================= TABLE =================
@@ -230,6 +237,26 @@
             });
 
             body.innerHTML = rows;
+        }
+
+        // ================= PAGINATION =================
+        function renderPagination() {
+
+            let html = "";
+
+            if (currentPage > 1) {
+                html += `<button class="btn btn-sm btn-primary"
+                onclick="loadReport(${currentPage - 1})">Prev</button>`;
+            }
+
+            html += `<span class="px-3">Page ${currentPage} of ${totalPages}</span>`;
+
+            if (currentPage < totalPages) {
+                html += `<button class="btn btn-sm btn-primary"
+                onclick="loadReport(${currentPage + 1})">Next</button>`;
+            }
+
+            document.getElementById("pagination").innerHTML = html;
         }
 
         // ================= EXPORT =================

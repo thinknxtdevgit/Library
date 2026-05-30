@@ -1,6 +1,7 @@
 ﻿
 using lib.DtoModel.StockBookDto;
 using lib.Interface;
+using lib.Pagination_Helper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace lib.Controllers
@@ -38,14 +39,44 @@ namespace lib.Controllers
         [HttpPost]
         public async Task<IActionResult> GetStock([FromBody] CollegeRequestDto request)
         {
-            if (request == null || string.IsNullOrEmpty(request.CollegeName))
+            try
+            {
+                if (request == null || string.IsNullOrEmpty(request.CollegeName))
+                    return BadRequest("CollegeName is required");
+
+                var data = await _service.GetStockBooksAsync(request.CollegeName);
+                return Ok(data);
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(500, ex.ToString());
+            }
+        }
+        [HttpPost]
+        public async Task<IActionResult> GetStockPaged([FromBody] PagedRequest request)
+        {
+            if (request == null || string.IsNullOrEmpty(request.Search))
                 return BadRequest("CollegeName is required");
 
-            var data = await _service.GetStockBooksAsync(request.CollegeName);
-            return Ok(data);
+            var data = await _service.GetStockBooksAsync(request.Search);
+
+            int totalRecords = data.Count;
+
+            var pagedData = data
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize)
+                .ToList();
+
+            return Ok(new PagedResult<StockBookDto>
+            {
+                Data = pagedData,
+                TotalRecords = totalRecords,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize
+            });
         }
 
-   
 
         // ================= SUMMARY ONLY API =================
         [HttpPost]

@@ -38,7 +38,12 @@
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">College Name</label>
-                        <input type="text" id="txtCollegeName" class="form-input-modern" placeholder="Enter college" />
+                        <select id="txtCollegeName"
+                                class="form-input-modern">
+                            <option value="">
+                                Select College
+                            </option>
+                        </select>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Accession No</label>
@@ -289,7 +294,8 @@
         let _isEditMode = false;
 
         $(document).ready(function () {
-
+            
+            loadColleges();
             let today = new Date().toISOString().split('T')[0];
             $('#txtDateEntry').val(today);
 
@@ -326,6 +332,44 @@
             setupAutocomplete('txtPlace', 'place');
         });
 
+
+               // =====================================================
+        // COLLEGE 
+        // =====================================================
+
+                function loadColleges() {
+
+            $.ajax({
+
+                url: '/colleges',
+                type: 'GET',
+
+                success: function (res) {
+
+                    $('#txtCollegeName').empty();
+
+                    $('#txtCollegeName').append(
+                        '<option value="">Select College</option>'
+                    );
+
+                    res.forEach(function (college) {
+
+                        $('#txtCollegeName').append(
+                            `<option value="${college}">
+                                ${college}
+                            </option>`
+                        );
+                    });
+
+                    // if (res.length === 1) {
+
+                    //     $('#txtCollegeName')
+                    //         .val(res[0])
+                    //         .trigger('change');
+                    // }
+                }
+            });
+        }
         // =====================================================
         // LOAD INITIAL COLLEGE DATA
         // =====================================================

@@ -11,7 +11,7 @@
 
         public DateTime? DateEntry { get; set; }
 
-        public string? BillDate { get; set; }
+        public string BillDate { get; set; }
 
         public string? Title { get; set; }
 

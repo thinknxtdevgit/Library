@@ -2,6 +2,7 @@
 using lib.DtoModel.AddStockBookDto;
 using lib.Interface;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 namespace lib.Controllers
 {
@@ -109,6 +110,18 @@ namespace lib.Controllers
                 await _service.UpdateBookAsync(req);
 
             return Ok(result);
+        }
+        [HttpGet("colleges")]
+        public IActionResult GetColleges()
+        {
+            var colleges = HttpContext.Session.GetString("Colleges");
+
+            if (string.IsNullOrEmpty(colleges))
+                return Ok(new List<string>());
+
+            return Ok(
+                JsonSerializer.Deserialize<List<string>>(colleges)
+            );
         }
     }
 }//using lib.Models;

@@ -4,11 +4,11 @@ using Microsoft.Data.SqlClient;
 
 namespace lib.Service
 {
-    public class StockRegisterService:IStockRegisterService
+    public class StockRegisterService:BaseService,IStockRegisterService
     {
         private readonly string _connectionString;
 
-        public StockRegisterService(IConfiguration configuration)
+        public StockRegisterService(IConfiguration configuration,IHttpContextAccessor httpContextAccessor):base(httpContextAccessor)
         {
             _connectionString =
                 configuration.GetConnectionString("DefaultConnection");

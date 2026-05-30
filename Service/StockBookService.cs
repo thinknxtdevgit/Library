@@ -1,17 +1,23 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Spreadsheet;
 using lib.DtoModel.StockBookDto;
 using lib.Interface;
+using lib.Pagination_Helper;
 using Microsoft.Data.SqlClient;
+using System.Data;
 
 namespace lib.Service
 {
     public class StockBookService: IStockBookService
     {
         private readonly string _connectionString;
+ 
 
         public StockBookService(IConfiguration config)
         {
             _connectionString = config.GetConnectionString("DefaultConnection");
+      
         }
 
         // ================= GET STOCK =================
@@ -67,17 +73,40 @@ WHERE LTRIM(RTRIM(CollegeName)) = LTRIM(RTRIM(@CollegeName))";
 
             await con.OpenAsync();
             using var reader = await cmd.ExecuteReaderAsync();
-
             while (await reader.ReadAsync())
             {
+                DateTime? dateEntry = null;
+
+                if (reader["DateEntry"] != DBNull.Value &&
+                    reader["DateEntry"] is DateTime dt1)
+                {
+                    dateEntry = dt1;
+                }
+
+                string billDateText = reader["BillDate"]?.ToString();
+
+                DateTime? billDate = null;
+
+                if (!string.IsNullOrWhiteSpace(billDateText))
+                {
+                    DateTime parsed;
+
+                    if (DateTime.TryParseExact(
+                        billDateText,
+                        new[] { "dd/MM/yyyy", "MM/dd/yyyy", "yyyy-MM-dd" },
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        System.Globalization.DateTimeStyles.None,
+                        out parsed))
+                    {
+                        billDate = parsed;
+                    }
+                }
+
                 list.Add(new StockBookDto
                 {
-                    DateEntry = reader["DateEntry"] == DBNull.Value
-    ? (DateTime?)null
-    : Convert.ToDateTime(reader["DateEntry"]),
+                    DateEntry = dateEntry,
 
                     AccessionNo = reader["AccessionNo"]?.ToString(),
-
                     Title = reader["Title"]?.ToString(),
                     Author = reader["Author"]?.ToString(),
                     Edition = reader["Edition"]?.ToString(),
@@ -85,14 +114,18 @@ WHERE LTRIM(RTRIM(CollegeName)) = LTRIM(RTRIM(@CollegeName))";
 
                     Year = reader["Year"]?.ToString(),
                     Pages = reader["Pages"]?.ToString(),
-
                     Volume = reader["Volume"]?.ToString(),
-
                     Source = reader["Source"]?.ToString(),
 
                     Price = reader["Price"]?.ToString(),
-                    NetPrice = reader["NetPrice"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["NetPrice"]),
-                    Discount = reader["Discount"] == DBNull.Value ? 0 : Convert.ToDecimal(reader["Discount"]),
+
+                    NetPrice = reader["NetPrice"] == DBNull.Value
+                        ? 0
+                        : Convert.ToDecimal(reader["NetPrice"]),
+
+                    Discount = reader["Discount"] == DBNull.Value
+                        ? 0
+                        : Convert.ToDecimal(reader["Discount"]),
 
                     Type = reader["Type"]?.ToString(),
                     Category = reader["Category"]?.ToString(),
@@ -100,9 +133,8 @@ WHERE LTRIM(RTRIM(CollegeName)) = LTRIM(RTRIM(@CollegeName))";
                     BillNo = reader["BillNo"]?.ToString(),
                     ClassNo = reader["ClassNo"]?.ToString(),
 
-                    BillDate = reader["BillDate"] == DBNull.Value
-    ? null
-    : Convert.ToDateTime(reader["BillDate"]).ToString("yyyy-MM-dd"),
+                    // ✅ FIXED
+                    BillDate = billDate?.ToString("yyyy-MM-dd"),
 
                     BookNo = reader["BookNo"]?.ToString(),
                     Remarks = reader["Remarks"]?.ToString(),
@@ -130,9 +162,10 @@ WHERE LTRIM(RTRIM(CollegeName)) = LTRIM(RTRIM(@CollegeName))";
                     Subject2 = reader["Subject2"]?.ToString()
                 });
             }
-
             return list;
         }
+
+        
 
         // ================= TOTAL BOOKS =================
         public async Task<int> GetTotalBooksAsync(string collegeName)
@@ -200,5 +233,7 @@ WHERE LTRIM(RTRIM(CollegeName)) = LTRIM(RTRIM(@CollegeName))";
             workbook.SaveAs(stream);
             return stream.ToArray();
         }
+       
     }
+
 }
