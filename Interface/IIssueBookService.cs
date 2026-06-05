@@ -6,6 +6,8 @@ namespace lib.Interface
     {
         Task<IssueBookResponseDto> CheckIdAsync(IssueBookRequestDto request);
         Task<IssueBookResponseDto> IssueBookAsync(IssueBookRequestDto request);
-
+        Task<IssueBookResponseDto> CheckAccessionDetailAsync(
+    string accessionNo,
+    string collegeName);
     }
 }

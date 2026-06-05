@@ -4,7 +4,7 @@
     {
         public string? CollegeName { get; set; }
 
-        public long AccessionNo { get; set; }
+        public string? AccessionNo { get; set; }
 
         public string? Name { get; set; }
 

@@ -11,7 +11,7 @@
             private readonly string _connectionString;
      
 
-            private const int StudentIssueDays = 7;
+            private const int StudentIssueDays = 14;
             private const int StaffIssueDays = 15;
 
             public IssueBookService(
@@ -788,6 +788,75 @@
                     await cmd.ExecuteScalarAsync();
 
                 return result?.ToString() ?? string.Empty;
+
+            }
+
+        // ========================CheckAccessionDetailAsync==============================
+        public async Task<IssueBookResponseDto> CheckAccessionDetailAsync(string accessionNo, string collegeName)
+
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(accessionNo))
+                {
+                    return Fail("Accession No required");
+                }
+
+                using SqlConnection con =
+                    new SqlConnection(_connectionString);
+
+                await con.OpenAsync();
+                string sql = @"
+SELECT
+    CollegeName,
+    Title,
+    Author,
+    Category,
+    AccessionNo
+FROM StockRegister
+WHERE AccessionNo = @AccessionNo";
+
+                using SqlCommand cmd = new SqlCommand(sql, con);
+
+                cmd.Parameters.Add("@AccessionNo", SqlDbType.NVarChar)
+                    .Value = accessionNo;
+                
+
+                using SqlDataReader dr = await cmd.ExecuteReaderAsync();
+                
+                if (await dr.ReadAsync())
+                {
+                    string dbCollege = dr["CollegeName"]?.ToString() ?? "";
+
+                    // 🚨 College validation (important)
+                    if (!string.Equals(dbCollege, collegeName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return Fail($"Accession No doesn't belong to '{collegeName}'");
+                    }
+
+                    return new IssueBookResponseDto
+                    {
+                        Success = true,
+                        Message = "Book Found",
+                        BookDetail = new BookDetailDto
+                        {
+                            Success = true,
+                            AccessionNo = dr["AccessionNo"]?.ToString(),
+                            Title = dr["Title"]?.ToString(),
+                            Author = dr["Author"]?.ToString(),
+                            Category = dr["Category"]?.ToString()
+                        }
+                    };
+                }
+                else
+                {
+                    return Fail("Accession No does not exist");
+                }
+            }
+            catch (Exception ex)
+            {
+                return Fail(ex.Message);
             }
         }
+    }
     }

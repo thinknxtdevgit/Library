@@ -1,5 +1,6 @@
 ﻿using lib.DtoModel.RenewBookDto;
 using lib.Interface;
+using lib.Models.ReturnBook;
 using Microsoft.Data.SqlClient;
 
 namespace lib.Service
@@ -19,7 +20,7 @@ namespace lib.Service
         {
             var response = new RenewBookResponseDto();
 
-            if (request.AccessionNo == 0)
+            if (request==null)
             {
                 response.Success = false;
                 response.Message = "Enter Accession No";
@@ -122,7 +123,7 @@ namespace lib.Service
         // =========================================
 
         private async Task<RenewBookDetailDto?> GetBookInfoAsync(
-            long accessionNo)
+            string accessionNo)
         {
             using SqlConnection con =
                 new SqlConnection(_connectionString);
@@ -143,9 +144,7 @@ namespace lib.Service
 
             using SqlCommand cmd = new SqlCommand(sql, con);
 
-            cmd.Parameters.AddWithValue(
-                "@AccessionNo",
-                accessionNo);
+            cmd.Parameters.AddWithValue("@AccessionNo", accessionNo);
 
             await con.OpenAsync();
 
@@ -158,8 +157,7 @@ namespace lib.Service
                 {
                     CollegeName = dr["CollegeName"].ToString(),
 
-                    AccessionNo =
-                        Convert.ToInt64(dr["AccessionNo"]),
+                    AccessionNo = dr["AccessionNo"].ToString(),
 
                     Name = dr["WhomIssued"].ToString(),
 
@@ -224,7 +222,7 @@ namespace lib.Service
         // RENEW BOOK
         // =========================================
 
-        private async Task RenewAsync(long accessionNo)
+        private async Task RenewAsync(string accessionNo)
         {
             using SqlConnection con =
                 new SqlConnection(_connectionString);

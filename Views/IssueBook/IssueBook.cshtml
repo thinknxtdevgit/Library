@@ -407,6 +407,7 @@
             elements.lblTotalBooks.html(`
                 Already Issued :
                 ${safe(data.totalIssuedBooks)}
+
             `);
 
             elements.summaryTotalBooks.text(
@@ -639,7 +640,7 @@
                 signature:
                     elements.txtSignature.val().trim()
             };
-
+                 
             if (!data.txtidno ||
                 !data.txtaccessionno ||
                 !data.signature) {
@@ -686,6 +687,48 @@
                 );
             }
         }
+        
+        // =========================================
+        //checkAccession
+        // =========================================
+                function checkAccession() {
+
+            let accessionNo = $('#txtAccession').val();
+            let collegeName = $('#txtCollege').val();
+
+            $.ajax({
+                url: '/check-accession',
+                type: 'GET',
+                data: {
+                    accessionNo: accessionNo,
+                    collegeName: collegeName
+                },
+                success: function (res) {
+
+                    console.log(res);
+
+                   $('#txtTitle').val(res.bookDetail.title);
+                   $('#txtAuthor').val(res.bookDetail.author);
+                   $('#txtCategory').val(res.bookDetail.category);
+                },
+                      error: function (xhr) {
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Book Not Allowed',
+                html: `<b>${xhr.responseJSON?.message}</b>`,
+                confirmButtonText: 'OK'
+            });
+
+            $('#txtAccession').val('');
+            $('#txtTitle').val('');
+            $('#txtAuthor').val('');
+            $('#txtCategory').val('');
+        }
+            });
+        }
+
+
 
         // =========================================
         // Events
@@ -694,6 +737,8 @@
         elements.txtIdNo.on("blur", loadBorrower);
 
         elements.txtAccession.on("blur", loadBook);
+
+        elements.txtAccession.on("blur", checkAccession);
 
         // =========================================
         // Navigation

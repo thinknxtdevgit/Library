@@ -120,5 +120,58 @@ SELECT COUNT(*) FROM IssueRegister WHERE CollegeName = @CollegeName;
 
             return stream.ToArray();
         }
+        public async Task<List<IssueBookReportDto>> GetIssueBooksReport(string collegeName)
+        {
+            List<IssueBookReportDto> list = new();
+
+            using SqlConnection con = new SqlConnection(_connectionString);
+            await con.OpenAsync();
+
+            string query = @"
+        SELECT
+            CONVERT(VARCHAR(20), IssueDate, 102) AS IssueDate,
+            IDNo,
+            WhomIssued,
+            Discipline,
+            TRY_CAST(AccessionNo AS INT) AS AccessionNo,
+            Title,
+            Author,
+            LastReturnDate,
+            Condition,
+            Type,
+            Category,
+            ReceiveDate,
+            Remarks
+        FROM IssueRegister
+        WHERE CollegeName = @CollegeName
+        ORDER BY TRY_CAST(AccessionNo AS INT)";
+
+            using SqlCommand cmd = new SqlCommand(query, con);
+            cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+
+            using SqlDataReader dr = await cmd.ExecuteReaderAsync();
+
+            while (await dr.ReadAsync())
+            {
+                list.Add(new IssueBookReportDto
+                {
+                    IssueDate = dr["IssueDate"]?.ToString(),
+                    IDNo = dr["IDNo"]?.ToString(),
+                    WhomIssued = dr["WhomIssued"]?.ToString(),
+                    Discipline = dr["Discipline"]?.ToString(),
+                    AccessionNo = dr["AccessionNo"]?.ToString(),
+                    Title = dr["Title"]?.ToString(),
+                    Author = dr["Author"]?.ToString(),
+                    LastReturnDate = dr["LastReturnDate"]?.ToString(),
+                    Condition = dr["Condition"]?.ToString(),
+                    Type = dr["Type"]?.ToString(),
+                    Category = dr["Category"]?.ToString(),
+                    ReceiveDate = dr["ReceiveDate"]?.ToString(),
+                    Remarks = dr["Remarks"]?.ToString()
+                });
+            }
+
+            return list;
+        }
     }
 }

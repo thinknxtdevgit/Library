@@ -1,5 +1,5 @@
-﻿@{
-    ViewData["Title"] = "Stock Register Report";
+@{
+    ViewData["Title"] = "Unissued Books Report";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -8,9 +8,9 @@
     <!-- HEADER -->
     <div class="page-header mt-2 mb-4">
         <div>
-            <h2 class="fw-bold mb-1">Stock Register Report</h2>
+            <h2 class="fw-bold mb-1">Unissued Books Report</h2>
             <p class="text-muted">
-                Analyze library stock inventory, track availability and export reports.
+                Analyze library books that have never been issued or are currently in stock.
             </p>
         </div>
 
@@ -48,7 +48,7 @@
 
             <div class="col-md-4 text-end d-none d-md-block">
                 <div class="text-muted small">
-                    Showing: <span class="fw-bold text-primary" id="currentFilter">Global Stock</span>
+                    Showing: <span class="fw-bold text-primary" id="currentFilter">Global Unissued Stock</span>
                 </div>
             </div>
 
@@ -89,8 +89,8 @@
                      style="width:50px;height:50px;">
                     <i class="fas fa-check-circle fa-lg"></i>
                 </div>
-                <p class="text-muted small fw-bold text-uppercase">Available Books</p>
-                <h2 class="fw-bold text-success" id="unusedBooks">0</h2>
+                <p class="text-muted small fw-bold text-uppercase">Available Copies</p>
+                <h2 class="fw-bold text-success" id="availableBooks">0</h2>
             </div>
         </div>
 
@@ -100,7 +100,7 @@
     <div class="modern-card">
 
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-bold mb-0">Stock Details</h5>
+            <h5 class="fw-bold mb-0">Unissued Details</h5>
             <div class="small badge bg-primary" id="rowCount">0 Records</div>
         </div>
 
@@ -113,25 +113,27 @@
                     <tr>
                         <td class="text-center py-5 text-muted">
                             <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
-                            <p>Apply filter to load stock data</p>
+                            <p>Apply filter to load unissued data</p>
                         </td>
                     </tr>
                 </tbody>
                 
             </table>
         </div>
-        <!-- ✅ PAGINATION (CORRECT PLACE) -->
+        <!-- PAGINATION -->
         <div id="pagination" class="mt-3 d-flex justify-content-center gap-2"></div>
 
     </div>
 
 </div>
+
 @section Scripts {
 
     <script>
 
+        let allBooks = [];
         let currentPage = 1;
-        let pageSize = 10;
+        let pageSize = 20;
         let totalPages = 0;
 
         // ================= INIT =================
@@ -161,43 +163,65 @@
             const collegeName = document.getElementById("collegeName").value;
 
             if (!collegeName) {
+                // If auto-loading on startup, fail silently
+                if (page === 1 && !document.getElementById("collegeName").dataset.loadedOnce) {
+                    return;
+                }
                 Swal.fire({ icon: 'warning', title: 'College Required' });
                 return;
             }
-                    const summaryRes = await fetch('/StockBook/GetSummary', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ collegeName })
-        });
+            document.getElementById("collegeName").dataset.loadedOnce = "true";
 
-        const summary = await summaryRes.json();
+            // If we already loaded data and only page changes, don't refetch
+            if (allBooks.length > 0 && allBooks[0].collegeName === collegeName) {
+                renderReportData();
+                return;
+            }
 
-        document.getElementById("totalBooks").innerText = summary.totalBooks ?? 0;
-        document.getElementById("totalTitles").innerText = summary.totalTitles ?? 0;
-        document.getElementById("unusedBooks").innerText = summary.unusedBooks ?? 0;
+            // Show loading
+            document.getElementById("tableBody").innerHTML = `
+                <tr>
+                    <td class="text-center py-5 text-muted">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
 
+            try {
+                const res = await fetch(`/UnissuedBooks/get?collegeName=${encodeURIComponent(collegeName)}`);
+                const result = await res.json();
 
-            const res = await fetch('/StockBook/GetStockPaged', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    search: collegeName,
-                    pageNumber: currentPage,
-                    pageSize: pageSize
-                })
-            });
+                allBooks = result || [];
+                allBooks.forEach(b => b.collegeName = collegeName);
 
-            const result = await res.json();
+                // Calculate summary
+                const totalBooks = allBooks.length;
+                const uniqueTitles = new Set(allBooks.map(b => (b.title || '').trim().toLowerCase())).size;
 
-            renderTable(result.data);
+                document.getElementById("totalBooks").innerText = totalBooks;
+                document.getElementById("totalTitles").innerText = uniqueTitles;
+                document.getElementById("availableBooks").innerText = totalBooks;
+                document.getElementById("currentFilter").innerText = collegeName;
 
-            document.getElementById("rowCount").innerText =
-                result.totalRecords + " Records";
+                renderReportData();
+            } catch (err) {
+                console.error(err);
+                document.getElementById("tableBody").innerHTML = `<tr><td class="text-center py-4 text-danger">Failed to load data</td></tr>`;
+            }
+        }
 
-            // ================= SAFE PAGINATION =================
-            totalPages = Math.ceil(result.totalRecords / pageSize);
+        function renderReportData() {
+            const totalRecords = allBooks.length;
+            document.getElementById("rowCount").innerText = totalRecords + " Records";
+
+            totalPages = Math.ceil(totalRecords / pageSize);
 
             if (totalPages === 0) totalPages = 1;
+
+            const pagedData = allBooks.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+            renderTable(pagedData);
 
             renderPagination();
         }
@@ -220,6 +244,7 @@
 
             let h = "<tr>";
             keys.forEach(k => {
+                if (k === "collegeName") return;
                 h += `<th>${k}</th>`;
             });
             h += "</tr>";
@@ -231,7 +256,14 @@
             data.forEach(row => {
                 rows += "<tr>";
                 keys.forEach(k => {
-                    rows += `<td>${row[k] ?? '-'}</td>`;
+                    if (k === "collegeName") return;
+                    let val = row[k];
+                    if (val === null || val === undefined) {
+                        val = '-';
+                    } else if (k === "dateEntry" && val) {
+                        val = new Date(val).toLocaleDateString('en-IN');
+                    }
+                    rows += `<td>${val}</td>`;
                 });
                 rows += "</tr>";
             });
@@ -260,7 +292,7 @@
         }
 
         // ================= EXPORT =================
-        async function exportExcel() {
+        function exportExcel() {
 
             const collegeName = document.getElementById("collegeName").value;
 
@@ -269,21 +301,33 @@
                 return;
             }
 
-            const res = await fetch('/StockBook/ExportExcel', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ collegeName })
-            });
+            if (allBooks.length === 0) {
+                Swal.fire({ icon: 'warning', title: 'No Data', text: 'No records to export.' });
+                return;
+            }
 
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
+            let csvContent = "data:text/csv;charset=utf-8,";
+            if (allBooks.length > 0) {
+                const keys = Object.keys(allBooks[0]).filter(k => k !== "collegeName");
+                csvContent += keys.join(",") + "\n";
 
+                allBooks.forEach(b => {
+                    const row = keys.map(k => {
+                        let val = b[k];
+                        if (val === null || val === undefined) return "";
+                        return `"${String(val).replace(/"/g, '""')}"`;
+                    }).join(",");
+                    csvContent += row + "\n";
+                });
+            }
+
+            const encodedUri = encodeURI(csvContent);
             const a = document.createElement("a");
-            a.href = url;
-            a.download = "StockRegister.xlsx";
+            a.href = encodedUri;
+            a.download = `UnissuedBooks_${collegeName}_${new Date().toISOString().slice(0, 10)}.csv`;
             document.body.appendChild(a);
             a.click();
-            a.remove();
+            document.body.removeChild(a);
         }
 
     </script>

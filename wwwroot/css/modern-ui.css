@@ -726,6 +726,16 @@ h1, h2, h3, h4, h5, h6 {
     border-top-right-radius: var(--radius-md) !important;
     border-bottom-right-radius: var(--radius-md) !important;
 }
+
+/* Modern Card Headers */
+.modern-card-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 /* =========================================================
    PROFESSIONAL REPORT TABLE
 ========================================================= */

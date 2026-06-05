@@ -2,7 +2,7 @@
 {
     public class ReceiveBookRequestDto
     {
-        public long AccessionNo { get; set; }
+        public string? AccessionNo { get; set; }
 
         public string? Signature { get; set; }
     }

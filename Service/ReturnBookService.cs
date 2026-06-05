@@ -1,5 +1,6 @@
 ﻿using lib.DtoModel.ReturnBookDto;
 using lib.Interface;
+using lib.Models.ReturnBook;
 using Microsoft.Data.SqlClient;
 using System.Data;
 
@@ -26,7 +27,7 @@ namespace lib.Service
         {
             try
             {
-                if (req.AccessionNo == 0)
+                if (req.AccessionNo==null)
                 {
                     return new ReceiveBookResponseDto
                     {
@@ -56,10 +57,8 @@ namespace lib.Service
                 using SqlCommand cmd =
                     new SqlCommand(sql, con);
 
-                cmd.Parameters.Add(
-                    "@Acc",
-                    SqlDbType.BigInt
-                ).Value = req.AccessionNo;
+                cmd.Parameters.Add("@Acc", SqlDbType.VarChar).Value = req.AccessionNo;
+
 
                 using SqlDataReader dr =
                     await cmd.ExecuteReaderAsync();
@@ -408,7 +407,7 @@ AND CollegeName=@CollegeName";
 
         private async Task DeleteIssueAsync(
             SqlConnection con,
-            long accNo,
+            string accNo,
             string college,
             long idNo)
         {
@@ -443,7 +442,7 @@ AND CollegeName=@CollegeName";
 
         private async Task InsertTransactionAsync(
       SqlConnection con,
-      long accNo,
+      string accNo,
       string college,
       string title,
       long idNo,
@@ -551,7 +550,7 @@ AND CollegeName=@CollegeName";
 
         private async Task InsertFineAsync(
             SqlConnection con,
-            long accNo,
+            string accNo,
             string college,
             string title,
             long idNo,

@@ -120,6 +120,18 @@
                         Issue Report
                     </a>
                 </li>
+                <li>
+                    <a asp-controller="ReferenceBook" asp-action="Index"
+                           class="menu-sub-item @(currentController == "ReferenceBook" && currentAction == "Index" ? "active" : "")">
+                        Reference Book
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="UnissuedBooks" asp-action="Index"
+                           class="menu-sub-item @(currentController == "UnissuedBooks" && currentAction == "Index" ? "active" : "")">
+                        Unissued Books
+                    </a>
+                </li>
             </ul>
         </div>
 
