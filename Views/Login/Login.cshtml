@@ -22,7 +22,7 @@
         <!-- Left Side: Visuals -->
         <div class="login-left d-none d-lg-flex">
             <div class="login-left-content">
-                <div class="badge bg-primary mb-3 px-3 py-2 rounded-pill shadow-glow" style="border: 1px solid rgba(255,255,255,0.15);">Version 2.0</div>
+              @*   <div class="badge bg-primary mb-3 px-3 py-2 rounded-pill shadow-glow" style="border: 1px solid rgba(255,255,255,0.15);">Version 2.0</div> *@
                 <h1 class="display-4 fw-bold mb-4"
                     style="font-family: 'Poppins', sans-serif; letter-spacing: -0.04em; color: #ffffff !important;">
                     Manage Your Library <br />
@@ -217,15 +217,10 @@
         !loginType) {
 
         Swal.fire({
-
         icon: 'warning',
-
-        title: 'Required Fields',
-
-        text:
-        'Please fill all login fields.',
-
-        confirmButtonColor: '#f59e0b'
+        title: 'Oops! Missing Information',
+        text: 'Please complete all required fields to continue.',
+        confirmButtonColor: '#f39c12'
         });
 
         return;
@@ -282,8 +277,7 @@
 
         icon: 'error',
 
-        title: 'Login Failed',
-
+        title: "Oops...",
         html: `
         <div style="font-size:14px;">
         Invalid Username,
@@ -308,17 +302,12 @@
 
         // ================= LOGIN SUCCESS =================
         Swal.fire({
-
         icon: 'success',
-
-        title: 'Login Successful',
-
-        text:
-        `Welcome ${result.userName}`,
-
-        timer: 1800,
-
-        showConfirmButton: false
+        title: 'Login Successful 🎉',
+        text: 'Login successful. Redirecting you...',
+        showConfirmButton: false,
+        timer: 2000,
+        timerProgressBar: true
         });
 
         setTimeout(() =>

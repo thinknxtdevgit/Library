@@ -264,7 +264,7 @@ namespace lib.Service
                 new("@BookSize", req.Size ?? (object)DBNull.Value),
                 new("@Subject1", req.Subject1 ?? (object)DBNull.Value),
                 new("@Subject2", req.Subject2 ?? (object)DBNull.Value),
-                new("@BindingBook", "Normal"),
+                new("@BindingBook", req.BindingBook?? (object)DBNull.Value),
                 new("@Attachment", DBNull.Value),
                 new("@CollegeId", req.CollegeId ?? 0),
               new("@AccessionId", req.AccessionId ?? 0),

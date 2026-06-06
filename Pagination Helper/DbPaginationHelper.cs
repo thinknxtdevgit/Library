@@ -13,40 +13,69 @@ namespace lib.Pagination_Helper
         }
 
         public async Task<PagedResult<T>> GetPagedResultAsync<T>(
-            string dataQuery,
-            string countQuery,
-            SqlParameter[] parameters,
-            int pageNumber,
-            int pageSize,
-            Func<SqlDataReader, T> map)
+      string dataQuery,
+      string countQuery,
+      SqlParameter[] parameters,
+      int pageNumber,
+      int pageSize,
+      Func<SqlDataReader, T> map)
         {
             var list = new List<T>();
-            int totalRecords = 0;
 
-            using SqlConnection con = new SqlConnection(_connectionString);
+            using SqlConnection con =
+                new SqlConnection(_connectionString);
 
-            // 🔹 COUNT
-            using (SqlCommand countCmd = new SqlCommand(countQuery, con))
+            await con.OpenAsync();
+
+            int totalRecords;
+
+            // COUNT QUERY
+            using (SqlCommand countCmd =
+                new SqlCommand(countQuery, con))
             {
                 if (parameters != null)
-                    countCmd.Parameters.AddRange(parameters);
+                {
+                    foreach (var p in parameters)
+                    {
+                        countCmd.Parameters.AddWithValue(
+                            p.ParameterName,
+                            p.Value);
+                    }
+                }
 
-                await con.OpenAsync();
-                totalRecords = (int)await countCmd.ExecuteScalarAsync();
+                totalRecords = Convert.ToInt32(
+                    await countCmd.ExecuteScalarAsync());
             }
 
-            int offset = PaginationHelper.GetOffset(pageNumber, pageSize);
+            int offset =
+                PaginationHelper.GetOffset(
+                    pageNumber,
+                    pageSize);
 
-            // 🔹 DATA
-            using SqlCommand cmd = new SqlCommand(dataQuery, con);
+            // DATA QUERY
+            using SqlCommand cmd =
+                new SqlCommand(dataQuery, con);
 
             if (parameters != null)
-                cmd.Parameters.AddRange(parameters);
+            {
+                foreach (var p in parameters)
+                {
+                    cmd.Parameters.AddWithValue(
+                        p.ParameterName,
+                        p.Value);
+                }
+            }
 
-            cmd.Parameters.AddWithValue("@Offset", offset);
-            cmd.Parameters.AddWithValue("@PageSize", pageSize);
+            cmd.Parameters.AddWithValue(
+                "@Offset",
+                offset);
 
-            using var reader = await cmd.ExecuteReaderAsync();
+            cmd.Parameters.AddWithValue(
+                "@PageSize",
+                pageSize);
+
+            using var reader =
+                await cmd.ExecuteReaderAsync();
 
             while (await reader.ReadAsync())
             {

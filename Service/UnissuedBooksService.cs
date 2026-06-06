@@ -1,5 +1,6 @@
 ﻿using lib.DtoModel.UnissuedBookDto;
 using lib.Interface;
+using lib.Pagination_Helper;
 using Microsoft.Data.SqlClient;
 
 namespace lib.Service
@@ -7,10 +8,12 @@ namespace lib.Service
     public class UnissuedBooksService : IUnissuedBooksService
     {
         private readonly string _connectionString;
-
+        private readonly DbPaginationHelper _paginationHelper;
         public UnissuedBooksService(IConfiguration configuration)
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
+            _paginationHelper = new DbPaginationHelper(_connectionString);
+       
         }
 
         public async Task<List<UnissuedBookDto>> GetUnissuedBooksAsync(string collegeName)
@@ -60,6 +63,87 @@ namespace lib.Service
 
             return list;
         }
+
+        public async Task<PagedResult<UnissuedBookDto>> GetUnissuedBooksAsyncPages(string collegeName, int pageNumber, int pageSize)
+
+        {
+            string countQuery = @"
+    SELECT COUNT(*)
+    FROM StockRegister sr
+    WHERE sr.CollegeName = @CollegeName
+    AND sr.AccessionNo NOT IN
+    (
+        SELECT ir.AccessionNo
+        FROM IssueRegister ir
+        WHERE ir.CollegeName = @CollegeName
+    )";
+
+            string dataQuery = @"
+    SELECT
+        sr.DateEntry,
+        sr.AccessionNo,
+        sr.Title,
+        sr.Author,
+        sr.Edition,
+        sr.Source,
+        sr.Publisher,
+        sr.ClassNo,
+        sr.BookNo
+    FROM StockRegister sr
+    WHERE sr.CollegeName = @CollegeName
+    AND sr.AccessionNo NOT IN
+    (
+        SELECT ir.AccessionNo
+        FROM IssueRegister ir
+        WHERE ir.CollegeName = @CollegeName
+    )
+    ORDER BY sr.AccessionNo
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY";
+
+            SqlParameter[] parameters =
+            {
+              new SqlParameter("@CollegeName", collegeName)
+            };
+
+            return await _paginationHelper.GetPagedResultAsync(
+                dataQuery,
+                countQuery,
+                parameters,
+                pageNumber,
+                pageSize,
+                reader => new UnissuedBookDto
+                {
+                    DateEntry =
+                        reader["DateEntry"] == DBNull.Value
+                        ? DateTime.MinValue
+                        : Convert.ToDateTime(reader["DateEntry"]),
+
+                    AccessionNo =
+                        reader["AccessionNo"]?.ToString(),
+
+                    Title =
+                        reader["Title"]?.ToString(),
+
+                    Author =
+                        reader["Author"]?.ToString(),
+
+                    Edition =
+                        reader["Edition"]?.ToString(),
+
+                    Source =
+                        reader["Source"]?.ToString(),
+
+                    Publisher =
+                        reader["Publisher"]?.ToString(),
+
+                    ClassNo =
+                        reader["ClassNo"]?.ToString(),
+
+                    BookNo =
+                        reader["BookNo"]?.ToString()
+                });
+        }
         //public byte[] ExportToExcel(List<UnissuedBookDto> data) 
         //{
         //    using (var package = new OfficeOpenXml.ExcelPackage())
@@ -95,7 +179,7 @@ namespace lib.Service
 
         //        return package.GetAsByteArray();
         //    }
-      //  }
+        //  }
     }
 
 }

@@ -76,6 +76,7 @@
         public string? Series { get; set; }
 
         public string? Remarks { get; set; }
+        public string? BindingBook { get; set; }
 
         public string? SearchText { get; set; }
 

@@ -1,4 +1,5 @@
 using lib.Interface;
+using lib.Pagination_Helper;
 using Microsoft.AspNetCore.Mvc;
 
 namespace lib.Controllers
@@ -30,6 +31,25 @@ namespace lib.Controllers
                     collegeName);
 
             return Ok(result);
+        }
+        [HttpPost("GetReferenceBooksPaged")]
+        public async Task<IActionResult> GetReferenceBooksPaged([FromBody] PagedRequest request)
+        {
+            try
+            {
+                var result =
+                    await _referenceBookService
+                    .GetReferenceBooksAsyncPages(
+                        request.Search,
+                        request.PageNumber,
+                        request.PageSize);
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return Ok(ex.ToString());
+            }
         }
     }
 }

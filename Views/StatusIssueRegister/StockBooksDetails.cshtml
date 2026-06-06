@@ -29,7 +29,7 @@
                 </div>
             </div>
             <div class="col-md-3">
-                <button class="btn btn-modern btn-primary-modern w-100 py-2 text-white" onclick="loadReport()">
+                <button class="btn btn-modern btn-primary-modern w-100 py-2 text-white" onclick="loadReport(1)">
                     <i class="fas fa-filter me-2"></i> Apply Filter
                 </button>
             </div>
@@ -99,260 +99,302 @@
 @section Scripts {
     <script>
 
-                let currentPage = 1;
+        let currentPage = 1;
         let pageSize = 10;
         let totalPages = 0;
 
-        document.addEventListener("DOMContentLoaded", loadColleges);
+        // ================= INIT =================
+        document.addEventListener("DOMContentLoaded", () => {
+            loadColleges();
+        });
 
-        // ================= LOAD COLLEGES =================
-        async function loadColleges() {
-            try {
-                const res = await fetch('/api/report/colleges');
-                const data = await res.json();
-
-                const ddl = document.getElementById("collegeName");
-
-                ddl.innerHTML = `<option value="">-- Select College --</option>`;
-
-                data.forEach(c => {
-                    ddl.innerHTML += `<option value="${c}">${c}</option>`;
-                });
-
-            } catch (err) {
-                console.error("College load failed", err);
-            }
-        }
-
-        // ================= LOAD REPORT =================
-        async function loadReport(page = 1) {
-            
-        
-
-        currentPage = page;
-
-            const collegeName = document.getElementById("collegeName").value;
-
-            if (!collegeName) {
-                Swal.fire({ icon: 'warning', title: 'College Name Required' });
-                return;
-            }
-
+        // ================= HELPERS =================
+        function showLoader() {
             Swal.fire({
                 title: 'Loading Report...',
                 allowOutsideClick: false,
                 didOpen: () => Swal.showLoading()
             });
-
-            try {
-
-                const response = await fetch('/api/report/college', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ collegeName })
-                });
-
-                if (!response.ok) {
-                    const error = await response.text();
-                    throw new Error(error);
-                }
-
-                const data = await response.json();
-
-                // ================= SUMMARY =================
-                document.getElementById("totalBooks").innerText = data.totalBooks ?? 0;
-                document.getElementById("issuedBooks").innerText = data.issuedBooks ?? 0;
-                document.getElementById("unissuedBooks").innerText = data.unissuedBooks ?? 0;
-
-                
-            // ================= Pagination Api Call =================
-                const pagedRes = await fetch('/Reports/GetStockPaged', {
-                method: 'POST',
-                 headers: {
-                'Content-Type': 'application/json'
-                },
-                  body: JSON.stringify({
-                  search: collegeName,
-                 pageNumber: currentPage,
-                 pageSize: pageSize
-                 })
-                });
-
-                 const pagedResult = await pagedRes.json();
-
-                      // ================= TABLE =================
-
-        const tableHead = document.getElementById("tableHead");
-        const tableBody = document.getElementById("tableBody");
-
-        tableHead.innerHTML = "";
-        tableBody.innerHTML = "";
-
-        if (!pagedResult.data || pagedResult.data.length === 0) {
-
-            tableBody.innerHTML = `
-                <tr>
-                    <td class="text-center py-4 text-muted">
-                        No records found
-                    </td>
-                </tr>`;
-
-            return;
         }
 
-        /* COLUMN TITLES */
-        const columnMap = {
-            issueDate: "Issue Date",
-            idNo: "ID No",
-            whomIssued: "Whom Issued",
-            discipline: "Discipline",
-            accessionNo: "Accession No",
-            title: "Book Title",
-            author: "Author",
-            lastReturnDate: "Return Date",
-            condition: "Condition",
-            type: "Type",
-            category: "Category",
-            receiveDate: "Receive Date",
-            remarks: "Remarks"
-        };
+        function hideLoader() {
+            Swal.close();
+        }
 
-        // ================= HEADER =================
-
-        let header = "<tr>";
-
-        Object.keys(pagedResult.data[0]).forEach(key => {
-
-            header += `
-                <th>
-                    ${columnMap[key] || key}
-                </th>
-            `;
-        });
-
-        header += "</tr>";
-
-        tableHead.innerHTML = header;
-
-        // ================= BODY =================
-
-        let rows = "";
-
-        pagedResult.data.forEach(item => {
-
-            rows += "<tr>";
-
-            Object.values(item).forEach(val => {
-
-                rows += `
-                    <td>
-                        ${val ?? '-'}
-                    </td>
-                `;
+        async function postJson(url, data) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
             });
 
-            rows += "</tr>";
-        });
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
 
-        tableBody.innerHTML = rows;
-
-        // Row Count
-        document.getElementById("rowCountDisplay").innerText =
-            pagedResult.totalRecords + " Records";
-
-        // Total Pages
-        totalPages = Math.ceil(
-            pagedResult.totalRecords / pageSize
-        );
-
-        if (totalPages <= 0) {
-            totalPages = 1;
+            return await response.json();
         }
 
-        // Render Pagination
-        renderPagination();
+        // ================= LOAD COLLEGES =================
+        async function loadColleges() {
+            try {
+
+                const res = await fetch('/api/report/colleges');
+                const colleges = await res.json();
+
+                const ddl = document.getElementById("collegeName");
+
+                ddl.innerHTML =
+                    `<option value="">-- Select College --</option>` +
+                    colleges.map(c =>
+                        `<option value="${c}">${c}</option>`
+                    ).join('');
 
             }
             catch (err) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: err.message
-                });
-            }
-            finally {
-                Swal.close(); // ALWAYS STOP LOADER
+                console.error("College load failed:", err);
             }
         }
 
-        // ================= EXPORT EXCEL =================
-        async function downloadExcel() {
+        // ================= LOAD REPORT =================
+        async function loadReport(page = 1) {
 
-            const collegeName = document.getElementById("collegeName").value;
+            currentPage = page;
+
+            const collegeName =
+                document.getElementById("collegeName").value;
 
             if (!collegeName) {
-                Swal.fire({ icon: 'warning', title: 'College Name Required' });
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'College Name Required',
+                    text: 'Please select a college name.'
+                });
+
                 return;
             }
 
             try {
 
-                const response = await fetch('/api/report/college/export', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ collegeName })
+                showLoader();
+
+                // ================= SUMMARY =================
+                const summary = await postJson(
+                    '/api/report/college',
+                    { collegeName }
+                );
+
+                document.getElementById("totalBooks").innerText =
+                    summary.totalBooks ?? 0;
+
+                document.getElementById("issuedBooks").innerText =
+                    summary.issuedBooks ?? 0;
+
+                document.getElementById("unissuedBooks").innerText =
+                    summary.unissuedBooks ?? 0;
+
+                // ================= PAGED DATA =================
+                const pagedResult = await postJson(
+                    '/Reports/GetStockPaged',
+                    {
+                        search: collegeName,
+                        pageNumber: currentPage,
+                        pageSize: pageSize
+                    }
+                );
+
+                renderTable(pagedResult);
+
+                document.getElementById("rowCountDisplay").innerText =
+                    `${pagedResult.totalRecords} Records`;
+
+                totalPages = Math.ceil(
+                    pagedResult.totalRecords / pageSize
+                );
+
+                if (totalPages <= 0)
+                    totalPages = 1;
+
+                renderPagination();
+            }
+            catch (err) {
+
+                console.error(err);
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: err.message || 'Something went wrong.'
                 });
+            }
+            finally {
+
+                hideLoader();
+            }
+        }
+
+        // ================= TABLE =================
+        function renderTable(result) {
+
+            const tableHead =
+                document.getElementById("tableHead");
+
+            const tableBody =
+                document.getElementById("tableBody");
+
+            tableHead.innerHTML = "";
+            tableBody.innerHTML = "";
+
+            if (!result.data || result.data.length === 0) {
+
+                tableBody.innerHTML = `
+                    <tr>
+                        <td class="text-center py-4 text-muted">
+                            No Records Found
+                        </td>
+                    </tr>
+                `;
+
+                return;
+            }
+
+            const columnMap = {
+                issueDate: "Issue Date",
+                idNo: "ID No",
+                whomIssued: "Whom Issued",
+                discipline: "Discipline",
+                accessionNo: "Accession No",
+                title: "Book Title",
+                author: "Author",
+                lastReturnDate: "Return Date",
+                condition: "Condition",
+                type: "Type",
+                category: "Category",
+                receiveDate: "Receive Date",
+                remarks: "Remarks"
+            };
+
+            // Header
+            let header = "<tr>";
+
+            Object.keys(result.data[0]).forEach(key => {
+                header += `<th>${columnMap[key] || key}</th>`;
+            });
+
+            header += "</tr>";
+
+            tableHead.innerHTML = header;
+
+            // Body
+            let rows = "";
+
+            result.data.forEach(item => {
+
+                rows += "<tr>";
+
+                Object.values(item).forEach(value => {
+                    rows += `<td>${value ?? '-'}</td>`;
+                });
+
+                rows += "</tr>";
+            });
+
+            tableBody.innerHTML = rows;
+        }
+
+        // ================= PAGINATION =================
+        function renderPagination() {
+
+            let html = "";
+
+            if (currentPage > 1) {
+                html += `
+                    <button class="btn btn-sm btn-primary"
+                        onclick="loadReport(${currentPage - 1})">
+                        Prev
+                    </button>
+                `;
+            }
+
+            html += `
+                <span class="px-3 align-self-center">
+                    Page ${currentPage} of ${totalPages}
+                </span>
+            `;
+
+            if (currentPage < totalPages) {
+                html += `
+                    <button class="btn btn-sm btn-primary"
+                        onclick="loadReport(${currentPage + 1})">
+                        Next
+                    </button>
+                `;
+            }
+
+            document.getElementById("pagination").innerHTML = html;
+        }
+
+        // ================= EXPORT EXCEL =================
+        async function downloadExcel() {
+
+            const collegeName =
+                document.getElementById("collegeName").value;
+
+            if (!collegeName) {
+
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'College Name Required',
+                    text: 'Please select a college name.'
+                });
+
+                return;
+            }
+
+            try {
+
+                showLoader();
+
+                const response = await fetch(
+                    '/api/report/college/export',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ collegeName })
+                    });
 
                 const blob = await response.blob();
 
-                const url = window.URL.createObjectURL(blob);
+                const url =
+                    window.URL.createObjectURL(blob);
 
-                const a = document.createElement('a');
+                const a =
+                    document.createElement("a");
+
                 a.href = url;
                 a.download = `${collegeName}_Report.xlsx`;
 
                 document.body.appendChild(a);
                 a.click();
                 a.remove();
-
-            } catch (err) {
-                console.error(err);
             }
-        }
+            catch (err) {
 
-
-         // ================= Pagination function =================
-                function renderPagination()
-        {
-            let html = '';
-
-            if (currentPage > 1)
-            {
-                html += `
-                <button class="btn btn-sm btn-primary"
-                    onclick="loadReport(${currentPage - 1})">
-                    Prev
-                </button>`;
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Export Failed',
+                    text: err.message
+                });
             }
+            finally {
 
-            html += `
-                <span class="px-3 align-self-center">
-                    Page ${currentPage}
-                    of
-                    ${totalPages}
-                </span>`;
-
-            if (currentPage < totalPages)
-            {
-                html += `
-                <button class="btn btn-sm btn-primary"
-                    onclick="loadReport(${currentPage + 1})">
-                    Next
-                </button>`;
+                hideLoader();
             }
-
-            document.getElementById("pagination").innerHTML =
-                html;
         }
 
     </script>

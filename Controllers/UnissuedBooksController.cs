@@ -1,4 +1,6 @@
 using lib.Interface;
+using lib.Pagination_Helper;
+using lib.Service;
 using Microsoft.AspNetCore.Mvc;
 
 namespace lib.Controllers
@@ -23,6 +25,18 @@ namespace lib.Controllers
         {
             var data = await _service.GetUnissuedBooksAsync(collegeName);
             return Ok(data);
+        }
+        [HttpPost("GetUnissuedBooksPaged")]
+        public async Task<IActionResult> GetUnissuedBooksPaged([FromBody] PagedRequest request)
+        {
+            var result =
+                await _service
+                .GetUnissuedBooksAsyncPages(
+                    request.Search,
+                    request.PageNumber,
+                    request.PageSize);
+
+            return Ok(result);
         }
         //[HttpGet("export")]
         //public async Task<IActionResult> Export(string collegeName)

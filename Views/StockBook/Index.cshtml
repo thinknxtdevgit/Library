@@ -41,7 +41,7 @@
 
             <div class="col-md-3">
                 <button class="btn btn-modern btn-primary-modern w-100 text-white"
-                        onclick="loadReport()">
+                        onclick="loadReport(1)">
                     <i class="fas fa-filter me-2"></i> Apply Filter
                 </button>
             </div>
@@ -137,7 +137,7 @@
         // ================= INIT =================
         document.addEventListener("DOMContentLoaded", () => {
             loadColleges();
-            loadReport(1); // optional auto load
+            // loadReport(1); // optional auto load
         });
 
         // ================= COLLEGES =================
@@ -160,22 +160,34 @@
 
             const collegeName = document.getElementById("collegeName").value;
 
-            if (!collegeName) {
-                Swal.fire({ icon: 'warning', title: 'College Required' });
-                return;
-            }
-                    const summaryRes = await fetch('/StockBook/GetSummary', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ collegeName })
-        });
+        if (!collegeName) {
+                  Swal.fire({
+                      icon: 'warning',
+                      title: 'College Name Required',
+                      text: 'Please select a college name.'
+                  });
+                  return;
+        }
 
-        const summary = await summaryRes.json();
+                  try {
 
-        document.getElementById("totalBooks").innerText = summary.totalBooks ?? 0;
-        document.getElementById("totalTitles").innerText = summary.totalTitles ?? 0;
-        document.getElementById("unusedBooks").innerText = summary.unusedBooks ?? 0;
+            Swal.fire({
+                title: 'Loading Report...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
 
+            const summaryRes = await fetch('/StockBook/GetSummary', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ collegeName })
+            });
+
+            const summary = await summaryRes.json();
+
+            document.getElementById("totalBooks").innerText = summary.totalBooks ?? 0;
+            document.getElementById("totalTitles").innerText = summary.totalTitles ?? 0;
+            document.getElementById("unusedBooks").innerText = summary.unusedBooks ?? 0;
 
             const res = await fetch('/StockBook/GetStockPaged', {
                 method: 'POST',
@@ -194,14 +206,28 @@
             document.getElementById("rowCount").innerText =
                 result.totalRecords + " Records";
 
-            // ================= SAFE PAGINATION =================
             totalPages = Math.ceil(result.totalRecords / pageSize);
-
             if (totalPages === 0) totalPages = 1;
 
             renderPagination();
-        }
 
+        }
+        catch (error) {
+
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load report.'
+            });
+
+            console.error(error);
+        }
+        finally {
+
+            Swal.close(); // Hamesha loader band hoga
+
+        }
+        }
         // ================= TABLE =================
         function renderTable(data) {
 

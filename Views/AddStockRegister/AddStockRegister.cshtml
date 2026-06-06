@@ -97,11 +97,11 @@
                         <label class="form-label small fw-bold text-muted">Type</label>
                         <select id="txtType" class="form-input-modern">
                             <option value="">-- Select Type --</option>
-                            <option value="Book">Book</option>
-                            <option value="Journal">Journal</option>
-                            <option value="Magazine">Magazine</option>
-                            <option value="CD/DVD">CD/DVD</option>
-                            <option value="Other">Other</option>
+                            <option value="General">General</option>
+                            <option value="Reference">Reference</option>
+                            <option value="Text Book">Text Book</option>
+                        @*     <option value="CD/DVD">CD/DVD</option>
+                            <option value="Other">Other</option> *@
                         </select>
                     </div>
                 </div>
@@ -234,10 +234,24 @@
                         <label class="form-label small fw-bold text-muted">Subject 2</label>
                         <input type="text" id="txtSubject2" class="form-input-modern" placeholder="Secondary" />
                     </div>
-                    <div class="col-12">
+                    <div class="col-md-4">
+                        <!-- ========== ADDED: BindingBook field ========== -->
+                        <label class="form-label small fw-bold text-muted">BindingBook</label>
+                        <select id="txtBindingBook" class="form-input-modern">
+                            <option value="">-- Select Binding --</option>
+                            <option value="Yes">Yes</option>
+                            <option value="No">No</option>                        
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-bold text-muted">Remarks</label>
+                        <input type="text" id="txtRemarks" class="form-input-modern" placeholder="Remarks" />
+                    </div>
+
+                   @*  <div class="col-3">
                         <label class="form-label small fw-bold text-muted">Remarks</label>
                         <textarea id="txtRemarks" class="form-input-modern" rows="2" placeholder="Additional notes..."></textarea>
-                    </div>
+                    </div> *@
                 </div>
             </div>
 
@@ -842,7 +856,7 @@
 
                     $('#txtSubject1').val(res.Subject1 ?? '');
                     $('#txtSubject2').val(res.Subject2 ?? '');
-
+                    $('#txtBindingBook').val(res.BindingBook ?? '');
                     $('#txtRemarks').val(res.Remarks ?? '');
 
                     $('#txtFirstAuthorForeName').val(res.FirstAuthorForeName ?? '');

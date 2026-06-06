@@ -41,7 +41,7 @@
 
             <div class="col-md-3">
                 <button class="btn btn-modern btn-primary-modern w-100 text-white"
-                        onclick="loadReport()">
+                        onclick="loadReport(1)">
                     <i class="fas fa-filter me-2"></i> Apply Filter
                 </button>
             </div>
@@ -131,148 +131,222 @@
 
     <script>
 
-        let allBooks = [];
         let currentPage = 1;
         let pageSize = 10;
         let totalPages = 0;
 
         // ================= INIT =================
-        document.addEventListener("DOMContentLoaded", () => {
+          document.addEventListener("DOMContentLoaded", () => {
             loadColleges();
-            loadReport(1); // optional auto load
         });
 
-        // ================= COLLEGES =================
-        async function loadColleges() {
-            const res = await fetch('/api/report/colleges');
-            const data = await res.json();
+         // ================= HELPERS =================
 
-            let ddl = document.getElementById("collegeName");
-            ddl.innerHTML = `<option value="">-- Select College --</option>`;
-
-            data.forEach(x => {
-                ddl.innerHTML += `<option value="${x}">${x}</option>`;
+        function showLoader() {
+            Swal.fire({
+                title: 'Loading Report...',
+                text: 'Please wait...',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => Swal.showLoading()
             });
         }
 
+        function hideLoader() {
+            Swal.close();
+        }
+
+        function showWarning(message) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Validation',
+                text: message
+            });
+        }
+
+        function showError(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message
+            });
+        }
+
+        // ================= COLLEGES =================
+        async function loadColleges() {
+
+            try {
+
+                const res = await fetch('/api/report/colleges');
+                const colleges = await res.json();
+
+                const ddl = document.getElementById("collegeName");
+
+                ddl.innerHTML =
+                    `<option value="">-- Select College --</option>` +
+                    colleges.map(c =>
+                        `<option value="${c}">${c}</option>`
+                    ).join('');
+
+            }
+            catch (err) {
+
+                console.error(err);
+
+                showError('Failed to load colleges.');
+            }
+        }
+
         // ================= LOAD REPORT =================
-        async function loadReport(page = 1) {
+               async function loadReport(page = 1) {
 
             currentPage = page;
 
-            const collegeName = document.getElementById("collegeName").value;
+            const collegeName =
+                document.getElementById("collegeName").value;
 
             if (!collegeName) {
-                // If auto-loading on startup, fail silently
-                if (page === 1 && !document.getElementById("collegeName").dataset.loadedOnce) {
-                    return;
-                }
-                Swal.fire({ icon: 'warning', title: 'College Required' });
+
+                showWarning(
+                    'Please select a college name.'
+                );
+
                 return;
             }
-            document.getElementById("collegeName").dataset.loadedOnce = "true";
-
-            // If we already loaded data and only page changes, don't refetch
-            if (allBooks.length > 0 && allBooks[0].collegeName === collegeName) {
-                renderReportData();
-                return;
-            }
-
-            // Show loading
-            document.getElementById("tableBody").innerHTML = `
-                <tr>
-                    <td class="text-center py-5 text-muted">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                    </td>
-                </tr>
-            `;
 
             try {
-                const res = await fetch(`/ReferenceBook/GetReferenceBooks?collegeName=${encodeURIComponent(collegeName)}`);
+
+                showLoader();
+
+                const res = await fetch(
+                    '/ReferenceBook/GetReferenceBooksPaged',
+                    {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            search: collegeName,
+                            pageNumber: currentPage,
+                            pageSize: pageSize
+                        })
+                    });
+
+                if (!res.ok) {
+                    throw new Error(
+                        'Failed to load report.'
+                    );
+                }
+
                 const result = await res.json();
 
-                allBooks = result.books || [];
-                allBooks.forEach(b => b.collegeName = collegeName);
+                document.getElementById(
+                    "currentFilter"
+                ).innerText = collegeName;
 
-                // // Calculate summary
-                // const totalBooks = allBooks.length;
-                // const uniqueTitles = new Set(allBooks.map(b => (b.title || '').trim().toLowerCase())).size;
-                // let totalValue = 0;
-                // allBooks.forEach(b => {
-                //     if (b.price != null) {
-                //         totalValue += parseFloat(b.price) || 0;
-                //     }
-                // });
+                document.getElementById(
+                    "rowCount"
+                ).innerText =
+                    `${result.totalRecords} Records`;
 
-                // document.getElementById("totalBooks").innerText = totalBooks;
-                // document.getElementById("totalTitles").innerText = uniqueTitles;
-                // document.getElementById("totalValuation").innerText = `₹${totalValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-                document.getElementById("currentFilter").innerText = collegeName;
+                totalPages = Math.max(
+                    1,
+                    Math.ceil(
+                        result.totalRecords / pageSize
+                    )
+                );
 
-                renderReportData();
-            } catch (err) {
-                console.error(err);
-                document.getElementById("tableBody").innerHTML = `<tr><td class="text-center py-4 text-danger">Failed to load data</td></tr>`;
+                renderTable(result.data);
+
+                renderPagination();
             }
-        }
+            catch (err) {
 
-        function renderReportData() {
-            const totalRecords = allBooks.length;
-            document.getElementById("rowCount").innerText = totalRecords + " Records";
+                console.error(err);
 
-            totalPages = Math.ceil(totalRecords / pageSize);
+                showError(
+                    err.message ||
+                    'Failed to load report.'
+                );
+            }
+            finally {
 
-            if (totalPages === 0) totalPages = 1;
-
-            const pagedData = allBooks.slice((currentPage - 1) * pageSize, currentPage * pageSize);
-            renderTable(pagedData);
-
-            renderPagination();
+                hideLoader();
+            }
         }
 
         // ================= TABLE =================
-        function renderTable(data) {
+               function renderTable(data) {
 
-            const head = document.getElementById("tableHead");
-            const body = document.getElementById("tableBody");
+            const head =
+                document.getElementById("tableHead");
+
+            const body =
+                document.getElementById("tableBody");
 
             head.innerHTML = "";
             body.innerHTML = "";
 
             if (!data || data.length === 0) {
-                body.innerHTML = `<tr><td class="text-center py-4">No Data Found</td></tr>`;
+
+                body.innerHTML = `
+                    <tr>
+                        <td colspan="100"
+                            class="text-center py-4">
+                            No Data Found
+                        </td>
+                    </tr>
+                `;
+
                 return;
             }
 
             const keys = Object.keys(data[0]);
 
-            let h = "<tr>";
-            keys.forEach(k => {
-                if (k === "collegeName") return;
-                h += `<th>${k}</th>`;
-            });
-            h += "</tr>";
+            let header = "<tr>";
 
-            head.innerHTML = h;
+            keys.forEach(key => {
+
+                header += `<th>${key}</th>`;
+            });
+
+            header += "</tr>";
+
+            head.innerHTML = header;
 
             let rows = "";
 
             data.forEach(row => {
+
                 rows += "<tr>";
-                keys.forEach(k => {
-                    if (k === "collegeName") return;
-                    let val = row[k];
-                    if (val === null || val === undefined) {
-                        val = '-';
-                    } else if (k === "dateEntry" && val) {
-                        val = new Date(val).toLocaleDateString('en-IN');
-                    } else if ((k === "price" || k === "netPrice" || k === "discount") && typeof val === "number") {
-                        val = val.toFixed(2);
+
+                keys.forEach(key => {
+
+                    let value = row[key];
+
+                    if (
+                        value === null ||
+                        value === undefined
+                    ) {
+                        value = "-";
                     }
-                    rows += `<td>${val}</td>`;
+
+                    if (
+                        key.toLowerCase() ===
+                        "dateentry" &&
+                        value !== "-"
+                    ) {
+                        value =
+                            new Date(value)
+                            .toLocaleDateString(
+                                "en-IN"
+                            );
+                    }
+
+                    rows += `<td>${value}</td>`;
                 });
+
                 rows += "</tr>";
             });
 
@@ -280,62 +354,61 @@
         }
 
         // ================= PAGINATION =================
-        function renderPagination() {
+              function renderPagination() {
 
-            let html = "";
+            let html = '';
 
             if (currentPage > 1) {
-                html += `<button class="btn btn-sm btn-primary"
-                onclick="loadReport(${currentPage - 1})">Prev</button>`;
+
+                html += `
+                    <button
+                        class="btn btn-sm btn-primary"
+                        onclick="loadReport(${currentPage - 1})">
+                        Prev
+                    </button>
+                `;
             }
 
-            html += `<span class="px-3">Page ${currentPage} of ${totalPages}</span>`;
+            html += `
+                <span class="px-3 align-self-center">
+                    Page ${currentPage}
+                    of
+                    ${totalPages}
+                </span>
+            `;
 
             if (currentPage < totalPages) {
-                html += `<button class="btn btn-sm btn-primary"
-                onclick="loadReport(${currentPage + 1})">Next</button>`;
+
+                html += `
+                    <button
+                        class="btn btn-sm btn-primary"
+                        onclick="loadReport(${currentPage + 1})">
+                        Next
+                    </button>
+                `;
             }
 
-            document.getElementById("pagination").innerHTML = html;
+            document.getElementById(
+                "pagination"
+            ).innerHTML = html;
         }
-
         // ================= EXPORT =================
-        function exportExcel() {
+              async function exportExcel() {
 
-            const collegeName = document.getElementById("collegeName").value;
+            const collegeName =
+                document.getElementById("collegeName").value;
 
             if (!collegeName) {
-                Swal.fire({ icon: 'warning', title: 'College Required' });
+
+                showWarning(
+                    'Please select a college.'
+                );
+
                 return;
             }
 
-            if (allBooks.length === 0) {
-                Swal.fire({ icon: 'warning', title: 'No Data', text: 'No records to export.' });
-                return;
-            }
-
-            let csvContent = "data:text/csv;charset=utf-8,";
-            if (allBooks.length > 0) {
-                const keys = Object.keys(allBooks[0]).filter(k => k !== "collegeName");
-                csvContent += keys.join(",") + "\n";
-
-                allBooks.forEach(b => {
-                    const row = keys.map(k => {
-                        let val = b[k];
-                        if (val === null || val === undefined) return "";
-                        return `"${String(val).replace(/"/g, '""')}"`;
-                    }).join(",");
-                    csvContent += row + "\n";
-                });
-            }
-
-            const encodedUri = encodeURI(csvContent);
-            const a = document.createElement("a");
-            a.href = encodedUri;
-            a.download = `ReferenceBooks_${collegeName}_${new Date().toISOString().slice(0, 10)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            window.location.href =
+                `/ReferenceBook/ExportExcel?collegeName=${encodeURIComponent(collegeName)}`;
         }
 
     </script>
