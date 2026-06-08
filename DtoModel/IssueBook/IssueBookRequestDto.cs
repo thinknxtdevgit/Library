@@ -8,5 +8,6 @@
 
         public string signature { get; set; }
         public string CollegeName { get; set; }
+        public bool ForceIssue { get; set; }
     }
 }

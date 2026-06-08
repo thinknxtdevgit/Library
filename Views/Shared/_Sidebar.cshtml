@@ -132,6 +132,12 @@
                         Unissued Books
                     </a>
                 </li>
+                <li>
+                    <a asp-controller="BookHistory" asp-action="Index"
+                           class="menu-sub-item @(currentController == "BookHistory" && currentAction == "Index" ? "active" : "")">
+                        Book History
+                    </a>
+                </li>
             </ul>
         </div>
 

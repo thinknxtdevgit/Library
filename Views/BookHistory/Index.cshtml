@@ -1,0 +1,263 @@
+﻿@{
+    ViewData["Title"] = "Book History";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid py-4">
+
+    ```
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-history me-2"></i>
+                    Book History
+                </h4>
+            </div>
+        </div>
+
+        <div class="card-body">
+
+            <!-- Search Section -->
+            <div class="row g-3 mb-4">
+
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label fw-semibold">
+                        College Name
+                    </label>
+                    <input type="text"
+                           id="txtCollegeName"
+                           class="form-control"
+                           placeholder="Enter College Name" />
+                </div>
+
+                <div class="col-lg-4 col-md-6">
+                    <label class="form-label fw-semibold">
+                        Accession No
+                    </label>
+                    <input type="text"
+                           id="txtAccessionNo"
+                           class="form-control"
+                           placeholder="Enter Accession No" />
+                </div>
+
+                <div class="col-lg-4 col-md-12 d-flex align-items-end">
+                    <button class="btn btn-primary w-100"
+                            id="btnSearch">
+                        <i class="fas fa-search me-2"></i>
+                        Search History
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- Loader -->
+            <div id="loader"
+                 class="text-center py-5"
+                 style="display:none;">
+
+                <div class="spinner-border text-primary"
+                     role="status">
+                </div>
+
+                <div class="mt-2">
+                    Loading History...
+                </div>
+
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive">
+
+                <table class="table table-bordered table-hover align-middle"
+                       id="historyTable">
+
+                    <thead class="table-dark">
+
+                        <tr>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Transaction</th>
+                            <th>Type</th>
+                            <th>Accession No</th>
+                            <th>Title</th>
+                            <th>ID No</th>
+                            <th>Person Name</th>
+                            <th>Person Type</th>
+                            <th>College</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="historyBody">
+
+                        <tr>
+                            <td colspan="10"
+                                class="text-center text-muted py-4">
+
+                                Search Book History
+
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+    </div>
+    ```
+
+</div>
+
+@section Scripts {
+
+    <script>
+
+        $(document).ready(function () {
+
+            $("#btnSearch").click(function () {
+
+                loadHistory();
+
+            });
+
+            $("#txtAccessionNo").keypress(function (e) {
+
+                if (e.which === 13) {
+
+                    loadHistory();
+
+                }
+
+            });
+
+        });
+
+        function loadHistory() {
+
+            let collegeName =
+                $("#txtCollegeName").val().trim();
+
+            let accessionNo =
+                $("#txtAccessionNo").val().trim();
+
+            if (!collegeName) {
+
+                Swal.fire(
+                    "Warning",
+                    "Select College Name",
+                    "warning"
+                );
+
+                return;
+            }
+
+            if (!accessionNo) {
+
+                Swal.fire(
+                    "Warning",
+                    "Enter Accession No",
+                    "warning"
+                );
+
+                return;
+            }
+
+            $("#loader").show();
+
+            $("#historyBody").html("");
+
+            $.ajax({
+
+                url: "/BookHistory/search",
+
+                type: "GET",
+
+                data: {
+
+                    collegeName: collegeName,
+                    accessionNo: accessionNo
+
+                },
+
+                success: function (response) {
+
+                    $("#loader").hide();
+
+                    let rows = "";
+
+                    $.each(response, function (i, item) {
+
+                        rows += `
+
+                        <tr>
+
+                            <td>${item.transactionDate ?? ''}</td>
+
+                            <td>${item.transactionTime ?? ''}</td>
+
+                            <td>
+                                <span class="badge bg-primary">
+                                    ${item.transactionName ?? ''}
+                                </span>
+                            </td>
+
+                            <td>${item.type ?? ''}</td>
+
+                            <td>${item.accessionNo ?? ''}</td>
+
+                            <td>${item.title ?? ''}</td>
+
+                            <td>${item.idNo ?? ''}</td>
+
+                            <td>${item.personName ?? ''}</td>
+
+                            <td>${item.personType ?? ''}</td>
+
+                            <td>${item.collegeName ?? ''}</td>
+
+                        </tr>
+
+                        `;
+                    });
+
+                    $("#historyBody").html(rows);
+
+                },
+
+                error: function (xhr) {
+
+                    $("#loader").hide();
+
+                    $("#historyBody").html(`
+
+                        <tr>
+
+                            <td colspan="10"
+                                class="text-center text-danger py-4">
+
+                                No Record Found
+
+                            </td>
+
+                        </tr>
+
+                    `);
+
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Record Not Found",
+                        text: xhr.responseText
+                    });
+                }
+
+            });
+
+        }
+
+    </script>
+
+}

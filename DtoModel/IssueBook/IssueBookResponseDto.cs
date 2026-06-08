@@ -14,5 +14,6 @@
 
         public int TotalIssuedBooks { get; set; }
         public decimal TotalFine { get; set; }
+        public int IssueLimit { get; set; }
     }
 }

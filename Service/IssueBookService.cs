@@ -64,8 +64,12 @@
                         ? "Invalid Student ID"
                         : "Invalid Staff ID");
                 }
+            int issueLimit =
+            await GetIssueLimitAsync(
+             user.CollegeName,
+             user.Type);
 
-                List<PreviousIssueDto> previousIssues =
+            List<PreviousIssueDto> previousIssues =
                     await GetPreviousIssues(
                         request.txtidno,
                         user.CollegeName);
@@ -112,7 +116,8 @@
                     PreviousIssues = previousIssues,
                     TotalIssuedBooks = totalBooks,
                     TotalFine = totalFine,
-                    BookDetail = book
+                    BookDetail = book,
+                    IssueLimit = issueLimit
                 };
             }
 
@@ -255,8 +260,20 @@
         @UserID,
         @IssueTime
     )";
+                int currentIssuedBooks =
+                await GetIssuedBookCount(request.txtidno, user.CollegeName);
 
-                    using SqlCommand cmd =
+                int issueLimit =
+                    await GetIssueLimitAsync(user.CollegeName, user.Type);
+
+                if (currentIssuedBooks >= issueLimit &&
+                    !request.ForceIssue)
+                {
+                    return Fail(
+                        $"Maximum is book limit is crossed. Maximum Allowed Books : {issueLimit}");
+                }
+
+                using SqlCommand cmd =
                         new SqlCommand(insertSql, con);
 
                     cmd.Parameters.AddWithValue(
@@ -858,5 +875,38 @@ WHERE AccessionNo = @AccessionNo";
                 return Fail(ex.Message);
             }
         }
-    }
-    }
+        // ========================CheckIssueLimit==============================
+        private async Task<int> GetIssueLimitAsync(
+    string collegeName,
+    string personType)
+        {
+            using SqlConnection con =
+                new SqlConnection(_connectionString);
+
+            await con.OpenAsync();
+
+            string sql = @"
+    SELECT TOP 1 IssueLimit
+    FROM MasterIssueLimit
+    WHERE CollegeName = @CollegeName
+    AND PersonType = @PersonType";
+
+            using SqlCommand cmd =
+                new SqlCommand(sql, con);
+
+            cmd.Parameters.AddWithValue(
+                "@CollegeName",
+                collegeName);
+
+            cmd.Parameters.AddWithValue(
+                "@PersonType",
+                personType);
+
+            object result =
+                await cmd.ExecuteScalarAsync();
+
+            return result != null
+                ? Convert.ToInt32(result)
+                : 0;
+        }
+    }  }
