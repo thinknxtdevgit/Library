@@ -3,112 +3,194 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="container-fluid py-4">
+<div class="fade-in">
 
-    ```
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-primary text-white">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">
-                    <i class="fas fa-history me-2"></i>
-                    Book History
-                </h4>
-            </div>
-        </div>
-
-        <div class="card-body">
-
-            <!-- Search Section -->
-            <div class="row g-3 mb-4">
-
-                <div class="col-lg-4 col-md-6">
-                    <label class="form-label fw-semibold">
-                        College Name
-                    </label>
-                    <input type="text"
-                           id="txtCollegeName"
-                           class="form-control"
-                           placeholder="Enter College Name" />
-                </div>
-
-                <div class="col-lg-4 col-md-6">
-                    <label class="form-label fw-semibold">
-                        Accession No
-                    </label>
-                    <input type="text"
-                           id="txtAccessionNo"
-                           class="form-control"
-                           placeholder="Enter Accession No" />
-                </div>
-
-                <div class="col-lg-4 col-md-12 d-flex align-items-end">
-                    <button class="btn btn-primary w-100"
-                            id="btnSearch">
-                        <i class="fas fa-search me-2"></i>
-                        Search History
-                    </button>
-                </div>
-
-            </div>
-
-            <!-- Loader -->
-            <div id="loader"
-                 class="text-center py-5"
-                 style="display:none;">
-
-                <div class="spinner-border text-primary"
-                     role="status">
-                </div>
-
-                <div class="mt-2">
-                    Loading History...
-                </div>
-
-            </div>
-
-            <!-- Table -->
-            <div class="table-responsive">
-
-                <table class="table table-bordered table-hover align-middle"
-                       id="historyTable">
-
-                    <thead class="table-dark">
-
-                        <tr>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Transaction</th>
-                            <th>Type</th>
-                            <th>Accession No</th>
-                            <th>Title</th>
-                            <th>ID No</th>
-                            <th>Person Name</th>
-                            <th>Person Type</th>
-                            <th>College</th>
-                        </tr>
-
-                    </thead>
-
-                    <tbody id="historyBody">
-
-                        <tr>
-                            <td colspan="10"
-                                class="text-center text-muted py-4">
-
-                                Search Book History
-
-                            </td>
-                        </tr>
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
+    <!-- HEADER -->
+    <div class="page-header mt-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">Book History Report</h2>
+            <p class="text-muted">
+                View complete transaction history of library books.
+            </p>
         </div>
     </div>
-    ```
+
+    <!-- FILTER CARD -->
+    <div class="modern-card mb-4 glass border-0">
+
+        <div class="row g-3 align-items-end">
+
+            <div class="col-md-5">
+                <label class="form-label small fw-bold text-muted">
+                    College Filter
+                </label>
+
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0">
+                        <i class="fas fa-university text-muted"></i>
+                    </span>
+
+                    <select id="collegeName" class="form-input-modern">
+                        <option value="">-- Select College --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label small fw-bold text-muted">
+                    Accession No
+                </label>
+
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0">
+                        <i class="fas fa-book text-muted"></i>
+                    </span>
+
+                    <input type="text"
+                           id="accessionNo"
+                           class="form-input-modern"
+                           placeholder="Enter Accession No" />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <button class="btn btn-modern btn-primary-modern w-100 text-white"
+                        onclick="loadBookHistory()">
+                    <i class="fas fa-search me-2"></i>
+                    Search
+                </button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SUMMARY -->
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-4">
+            <div class="modern-card text-center bg-white"
+                 style="border-top:4px solid var(--primary);">
+
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                     style="width:50px;height:50px;">
+                    <i class="fas fa-history"></i>
+                </div>
+
+                <p class="text-muted small fw-bold text-uppercase">
+                    Total Transactions
+                </p>
+
+                <h2 class="fw-bold text-primary"
+                    id="totalTransactions">
+                    0
+                </h2>
+
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="modern-card text-center bg-white"
+                 style="border-top:4px solid var(--success);">
+
+                <div class="bg-warning bg-opacity-10 text-warning rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                     style="width:50px;height:50px;">
+                    <i class="fas fa-sync-alt"></i>
+                </div>
+
+                <p class="text-muted small fw-bold text-uppercase">
+                    Total Renew
+                </p>
+
+                <h2 class="fw-bold text-warning"
+                    id="totalRenew">
+                    0
+                </h2>
+
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="modern-card text-center bg-white"
+                 style="border-top:4px solid var(--warning);">
+
+                <div class="bg-warning bg-opacity-10 text-warning rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                     style="width:50px;height:50px;">
+                    <i class="fas fa-undo-alt"></i>
+                </div>
+
+                <p class="text-muted small fw-bold text-uppercase">
+                    Total Return
+                </p>
+
+                <h2 class="fw-bold text-success"
+                    id="totalReturn">
+                    0
+                </h2>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- TABLE -->
+    <div class="modern-card">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <h5 class="fw-bold mb-0">
+                Transaction History
+            </h5>
+
+            <div class="small badge bg-primary"
+                 id="rowCount">
+                0 Records
+            </div>
+
+        </div>
+
+        <div class="table-responsive-modern">
+
+            <table class="table custom-table">
+
+                <thead>
+
+                    <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Transaction</th>
+                        <th>Type</th>
+                        <th>Accession No</th>
+                        <th>Title</th>
+                        <th>ID No</th>
+                        <th>Person Name</th>
+                        <th>Person Type</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="tableBody">
+
+                    <tr>
+                        <td colspan="9"
+                            class="text-center py-5 text-muted">
+
+                            <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+
+                            <p>
+                                Search Book History
+                            </p>
+
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
 
 </div>
 
@@ -116,40 +198,87 @@
 
     <script>
 
-        $(document).ready(function () {
+        document.addEventListener("DOMContentLoaded", async () => {
 
-            $("#btnSearch").click(function () {
-
-                loadHistory();
-
-            });
-
-            $("#txtAccessionNo").keypress(function (e) {
-
-                if (e.which === 13) {
-
-                    loadHistory();
-
-                }
-
-            });
+            await loadColleges();
 
         });
 
-        function loadHistory() {
+        // ================= LOAD COLLEGES =================
 
-            let collegeName =
-                $("#txtCollegeName").val().trim();
+        async function loadColleges() {
 
-            let accessionNo =
-                $("#txtAccessionNo").val().trim();
+            try {
+
+                const response =
+                    await fetch('/api/report/colleges');
+
+                if (!response.ok)
+                    throw new Error();
+
+                const colleges =
+                    await response.json();
+
+                const ddl =
+                    document.getElementById("collegeName");
+
+                ddl.innerHTML =
+                    '<option value="">-- Select College --</option>';
+
+                colleges.forEach(college => {
+
+                    ddl.innerHTML +=
+                        `<option value="${college}">
+                            ${college}
+                        </option>`;
+                });
+            }
+            catch {
+
+                Swal.fire(
+                    'Error',
+                    'Unable to load colleges.',
+                    'error'
+                );
+            }
+        }
+
+        // ================= LOADER =================
+
+        function showLoader() {
+
+            Swal.fire({
+                title: 'Loading...',
+                text: 'Please Wait',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+
+        function hideLoader() {
+
+            Swal.close();
+        }
+
+        // ================= SEARCH =================
+
+        async function loadBookHistory() {
+
+            const collegeName =
+                document.getElementById("collegeName").value;
+
+            const accessionNo =
+                document.getElementById("accessionNo").value.trim();
 
             if (!collegeName) {
 
                 Swal.fire(
-                    "Warning",
-                    "Select College Name",
-                    "warning"
+                    'Warning',
+                    'Select College Name',
+                    'warning'
                 );
 
                 return;
@@ -158,104 +287,118 @@
             if (!accessionNo) {
 
                 Swal.fire(
-                    "Warning",
-                    "Enter Accession No",
-                    "warning"
+                    'Warning',
+                    'Enter Accession No',
+                    'warning'
                 );
 
                 return;
             }
 
-            $("#loader").show();
+            try {
 
-            $("#historyBody").html("");
+                showLoader();
 
-            $.ajax({
+                const response =
+                    await fetch(
+                        `/BookHistory/search?collegeName=${encodeURIComponent(collegeName)}&accessionNo=${encodeURIComponent(accessionNo)}`
+                    );
 
-                url: "/BookHistory/search",
+                if (!response.ok) {
 
-                type: "GET",
+                    const error =
+                        await response.text();
 
-                data: {
-
-                    collegeName: collegeName,
-                    accessionNo: accessionNo
-
-                },
-
-                success: function (response) {
-
-                    $("#loader").hide();
-
-                    let rows = "";
-
-                    $.each(response, function (i, item) {
-
-                        rows += `
-
-                        <tr>
-
-                            <td>${item.transactionDate ?? ''}</td>
-
-                            <td>${item.transactionTime ?? ''}</td>
-
-                            <td>
-                                <span class="badge bg-primary">
-                                    ${item.transactionName ?? ''}
-                                </span>
-                            </td>
-
-                            <td>${item.type ?? ''}</td>
-
-                            <td>${item.accessionNo ?? ''}</td>
-
-                            <td>${item.title ?? ''}</td>
-
-                            <td>${item.idNo ?? ''}</td>
-
-                            <td>${item.personName ?? ''}</td>
-
-                            <td>${item.personType ?? ''}</td>
-
-                            <td>${item.collegeName ?? ''}</td>
-
-                        </tr>
-
-                        `;
-                    });
-
-                    $("#historyBody").html(rows);
-
-                },
-
-                error: function (xhr) {
-
-                    $("#loader").hide();
-
-                    $("#historyBody").html(`
-
-                        <tr>
-
-                            <td colspan="10"
-                                class="text-center text-danger py-4">
-
-                                No Record Found
-
-                            </td>
-
-                        </tr>
-
-                    `);
-
-                    Swal.fire({
-                        icon: "warning",
-                        title: "Record Not Found",
-                        text: xhr.responseText
-                    });
+                    throw new Error(error);
                 }
 
-            });
+                const data =
+                    await response.json();
+                            document.getElementById("totalTransactions").innerText =
+            data.length;
 
+        // Renew Count
+           const renewCount = data.filter(x =>
+            x.transactionName?.toLowerCase().includes("renew")
+        ).length;
+
+        document.getElementById("totalRenew").innerText =
+            renewCount;
+
+        // Return Count
+             const returnCount = data.filter(x =>
+            x.transactionName?.toLowerCase().includes("return")
+        ).length;
+
+        document.getElementById("totalReturn").innerText =
+            returnCount;
+
+                renderTable(data);
+
+                document.getElementById("rowCount").innerText =
+                    `${data.length} Records`;
+
+                document.getElementById("totalTransactions").innerText =
+                    data.length;
+
+              
+
+            }
+            catch (err) {
+
+                Swal.fire(
+                    'Error',
+                    err.message,
+                    'error'
+                );
+            }
+            finally {
+
+                hideLoader();
+            }
+        }
+
+        // ================= TABLE =================
+
+        function renderTable(data) {
+
+            const tbody =
+                document.getElementById("tableBody");
+
+            tbody.innerHTML = "";
+
+            if (data.length === 0) {
+
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9"
+                            class="text-center">
+                            No Record Found
+                        </td>
+                    </tr>`;
+
+                return;
+            }
+
+            data.forEach(item => {
+
+                tbody.innerHTML += `
+
+                <tr>
+
+                    <td>${item.transactionDate}</td>
+                    <td>${item.transactionTime}</td>
+                    <td>${item.transactionName}</td>
+                    <td>${item.type}</td>
+                    <td>${item.accessionNo}</td>
+                    <td>${item.title}</td>
+                    <td>${item.idNo}</td>
+                    <td>${item.personName}</td>
+                    <td>${item.personType}</td>
+
+                </tr>
+                `;
+            });
         }
 
     </script>

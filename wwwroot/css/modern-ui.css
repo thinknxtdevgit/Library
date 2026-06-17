@@ -468,6 +468,8 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--glass-bg);
     backdrop-filter: blur(20px) saturate(180%);
     border: 1px solid var(--glass-border);
+    /*   transform: translateY(-62px);*/
+
 }
 
 /* Premium Dashboard Stat Cards Layout & Gradient Sets */

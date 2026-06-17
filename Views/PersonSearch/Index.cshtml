@@ -1,0 +1,600 @@
+@{
+    ViewData["Title"] = "Person Search";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="page-header mt-2 mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fas fa-user-zoom me-2 text-primary"></i>Person Search</h2>
+            <p class="text-muted">Search library members by ID or University Roll Number, view enrollment status, issued books/CDs, and pending fines.</p>
+        </div>
+    </div>
+
+    <!-- Search Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="modern-card glass shadow-lg p-4" style="border-top: 4px solid var(--primary);">
+                <form id="searchForm" novalidate>
+                    <div class="row align-items-end g-3">
+                        <div class="col-md-7">
+                            <label for="txtSearchQuery" class="form-label small fw-bold text-muted mb-2">ID Number / University Roll Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 input-group-text-modern"><i class="fas fa-search text-muted"></i></span>
+                                <input type="text" id="txtSearchQuery" class="form-input-modern border-start-0" placeholder="Enter ID Number or University Roll Number..." style="border-top-left-radius: 0; border-bottom-left-radius: 0;" required />
+                                <div class="invalid-feedback">Please enter an ID or University Roll Number.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-center justify-content-start pb-2">
+                            <div class="form-check form-switch p-0 m-0 d-flex align-items-center cursor-pointer">
+                                <input class="form-check-input ms-0 me-2 cursor-pointer" type="checkbox" id="chkSearchType" style="width: 2.5em; height: 1.25em;">
+                                <label class="form-check-label small fw-bold text-muted cursor-pointer" for="chkSearchType">Search by University Roll No</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" id="btnSearch" class="btn btn-modern btn-primary-modern w-100" style="height: 48px;">
+                                <i class="fas fa-search me-2" id="searchIcon"></i>
+                                <span class="spinner-border spinner-border-sm me-2 d-none" id="searchSpinner" role="status" aria-hidden="true"></span>
+                                Search
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Alert Section -->
+    <div class="row d-none" id="errorAlertContainer">
+        <div class="col-12 mb-4">
+            <div class="alert alert-danger d-flex align-items-center border-0 shadow-sm p-3" role="alert" style="border-radius: var(--radius-md); background: rgba(239, 68, 68, 0.1); color: var(--danger);">
+                <i class="fas fa-exclamation-circle me-3 fs-4"></i>
+                <div class="fw-semibold" id="errorMessage">Person Record Not Found</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dashboard Content Container (Initially Hidden) -->
+    <div class="row d-none" id="resultContainer">
+        <!-- Profile snapshot left card -->
+        <div class="col-lg-4 mb-4">
+            <div class="modern-card glass h-100 d-flex flex-column align-items-center justify-content-between p-4" id="profileCard">
+                <div class="text-center w-100">
+                    <h5 class="fw-bold mb-4 border-bottom pb-2 text-start text-muted"><i class="fas fa-camera me-2"></i>Profile Photo</h5>
+                    <div class="avatar-lg mx-auto mb-3" style="width: 150px; height: 150px; border-radius: var(--radius-lg); overflow: hidden; border: 3px solid var(--border-color); position: relative; background: var(--bg-main); display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow-sm);">
+                        <img id="imgProfilePhoto" src="" alt="Profile Photo" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
+                        <i id="imgPlaceholder" class="fas fa-user-circle text-muted" style="font-size: 8.5rem; display: block;"></i>
+                    </div>
+                    <h4 class="fw-bold mb-1" id="profileName">-</h4>
+                    <p class="text-muted small mb-3" id="profileCourse">-</p>
+                    <div class="mb-4">
+                        <span class="badge px-3 py-2 rounded-pill fs-7" id="profileBadge">-</span>
+                    </div>
+                </div>
+                <div class="w-100 border-top pt-3 text-start small">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">Member Type:</span>
+                        <span class="fw-bold" id="profileType">-</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="text-muted">ID / Roll No:</span>
+                        <span class="fw-bold text-primary" id="profileRollNo">-</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span class="text-muted">Department/Batch:</span>
+                        <span class="fw-bold" id="profileBatch">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail tabs right card -->
+        <div class="col-lg-8 mb-4">
+            <div class="modern-card glass h-100 p-4">
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-tabs nav-tabs-modern mb-4" id="memberTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details-tab-pane" type="button" role="tab" aria-controls="details-tab-pane" aria-selected="true">
+                            <i class="fas fa-id-card me-2"></i>Person Details
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="books-tab" data-bs-toggle="tab" data-bs-target="#books-tab-pane" type="button" role="tab" aria-controls="books-tab-pane" aria-selected="false">
+                            <i class="fas fa-book me-2"></i>Books Issued <span class="badge bg-success bg-opacity-10 text-success rounded-pill ms-1" id="cntBooks">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cds-tab" data-bs-toggle="tab" data-bs-target="#cds-tab-pane" type="button" role="tab" aria-controls="cds-tab-pane" aria-selected="false">
+                            <i class="fas fa-compact-disc me-2"></i>CDs Issued <span class="badge bg-info bg-opacity-10 text-info rounded-pill ms-1" id="cntCDs">0</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="fines-tab" data-bs-toggle="tab" data-bs-target="#fines-tab-pane" type="button" role="tab" aria-controls="fines-tab-pane" aria-selected="false">
+                            <i class="fas fa-wallet me-2"></i>Fine Details <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill ms-1" id="cntFines">0</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="memberTabContent">
+                    <!-- Tab 1: Person Details -->
+                    <div class="tab-pane fade show active" id="details-tab-pane" role="tabpanel" aria-labelledby="details-tab" tabindex="0">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-light bg-opacity-25">
+                                    <label class="form-label small fw-bold text-muted mb-1">College Name</label>
+                                    <h5 class="fw-semibold text-main mb-0" id="detCollege">-</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-light bg-opacity-25">
+                                    <label class="form-label small fw-bold text-muted mb-1">Person Name</label>
+                                    <h5 class="fw-semibold text-main mb-0" id="detName">-</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-light bg-opacity-25">
+                                    <label class="form-label small fw-bold text-muted mb-1">Course / Designation</label>
+                                    <h5 class="fw-semibold text-main mb-0" id="detCourse">-</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-light bg-opacity-25">
+                                    <label class="form-label small fw-bold text-muted mb-1">Batch / Department</label>
+                                    <h5 class="fw-semibold text-main mb-0" id="detBatch">-</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-light bg-opacity-25">
+                                    <label class="form-label small fw-bold text-muted mb-1">Roll No / ID No</label>
+                                    <h5 class="fw-semibold text-main mb-0" id="detRollNo">-</h5>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-light bg-opacity-25">
+                                    <label class="form-label small fw-bold text-muted mb-1">Person Type</label>
+                                    <h5 class="fw-semibold text-main mb-0" id="detType">-</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab 2: Books Issued -->
+                    <div class="tab-pane fade" id="books-tab-pane" role="tabpanel" aria-labelledby="books-tab" tabindex="0">
+                        <div class="table-responsive-modern border-0">
+                            <table class="table custom-table mb-0" id="tblBooks">
+                                <thead>
+                                    <tr>
+                                        <th>Accession No</th>
+                                        <th>Title</th>
+                                        <th>Author</th>
+                                        <th>Issue Date</th>
+                                        <th>Last Return Date</th>
+                                        <th>Condition</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="7" class="text-center text-muted py-4">No Books Issued</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab 3: CDs Issued -->
+                    <div class="tab-pane fade" id="cds-tab-pane" role="tabpanel" aria-labelledby="cds-tab" tabindex="0">
+                        <div class="table-responsive-modern border-0">
+                            <table class="table custom-table mb-0" id="tblCDs">
+                                <thead>
+                                    <tr>
+                                        <th>Serial No</th>
+                                        <th>Title</th>
+                                        <th>Issue Type</th>
+                                        <th>Issue Date</th>
+                                        <th>Magazine ID</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted py-4">No CDs Issued</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tab 4: Fine Details -->
+                    <div class="tab-pane fade" id="fines-tab-pane" role="tabpanel" aria-labelledby="fines-tab" tabindex="0">
+                        <div class="table-responsive-modern border-0">
+                            <table class="table custom-table mb-0" id="tblFines">
+                                <thead>
+                                    <tr>
+                                        <th>Accession No</th>
+                                        <th>Title</th>
+                                        <th>Author</th>
+                                        <th>Date Of Issue</th>
+                                        <th>Last Return Date</th>
+                                        <th>Date Of Fine</th>
+                                        <th>Fine Amount</th>
+                                        <th>Fine Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td colspan="8" class="text-center text-muted py-4">No Fine Records</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Styling matching the modern-ui theme and custom elements */
+    .nav-tabs-modern {
+        border-bottom: 1px solid var(--border-color);
+        gap: 0.5rem;
+    }
+    .nav-tabs-modern .nav-link {
+        border: 1px solid transparent;
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+        color: var(--text-muted);
+        font-weight: 500;
+        padding: 0.75rem 1.25rem;
+        transition: all var(--transition-fast);
+        background: transparent;
+    }
+    .nav-tabs-modern .nav-link:hover {
+        color: var(--text-main);
+        background-color: rgba(100, 116, 139, 0.05);
+        border-color: transparent;
+    }
+    .nav-tabs-modern .nav-link.active {
+        color: var(--primary);
+        background-color: var(--bg-card);
+        border-color: var(--border-color) var(--border-color) transparent;
+        font-weight: 600;
+        box-shadow: inset 0 -2px 0 var(--primary);
+    }
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    [data-theme="dark"] .bg-light {
+        background-color: rgba(255, 255, 255, 0.03) !important;
+    }
+    [data-theme="light"] .bg-light {
+        background-color: rgba(0, 0, 0, 0.02) !important;
+    }
+</style>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // Helper function to format Dates (DD-MMM-YYYY)
+            function formatDate(dateString) {
+                if (!dateString) return '-';
+                try {
+                    const date = new Date(dateString);
+                    if (isNaN(date.getTime())) return '-';
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    const month = months[date.getMonth()];
+                    const year = date.getFullYear();
+                    return `${day}-${month}-${year}`;
+                } catch (e) {
+                    return '-';
+                }
+            }
+
+            // Helper function to format Fine Amount
+            function formatCurrency(amount) {
+                if (amount === undefined || amount === null) return '₹0.00';
+                return '₹' + parseFloat(amount).toFixed(2);
+            }
+
+            // Search Form Submission Handler
+            $('#searchForm').on('submit', function (e) {
+                e.preventDefault();
+
+                const searchQuery = $('#txtSearchQuery').val().trim();
+                const isUniversityRollNo = $('#chkSearchType').is(':checked');
+
+                // Empty validation
+           if (!searchQuery) {
+              $('#txtSearchQuery').addClass('is-invalid');
+
+               Swal.fire({
+               icon: 'warning',
+               title: 'Required',
+               text: 'Please enter ID Number or University Roll Number.',
+               confirmButtonColor: '#3085d6'
+             });
+
+            return; // Stop here
+    }
+            // Remove validation class
+            $('#txtSearchQuery').removeClass('is-invalid');
+                // Reset UI state & Trigger loading state
+                resetUI();
+                setLoadingState(true);
+
+                // Make AJAX POST Request to /Search API Endpoint
+             $.ajax({
+                url: '/Search',
+                type: 'POST',
+                contentType: 'application/json',
+               data: JSON.stringify({
+               idNo: searchQuery,
+              isUniversityRollNo: isUniversityRollNo
+    }),
+
+               success: function (response) {
+              setLoadingState(false);
+
+            if (!response) {
+              showError('Person Record Not Found');
+              return;
+            }
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Success',
+            text: 'Person Record Found Successfully.',
+            timer: 1500,
+            showConfirmButton: false
+        });
+
+        renderResult(response);
+    },
+
+    error: function (xhr, status, error) {
+        setLoadingState(false);
+        showError('Person Record Not Found');
+    }
+});
+            });
+
+            // Remove validation styling on user typing
+            $('#txtSearchQuery').on('input', function () {
+                if ($(this).val().trim()) {
+                    $(this).removeClass('is-invalid');
+                }
+            });
+
+            function setLoadingState(isLoading) {
+                if (isLoading) {
+                    $('#btnSearch').prop('disabled', true);
+                    $('#searchIcon').addClass('d-none');
+                    $('#searchSpinner').removeClass('d-none');
+                } else {
+                    $('#btnSearch').prop('disabled', false);
+                    $('#searchIcon').removeClass('d-none');
+                    $('#searchSpinner').addClass('d-none');
+                }
+            }
+
+            function resetUI() {
+                $('#errorAlertContainer').addClass('d-none');
+                $('#resultContainer').addClass('d-none');
+                
+                // Clear Profile Snap Elements
+                $('#profileName').text('-');
+                $('#profileCourse').text('-');
+                $('#profileRollNo').text('-');
+                $('#profileType').text('-');
+                $('#profileBatch').text('-');
+                
+                // Reset Photo Img & Icon Placeholder
+                $('#imgProfilePhoto').hide().attr('src', '');
+                $('#imgPlaceholder').show();
+
+                // Clear Badges and Card Outline highlights
+                $('#profileBadge').attr('class', 'badge px-3 py-2 rounded-pill fs-7').text('-');
+                $('#profileCard').css({
+                    'border': '',
+                    'box-shadow': ''
+                });
+
+                // Clear Details tab fields
+                $('#detName').text('-');
+                $('#detCollege').text('-');
+                $('#detCourse').text('-');
+                $('#detBatch').text('-');
+                $('#detRollNo').text('-');
+                $('#detType').text('-');
+
+                // Reset Tab Badges counts
+                $('#cntBooks').text('0');
+                $('#cntCDs').text('0');
+                $('#cntFines').text('0');
+
+                // Clear lists table rows and reset to default placeholders
+                $('#tblBooks tbody').html('<tr><td colspan="7" class="text-center text-muted py-4">No Books Issued</td></tr>');
+                $('#tblCDs tbody').html('<tr><td colspan="6" class="text-center text-muted py-4">No CDs Issued</td></tr>');
+                $('#tblFines tbody').html('<tr><td colspan="8" class="text-center text-muted py-4">No Fine Records</td></tr>');
+            }
+            function showError(message) {
+            Swal.fire({
+            icon: 'error',
+            title: 'Record Not Found',
+            text: message,
+            confirmButtonColor: '#dc3545'
+        });
+            }
+
+            function renderResult(data) {
+                // Read properties with robust support for both camelCase and PascalCase
+                const name = data.name || data.Name || '';
+                const collegeName = data.collegeName || data.CollegeName || '';
+                const courseOrDesignation = data.courseOrDesignation || data.CourseOrDesignation || '';
+                const batchOrDepartment = data.batchOrDepartment || data.BatchOrDepartment || '';
+                const rollNoOrIdNo = data.rollNoOrIdNo || data.RollNoOrIdNo || '';
+                const personType = data.personType || data.PersonType || '';
+                const snap = data.snap || data.Snap || null;
+                const books = data.books || data.Books || [];
+                const cds = data.cds || data.CDs || [];
+                const fines = data.fines || data.Fines || [];
+
+                // Render Left Profile Snap Card
+                $('#profileName').text(name);
+                $('#profileCourse').text(courseOrDesignation);
+                $('#profileRollNo').text(rollNoOrIdNo);
+                $('#profileType').text(personType);
+                $('#profileBatch').text(batchOrDepartment);
+
+                // Render Details Tab fields
+                $('#detName').text(name);
+                $('#detCollege').text(collegeName);
+                $('#detCourse').text(courseOrDesignation);
+                $('#detBatch').text(batchOrDepartment);
+                $('#detRollNo').text(rollNoOrIdNo);
+                $('#detType').text(personType);
+
+                // Profile Snap Byte Array Rendering (Base64)
+                if (snap && snap.length > 0) {
+                    $('#imgProfilePhoto').attr('src', 'data:image/jpeg;base64,' + snap).show();
+                    $('#imgPlaceholder').hide();
+                } else {
+                    $('#imgProfilePhoto').hide().attr('src', '');
+                    $('#imgPlaceholder').show();
+                }
+
+                // Determine badge and highlight styling based on PersonType
+                const badge = $('#profileBadge');
+                const card = $('#profileCard');
+                
+                // Clear any previous color borders/glows
+                card.css({
+                    'border': '',
+                    'box-shadow': ''
+                });
+
+                const lowerPersonType = personType.toLowerCase();
+                if (lowerPersonType === 'student') {
+                    badge.attr('class', 'badge bg-success bg-opacity-10 text-success px-3 py-2 rounded-pill fs-7').text('Active Student');
+                } else if (lowerPersonType === 'staff') {
+                    badge.attr('class', 'badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill fs-7').text('Active Staff');
+                } else if (lowerPersonType === 'leftstaff') {
+                    badge.attr('class', 'badge bg-warning text-dark px-3 py-2 rounded-pill fs-7').text('Left Staff');
+                    card.css({
+                        'border': '2px solid var(--warning)',
+                        'box-shadow': '0 0 20px var(--warning-glow)'
+                    });
+                } else if (lowerPersonType === 'cancelledstudent') {
+                    badge.attr('class', 'badge bg-danger px-3 py-2 rounded-pill fs-7').text('Cancelled Admission');
+                    card.css({
+                        'border': '2px solid var(--danger)',
+                        'box-shadow': '0 0 20px var(--danger-glow)'
+                    });
+                } else {
+                    badge.attr('class', 'badge bg-secondary px-3 py-2 rounded-pill fs-7').text(personType);
+                }
+
+                // Render Books Issued List Table
+                $('#cntBooks').text(books.length);
+                if (books.length > 0) {
+                    let booksHtml = '';
+                    books.forEach(function (book) {
+                        const accessionNo = book.accessionNo || book.AccessionNo || '-';
+                        const title = book.title || book.Title || '-';
+                        const author = book.author || book.Author || '-';
+                        const issueDate = formatDate(book.issueDate || book.IssueDate);
+                        const lastReturnDate = formatDate(book.lastReturnDate || book.LastReturnDate);
+                        const condition = book.condition || book.Condition || '-';
+                        const remarks = book.remarks || book.Remarks || '-';
+
+                        booksHtml += `<tr>
+                            <td><strong>${accessionNo}</strong></td>
+                            <td>${title}</td>
+                            <td>${author}</td>
+                            <td>${issueDate}</td>
+                            <td>${lastReturnDate}</td>
+                            <td><span class="badge bg-light text-dark border">${condition}</span></td>
+                            <td>${remarks}</td>
+                        </tr>`;
+                    });
+                    $('#tblBooks tbody').html(booksHtml);
+                }
+
+                // Render CDs Issued List Table
+                $('#cntCDs').text(cds.length);
+                if (cds.length > 0) {
+                    let cdsHtml = '';
+                    cds.forEach(function (cd) {
+                        const serialNo = cd.serialNo || cd.SerialNo || '-';
+                        const title = cd.title || cd.Title || '-';
+                        const issueType = cd.issueType || cd.IssueType || '-';
+                        const issueDate = formatDate(cd.issueDate || cd.IssueDate);
+                        const magazineID = cd.magazineID || cd.magazineId || cd.MagazineID || cd.MagazineId || '-';
+                        const remarks = cd.remarks || cd.Remarks || '-';
+
+                        cdsHtml += `<tr>
+                            <td><strong>${serialNo}</strong></td>
+                            <td>${title}</td>
+                            <td><span class="badge bg-secondary bg-opacity-10 text-secondary">${issueType}</span></td>
+                            <td>${issueDate}</td>
+                            <td>${magazineID}</td>
+                            <td>${remarks}</td>
+                        </tr>`;
+                    });
+                    $('#tblCDs tbody').html(cdsHtml);
+                }
+
+                // Render Fines List Table
+                $('#cntFines').text(fines.length);
+                if (fines.length > 0) {
+                    let finesHtml = '';
+                    fines.forEach(function (fine) {
+                        const accessionNo = fine.accessionNo || fine.AccessionNo || '-';
+                        const title = fine.title || fine.Title || '-';
+                        const author = fine.author || fine.Author || '-';
+                        const dateOfIssue = formatDate(fine.dateOfIssue || fine.DateOfIssue);
+                        const lastReturnDate = formatDate(fine.lastReturnDate || fine.LastReturnDate);
+                        const dateOfFine = formatDate(fine.dateOfFine || fine.DateOfFine);
+                        const fineAmount = formatCurrency(fine.fine !== undefined ? fine.fine : fine.Fine);
+                        const fineStatus = fine.fineStatus || fine.FineStatus || '-';
+
+                        let statusBadge = '';
+                        if (fineStatus.toLowerCase() === 'paid') {
+                            statusBadge = `<span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2 py-1"><i class="fas fa-check-circle me-1"></i> Paid</span>`;
+                        } else if (fineStatus.toLowerCase() === 'pending') {
+                            statusBadge = `<span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-2 py-1"><i class="fas fa-clock me-1"></i> Pending</span>`;
+                        } else {
+                            statusBadge = `<span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2 py-1">${fineStatus}</span>`;
+                        }
+
+                        finesHtml += `<tr>
+                            <td><strong>${accessionNo}</strong></td>
+                            <td>${title}</td>
+                            <td>${author}</td>
+                            <td>${dateOfIssue}</td>
+                            <td>${lastReturnDate}</td>
+                            <td>${dateOfFine}</td>
+                            <td class="text-danger fw-bold">${fineAmount}</td>
+                            <td>${statusBadge}</td>
+                        </tr>`;
+                    });
+                    $('#tblFines tbody').html(finesHtml);
+                }
+
+                // Reveal Dashboard Content Container
+                $('#resultContainer').removeClass('d-none');
+                
+                // Show default tab on loaded results
+                const detailsTabEl = document.querySelector('#memberTabs button[data-bs-target="#details-tab-pane"]');
+                if (detailsTabEl) {
+                    const tab = new bootstrap.Tab(detailsTabEl);
+                    tab.show();
+                }
+            }
+        });
+    </script>
+}

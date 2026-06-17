@@ -45,12 +45,12 @@
                         All Books
                     </a>
                 </li>
-                <li>
+               @*  <li>
                     <a asp-controller="Books" asp-action="Create" 
                        class="menu-sub-item @(currentController == "Books" && currentAction == "Create" ? "active" : "")">
                         Add New Book
                     </a>
-                </li>
+                </li> *@
             </ul>
         </div>
 
@@ -103,7 +103,7 @@
         <div class="menu-dropdown">
             <button class="menu-dropdown-toggle" type="button" 
                     aria-expanded="@(currentController == "Reports" ? "true" : "false")">
-                <div class="menu-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="menu-icon"><i class="bi bi-file-earmark-bar-graph-fill"></i></div>
                 <span>Reports</span>
                 <i class="fas fa-chevron-right toggle-icon"></i>
             </button>
@@ -141,7 +141,44 @@
             </ul>
         </div>
 
+        <!-- Search Dropdown -->
+        <div class="menu-dropdown">
+            <button class="menu-dropdown-toggle" type="button"
+                    aria-expanded="@(currentController == "Search" ? "true" : "false")">
+
+                <div class="menu-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+
+                <span>Search</span>
+
+                <i class="fas fa-chevron-right toggle-icon"></i>
+            </button>
+
+            <ul class="menu-sub @(currentController == "Search" ? "show" : "")">
+                <li>
+                    <a asp-controller="PersonSearch" asp-action="Index"
+                           class="menu-sub-item @(currentController == "PersonSearch" ? "active" : "")">
+                        Person Id
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="SearchDetailedAccession" asp-action="Index"
+                           class="menu-sub-item @(currentController == "SearchDetailedAccession" ? "active" : "")">
+                        Detailed Accession No.
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="SearchPersonId" asp-action="Index"
+                           class="menu-sub-item @(currentController == "SearchPersonId" ? "active" : "")">
+                        Detailed Person ID
+                    </a>
+                </li>
+            </ul>
+          
+        </div>
         <!-- Settings -->
+
        @*  <a asp-controller="Settings" asp-action="Index" 
            class="menu-item @(currentController == "Settings" && currentAction == "Index" ? "active" : "")">
             <div class="menu-icon"><i class="fas fa-cog"></i></div>
