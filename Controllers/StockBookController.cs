@@ -38,23 +38,23 @@ namespace lib.Controllers
         }
 
         // ================= API: GET STOCK (AJAX SUPPORT) =================
-        [HttpPost]
-        public async Task<IActionResult> GetStock([FromBody] CollegeRequestDto request)
-        {
-            try
-            {
-                if (request == null || string.IsNullOrEmpty(request.CollegeName))
-                    return BadRequest("CollegeName is required");
+        //[HttpPost]
+        //public async Task<IActionResult> GetStock([FromBody] CollegeRequestDto request)
+        //{
+        //    try
+        //    {
+        //        if (request == null || string.IsNullOrEmpty(request.CollegeName))
+        //            return BadRequest("CollegeName is required");
 
-                var data = await _service.GetStockBooksAsync(request.CollegeName);
-                return Ok(data);
-            }
-            catch (Exception ex)
-            {
+        //        var data = await _service.GetStockBooksAsync(request.CollegeName);
+        //        return Ok(data);
+        //    }
+        //    catch (Exception ex)
+        //    {
 
-                return StatusCode(500, ex.ToString());
-            }
-        }
+        //        return StatusCode(500, ex.ToString());
+        //    }
+        //}
         [HttpPost]
         public async Task<IActionResult> GetStockPaged([FromBody] PagedRequest request)
         {

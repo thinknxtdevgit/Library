@@ -35,14 +35,14 @@
             <button class="menu-dropdown-toggle" type="button" 
                     aria-expanded="@(currentController == "Books" ? "true" : "false")">
                 <div class="menu-icon"><i class="fas fa-book"></i></div>
-                <span>Book Management</span>
+                <span>Stock</span>
                 <i class="fas fa-chevron-right toggle-icon"></i>
             </button>
             <ul class="menu-sub @(currentController == "Books" ? "show" : "")">
                 <li>
                     <a asp-controller="Books" asp-action="Index" 
                        class="menu-sub-item @(currentController == "Books" && currentAction == "Index" ? "active" : "")">
-                        All Books
+                        Add Books
                     </a>
                 </li>
                @*  <li>
@@ -99,12 +99,12 @@
             <span>Renew Book</span>
         </a>
 
-        <!-- Reports Dropdown -->
+        <!-- Status Dropdown -->
         <div class="menu-dropdown">
             <button class="menu-dropdown-toggle" type="button" 
                     aria-expanded="@(currentController == "Reports" ? "true" : "false")">
-                <div class="menu-icon"><i class="bi bi-file-earmark-bar-graph-fill"></i></div>
-                <span>Reports</span>
+                <div class="menu-icon"><i class="bi bi-patch-check-fill"></i></i></div>
+                <span>Status</span>
                 <i class="fas fa-chevron-right toggle-icon"></i>
             </button>
             <ul class="menu-sub @(currentController == "Reports" ? "show" : "")">
@@ -174,9 +174,64 @@
                         Detailed Person ID
                     </a>
                 </li>
+                <li>
+                    <a asp-controller="SearchStudentName" asp-action="Index"
+                           class="menu-sub-item @(currentController == "SearchStudentName" ? "active" : "")">
+                        Student Name
+                    </a>
+                </li>
             </ul>
           
         </div>
+        <!-- Master Dropdown -->
+        <div class="menu-dropdown">
+            <button class="menu-dropdown-toggle" type="button"
+                    aria-expanded="@(currentController == "Master" ? "true" : "false")">
+                <div class="menu-icon"><i class="bi bi-database-fill"></i></div>
+                <span>Master</span>
+                <i class="fas fa-chevron-right toggle-icon"></i>
+            </button>
+            <ul class="menu-sub @(currentController == "MasterFine" ? "Index" : "")">
+                <li>
+                    <a asp-controller="MasterFine" asp-action="Index"
+                           class="menu-sub-item @(currentController == "MasterFine" && currentAction == "Index" ? "active" : "")">
+                        MasterFine
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="MasterIssueLimit" asp-action="Index"
+                           class="menu-sub-item @(currentController == "MasterIssueLimit" && currentAction == "Index" ? "active" : "")">
+                        Issue Limit
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+
+        <div class="menu-dropdown">
+            <button class="menu-dropdown-toggle" type="button"
+                    aria-expanded="@(currentController == "Reports" ? "true" : "false")">
+                <div class="menu-icon"><i class="bi bi-file-earmark-text"></i></div>
+                <span>Reports</span>
+                <i class="fas fa-chevron-right toggle-icon"></i>
+            </button>
+            <ul class="menu-sub @(currentController == "Student" ? "Index" : "")">
+                <li>
+                    <a asp-controller="StudentReport" asp-action="Index"
+                           class="menu-sub-item @(currentController == "StudentReport" && currentAction == "Index" ? "active" : "")">
+                        Student
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Staff" asp-action="Index"
+                           class="menu-sub-item @(currentController == "Staff" && currentAction == "Index" ? "active" : "")">
+                        Staff
+                    </a>
+                </li>
+            </ul>
+        </div>
+                
+
         <!-- Settings -->
 
        @*  <a asp-controller="Settings" asp-action="Index" 

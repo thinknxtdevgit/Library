@@ -1,0 +1,428 @@
+@{
+    ViewData["Title"] = "Master Fine Configuration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="page-header mt-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="fas fa-hand-holding-dollar text-primary me-2"></i>Master Fine Configuration
+            </h2>
+            <p class="text-muted">Manage and update library daily fine rates for different college profiles.</p>
+        </div>
+        <div class="d-flex gap-2 w-100-mobile">
+            <a href="/Settings" class="btn btn-modern btn-secondary-modern btn-auto-width text-decoration-none">
+                <i class="fas fa-arrow-left me-2 text-primary"></i> Back to Settings
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row g-4">
+        <!-- Left Column: Fine Configuration Form -->
+        <div class="col-xl-7">
+            <div class="modern-card mb-4" style="border-top: 4px solid var(--primary);">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-coins me-2 text-primary"></i> Fine Rate Settings
+                    </h5>
+                    <span class="badge badge-modern badge-modern-primary animate-pulse" id="statusBadge">
+                        Select College
+                    </span>
+                </div>
+
+                <!-- College Input Group -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label small fw-bold text-muted mb-0">College Name</label>
+                        <button type="button" class="btn btn-link p-0 small text-decoration-none" id="toggleCollegeInput" style="font-size: 0.75rem;">
+                            <i class="fas fa-keyboard me-1"></i> Enter custom college name
+                        </button>
+                    </div>
+                    
+                    <!-- Dropdown Selector (default) -->
+                    <div id="collegeDropdownContainer" class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-color: var(--border-color);">
+                            <i class="fas fa-university text-muted"></i>
+                        </span>
+                        <select id="ddlCollege" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;">
+                            <option value="">-- Fetching Colleges... --</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Text Input (hidden initially) -->
+                    <div id="collegeTextInputContainer" class="input-group d-none">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-color: var(--border-color);">
+                            <i class="fas fa-pen-fancy text-muted"></i>
+                        </span>
+                        <input type="text" id="txtCollege" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" placeholder="Type custom college name..." />
+                    </div>
+                </div>
+
+                <!-- Fine Amount Group -->
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted mb-2">Daily Fine Rate (per day)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-color: var(--border-color);">
+                            <i class="fas fa-indian-rupee-sign text-muted"></i>
+                        </span>
+                        <input type="number" id="txtFinePerDay" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" min="0" step="0.01" placeholder="0.00" />
+                    </div>
+                    <div class="form-text text-muted small mt-2">Specify the amount charged in rupees per day for overdue materials.</div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex gap-3">
+                    <button type="button" class="btn btn-modern btn-primary-modern flex-grow-1 py-3 text-white" id="btnSave" disabled>
+                        <i class="fas fa-save me-2"></i> Save Configuration
+                    </button>
+                    <button type="button" class="btn btn-modern btn-secondary-modern py-3 px-4" id="btnReset" title="Reset Form">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Status & Insights -->
+        <div class="col-xl-5">
+            <!-- Card: Current Status Display -->
+            <div class="modern-card glass mb-4" id="infoCard">
+                <h5 class="fw-bold mb-3"><i class="fas fa-info-circle me-2 text-info"></i> Configuration Details</h5>
+                
+                <div class="active-config-preview p-4 rounded text-center mb-4" style="background: rgba(37, 99, 235, 0.05); border: 1px dashed var(--border-color);">
+                    <div class="display-rate mb-1 text-primary fw-bold" style="font-size: 2rem;">
+                        <span id="previewCurrency"><i class="fas fa-indian-rupee-sign me-1" style="font-size: 1.5rem;"></i></span><span id="previewFine">0.00</span>
+                    </div>
+                    <div class="text-muted small">Daily Fine Rate</div>
+                </div>
+
+                <div class="info-details-list">
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">College Profile</span>
+                        <span class="fw-semibold small" id="lblCollege">None Selected</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Configuration Status</span>
+                        <span class="fw-semibold small" id="lblStatus">No active rate</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2">
+                        <span class="text-muted small">Policy Applied</span>
+                        <span class="fw-semibold small text-success" id="lblPolicy">Standard Fine Rules</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Quick Guidelines -->
+            <div class="modern-card">
+                <h5 class="fw-bold mb-3"><i class="fas fa-shield-alt me-2 text-warning"></i> Guidelines</h5>
+                <ul class="ps-3 mb-0 small text-muted">
+                    <li class="mb-2">Fine configurations apply immediately to all active borrow records of the selected college upon return processing.</li>
+                    <li class="mb-2">If a college doesn't have an explicitly configured fine rule, you can create one here.</li>
+                    <li class="mb-2">To disable fines for a specific college, save the configuration with a value of <code>0.00</code>.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let collegesList = [];
+        let isCustomInput = false;
+
+        $(document).ready(async function () {
+            await fetchColleges();
+            
+          
+            $('#toggleCollegeInput').click(function () {
+                isCustomInput = !isCustomInput;
+                if (isCustomInput) {
+                    $('#collegeDropdownContainer').addClass('d-none');
+                    $('#collegeTextInputContainer').removeClass('d-none');
+                    $(this).html('<i class="fas fa-list me-1"></i> Select from existing colleges');
+                    $('#ddlCollege').val('');
+                    $('#txtCollege').val('');
+                    resetFormState();
+                } else {
+                    $('#collegeDropdownContainer').removeClass('d-none');
+                    $('#collegeTextInputContainer').addClass('d-none');
+                    $(this).html('<i class="fas fa-keyboard me-1"></i> Enter custom college name');
+                    $('#txtCollege').val('');
+                    $('#ddlCollege').val('');
+                    resetFormState();
+                }
+            });
+
+            // Trigger Fine Load on College change/blur
+            $('#ddlCollege').change(function () {
+                const college = getSelectedCollege();
+                if (college) {
+                    loadFine(college);
+                } else {
+                    resetFormState();
+                }
+            });
+
+            $('#txtCollege').on('blur', function () {
+                const college = getSelectedCollege();
+                if (college) {
+                    loadFine(college);
+                } else {
+                    resetFormState();
+                }
+            });
+
+            // Live Preview update as user types
+            $('#txtFinePerDay').on('input', function() {
+                const val = $(this).val();
+                if (val !== '' && !isNaN(val)) {
+                    $('#previewFine').text(parseFloat(val).toFixed(2));
+                } else {
+                    $('#previewFine').text('0.00');
+                }
+            });
+
+            // Reset Button handler
+            $('#btnReset').click(function() {
+                if (isCustomInput) {
+                    $('#txtCollege').val('');
+                } else {
+                    $('#ddlCollege').val('');
+                }
+                resetFormState();
+            });
+
+            // Save Button handler
+            $('#btnSave').click(function () {
+                saveFine();
+            });
+        });
+
+        // ================= GET SELECTED COLLEGE =================
+        function getSelectedCollege() {
+            if (isCustomInput) {
+                return $('#txtCollege').val().trim();
+            } else {
+                const val = $('#ddlCollege').val();
+                return val ? decodeURIComponent(val) : "";
+            }
+        }
+
+        // ================= FETCH COLLEGES LIST =================
+        async function fetchColleges() {
+            try {
+                let response = await fetch('/colleges');
+                if (!response.ok) {
+                    response = await fetch('/api/report/colleges');
+                }
+                if (response.ok) {
+                    collegesList = await response.json();
+                    populateDropdown();
+                } else {
+                    throw new Error("Could not fetch colleges from endpoints");
+                }
+            } catch (error) {
+                console.error("Colleges loading error:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Colleges Loading Failed',
+                    text: 'Could not retrieve list of colleges automatically. You can still input a custom college name.',
+                    confirmButtonColor: 'var(--primary)'
+                });
+                switchToTextInput();
+            }
+        }
+
+        // ================= POPULATE DDL =================
+        function populateDropdown() {
+            const $ddl = $('#ddlCollege');
+            $ddl.empty();
+            $ddl.append('<option value="">-- Select College --</option>');
+            collegesList.forEach(college => {
+                $ddl.append(`<option value="${encodeURIComponent(college)}">${college}</option>`);
+            });
+        }
+
+        // ================= SWITCH TO TEXT INPUT ON API FAIL =================
+        function switchToTextInput() {
+            isCustomInput = true;
+            $('#collegeDropdownContainer').addClass('d-none');
+            $('#collegeTextInputContainer').removeClass('d-none');
+            $('#toggleCollegeInput').addClass('d-none'); // Hide toggler if API is completely unavailable
+            $('#txtCollege').val('');
+            resetFormState();
+        }
+
+        // ================= LOAD FINE VALUE FROM CONTROLLER =================
+        async function loadFine(collegeName) {
+            showLoader();
+            try {
+                const response = await $.ajax({
+                    url: '/MasterFine/GetFine',
+                    type: 'GET',
+                    data: { collegeName: collegeName }
+                });
+                
+                Swal.close();
+                
+                if (response && response.success && response.data) {
+                    // Record exists
+                    const fineVal = parseFloat(response.data.finePerDay).toFixed(2);
+                    $('#txtFinePerDay').val(fineVal);
+                    $('#previewFine').text(fineVal);
+                    $('#lblCollege').text(collegeName);
+                    $('#lblStatus').text('Active Configured Rate');
+                    $('#statusBadge')
+                        .removeClass('badge-modern-primary badge-modern-warning badge-modern-danger')
+                        .addClass('badge-modern-success')
+                        .text('Existing Rate Loaded');
+                    $('#btnSave').prop('disabled', false);
+                } else {
+                    // Record not found
+                    $('#txtFinePerDay').val('');
+                    $('#previewFine').text('0.00');
+                    $('#lblCollege').text(collegeName);
+                    $('#lblStatus').text('No rate configured (defaults to 0)');
+                    $('#statusBadge')
+                        .removeClass('badge-modern-primary badge-modern-success badge-modern-danger')
+                        .addClass('badge-modern-warning')
+                        .text('New Configuration');
+                    $('#btnSave').prop('disabled', false);
+                }
+            } catch (error) {
+                Swal.close();
+                console.error("Error loading fine:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Retrieval Failed',
+                    text: 'Failed to retrieve current fine rate. Please try again.',
+                    confirmButtonColor: 'var(--primary)'
+                });
+            }
+        }
+
+        // ================= SAVE FINE CONFIGURATION =================
+        async function saveFine() {
+            const college = getSelectedCollege();
+            const fineStr = $('#txtFinePerDay').val();
+
+            if (!college) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'College Required',
+                    text: 'Please select or enter a college name first.',
+                    confirmButtonColor: 'var(--warning)'
+                });
+                return;
+            }
+
+            if (fineStr === '' || isNaN(fineStr) || parseFloat(fineStr) < 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Fine Rate',
+                    text: 'Please enter a valid fine amount (0 or greater).',
+                    confirmButtonColor: 'var(--warning)'
+                });
+                return;
+            }
+
+            const finePerDay = parseFloat(fineStr);
+
+            // Disable UI inputs
+            $('#btnSave').prop('disabled', true);
+            $('#btnReset').prop('disabled', true);
+            
+            Swal.fire({
+                title: 'Saving Settings...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                const response = await $.ajax({
+                    url: '/MasterFine/Save',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        CollegeName: college,
+                        FinePerDay: finePerDay
+                    })
+                });
+
+                Swal.close();
+                $('#btnSave').prop('disabled', false);
+                $('#btnReset').prop('disabled', false);
+
+                if (response && response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Configuration Saved',
+                        text: response.message || 'Fine configuration has been updated successfully.',
+                        confirmButtonColor: 'var(--success)'
+                    }).then(() => {
+                        const currentCollege = college;
+                        // Reload college list in case it's a new college, then reload active selection
+                        fetchColleges().then(() => {
+                            if (isCustomInput) {
+                                $('#txtCollege').val(currentCollege);
+                            } else {
+                                $('#ddlCollege').val(encodeURIComponent(currentCollege));
+                            }
+                            loadFine(currentCollege);
+                        });
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Save Failed',
+                        text: response.message || 'An error occurred while saving configuration.',
+                        confirmButtonColor: 'var(--danger)'
+                    });
+                }
+            } catch (error) {
+                Swal.close();
+                $('#btnSave').prop('disabled', false);
+                $('#btnReset').prop('disabled', false);
+                console.error("Save error:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Request Failed',
+                    text: 'A network or server error occurred.',
+                    confirmButtonColor: 'var(--danger)'
+                });
+            }
+        }
+
+        // ================= RESET FORM STATE =================
+        function resetFormState() {
+            $('#txtFinePerDay').val('');
+            $('#previewFine').text('0.00');
+            $('#lblCollege').text('None Selected');
+            $('#lblStatus').text('No active rate');
+            $('#statusBadge')
+                .removeClass('badge-modern-success badge-modern-warning badge-modern-danger')
+                .addClass('badge-modern-primary')
+                .text('Select College');
+            $('#btnSave').prop('disabled', true);
+        }
+
+        // ================= SHOW AJAX LOADER =================
+        function showLoader() {
+            Swal.fire({
+                title: 'Loading...',
+                text: 'Please Wait',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+    </script>
+}

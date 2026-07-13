@@ -1,0 +1,517 @@
+@{
+    ViewData["Title"] = "Master Issue Limit Configuration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="page-header mt-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="fas fa-book-open text-primary me-2"></i>Master Issue Limit Configuration
+            </h2>
+            <p class="text-muted">Configure the maximum number of checkouts allowed per college and user profile type.</p>
+        </div>
+        <div class="d-flex gap-2 w-100-mobile">
+            <a href="/Settings" class="btn btn-modern btn-secondary-modern btn-auto-width text-decoration-none">
+                <i class="fas fa-arrow-left me-2 text-primary"></i> Back to Settings
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content Row -->
+    <div class="row g-4">
+        <!-- Left Column: Configuration Form -->
+        <div class="col-xl-7">
+            <div class="modern-card mb-4" style="border-top: 4px solid var(--primary);">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0">
+                        <i class="fas fa-sliders me-2 text-primary"></i> Issue Limit Settings
+                    </h5>
+                    <span class="badge badge-modern badge-modern-primary animate-pulse" id="statusBadge">
+                        Awaiting Selection
+                    </span>
+                </div>
+
+                <!-- College Name Group -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label small fw-bold text-muted mb-0">College Name</label>
+                        <button type="button" class="btn btn-link p-0 small text-decoration-none" id="toggleCollegeInput" style="font-size: 0.75rem;">
+                            <i class="fas fa-keyboard me-1"></i> Enter custom college name
+                        </button>
+                    </div>
+                    
+                    <!-- College Dropdown Selector -->
+                    <div id="collegeDropdownContainer" class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-color: var(--border-color);">
+                            <i class="fas fa-university text-muted"></i>
+                        </span>
+                        <select id="ddlCollege" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;">
+                            <option value="">-- Fetching Colleges... --</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom College Text Input -->
+                    <div id="collegeTextInputContainer" class="input-group d-none">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-color: var(--border-color);">
+                            <i class="fas fa-pen-fancy text-muted"></i>
+                        </span>
+                        <input type="text" id="txtCollege" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" placeholder="Type custom college name..." />
+                    </div>
+                </div>
+
+                <!-- Person Type Group -->
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label small fw-bold text-muted mb-0">Person Type (Role)</label>
+                        <button type="button" class="btn btn-link p-0 small text-decoration-none" id="togglePersonTypeInput" style="font-size: 0.75rem;">
+                            <i class="fas fa-keyboard me-1"></i> Enter custom person type
+                        </button>
+                    </div>
+
+                    <!-- Person Type Dropdown Selector -->
+                    <div id="personTypeDropdownContainer" class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-color: var(--border-color);">
+                            <i class="fas fa-user-tag text-muted"></i>
+                        </span>
+                        <select id="ddlPersonType" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;">
+                            <option value="">-- Select Person Type --</option>
+                            <option value="Student">Student</option>
+                            <option value="Staff">Staff</option>
+                        </select>
+                    </div>
+
+                    <!-- Custom Person Type Text Input -->
+                    <div id="personTypeTextInputContainer" class="input-group d-none">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-color: var(--border-color);">
+                            <i class="fas fa-user-edit text-muted"></i>
+                        </span>
+                        <input type="text" id="txtPersonType" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" placeholder="Type custom person type (e.g. Faculty, Visitor)..." />
+                    </div>
+                </div>
+
+                <!-- Issue Limit Group -->
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-muted mb-2">Issue Limit (Max Books Allowed)</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-color: var(--border-color);">
+                            <i class="fas fa-book-bookmark text-muted"></i>
+                        </span>
+                        <input type="number" id="txtIssueLimit" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" min="1" step="1" placeholder="Enter book count limit" />
+                    </div>
+                    <div class="form-text text-muted small mt-2">Enter the maximum number of items this profile can check out simultaneously.</div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="d-flex gap-3">
+                    <button type="button" class="btn btn-modern btn-primary-modern flex-grow-1 py-3 text-white" id="btnSave" disabled>
+                        <i class="fas fa-save me-2"></i> Save Configuration
+                    </button>
+                    <button type="button" class="btn btn-modern btn-secondary-modern py-3 px-4" id="btnReset" title="Reset Form">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Live Status & Info -->
+        <div class="col-xl-5">
+            <!-- Card: Live Preview -->
+            <div class="modern-card glass mb-4" id="infoCard">
+                <h5 class="fw-bold mb-3"><i class="fas fa-info-circle me-2 text-info"></i> Configuration Details</h5>
+                
+                <div class="active-config-preview p-4 rounded text-center mb-4" style="background: rgba(37, 99, 235, 0.05); border: 1px dashed var(--border-color);">
+                    <div class="display-rate mb-1 text-primary fw-bold" style="font-size: 2.2rem;">
+                        <span id="previewLimit">0</span>
+                    </div>
+                    <div class="text-muted small">Max Books Allowed</div>
+                </div>
+
+                <div class="info-details-list">
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">College Profile</span>
+                        <span class="fw-semibold small" id="lblCollege">None Selected</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Borrower Profile</span>
+                        <span class="fw-semibold small" id="lblPersonType">None Selected</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2 border-bottom">
+                        <span class="text-muted small">Configuration Status</span>
+                        <span class="fw-semibold small" id="lblStatus">No active config</span>
+                    </div>
+                    <div class="d-flex justify-content-between py-2">
+                        <span class="text-muted small">Policy Applied</span>
+                        <span class="fw-semibold small text-success" id="lblPolicy">Custom Limit Rules</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card: Dynamic Guidelines -->
+            <div class="modern-card">
+                <h5 class="fw-bold mb-3"><i class="fas fa-shield-alt me-2 text-warning"></i> Policy Guidelines</h5>
+                <ul class="ps-3 mb-0 small text-muted">
+                    <li class="mb-2">Issue limits determine checkout authorization checks. Borrowers cannot check out items beyond this count limit.</li>
+                    <li class="mb-2">Ensure limits are positive integers (greater than or equal to 1).</li>
+                    <li class="mb-2">If no rule is set for a combination of college and role, the system might block issue operations or apply global system default behaviors.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let collegesList = [];
+        let isCustomCollegeInput = false;
+        let isCustomPersonTypeInput = false;
+
+        $(document).ready(async function () {
+            await fetchColleges();
+
+            // Toggle College Input Type
+            $('#toggleCollegeInput').click(function () {
+                isCustomCollegeInput = !isCustomCollegeInput;
+                if (isCustomCollegeInput) {
+                    $('#collegeDropdownContainer').addClass('d-none');
+                    $('#collegeTextInputContainer').removeClass('d-none');
+                    $(this).html('<i class="fas fa-list me-1"></i> Select from existing colleges');
+                    $('#ddlCollege').val('');
+                    $('#txtCollege').val('');
+                } else {
+                    $('#collegeDropdownContainer').removeClass('d-none');
+                    $('#collegeTextInputContainer').addClass('d-none');
+                    $(this).html('<i class="fas fa-keyboard me-1"></i> Enter custom college name');
+                    $('#txtCollege').val('');
+                    $('#ddlCollege').val('');
+                }
+                checkAndLoadTrigger();
+            });
+
+            // Toggle Person Type Input Type
+            $('#togglePersonTypeInput').click(function () {
+                isCustomPersonTypeInput = !isCustomPersonTypeInput;
+                if (isCustomPersonTypeInput) {
+                    $('#personTypeDropdownContainer').addClass('d-none');
+                    $('#personTypeTextInputContainer').removeClass('d-none');
+                    $(this).html('<i class="fas fa-list me-1"></i> Select from standard roles');
+                    $('#ddlPersonType').val('');
+                    $('#txtPersonType').val('');
+                } else {
+                    $('#personTypeDropdownContainer').removeClass('d-none');
+                    $('#personTypeTextInputContainer').addClass('d-none');
+                    $(this).html('<i class="fas fa-keyboard me-1"></i> Enter custom person type');
+                    $('#txtPersonType').val('');
+                    $('#ddlPersonType').val('');
+                }
+                checkAndLoadTrigger();
+            });
+
+            // Trigger Load on changes/blurs
+            $('#ddlCollege').change(checkAndLoadTrigger);
+            $('#ddlPersonType').change(checkAndLoadTrigger);
+            $('#txtCollege').on('blur', checkAndLoadTrigger);
+            $('#txtPersonType').on('blur', checkAndLoadTrigger);
+
+            // Live preview update
+            $('#txtIssueLimit').on('input', function() {
+                const val = $(this).val();
+                if (val !== '' && !isNaN(val)) {
+                    $('#previewLimit').text(parseInt(val, 10));
+                } else {
+                    $('#previewLimit').text('0');
+                }
+            });
+
+            // Reset Form Button
+            $('#btnReset').click(function() {
+                if (isCustomCollegeInput) $('#txtCollege').val('');
+                else $('#ddlCollege').val('');
+
+                if (isCustomPersonTypeInput) $('#txtPersonType').val('');
+                else $('#ddlPersonType').val('');
+
+                resetFormState();
+            });
+
+            // Save Configuration Button
+            $('#btnSave').click(function() {
+                saveIssueLimit();
+            });
+        });
+
+        // ================= GET SELECT VALUES =================
+        function getSelectedCollege() {
+            if (isCustomCollegeInput) {
+                return $('#txtCollege').val().trim();
+            } else {
+                const val = $('#ddlCollege').val();
+                return val ? decodeURIComponent(val) : "";
+            }
+        }
+
+        function getSelectedPersonType() {
+            if (isCustomPersonTypeInput) {
+                return $('#txtPersonType').val().trim();
+            } else {
+                return $('#ddlPersonType').val();
+            }
+        }
+
+        // ================= CHANGE OR BLUR HANDLER =================
+        function checkAndLoadTrigger() {
+            const college = getSelectedCollege();
+            const personType = getSelectedPersonType();
+
+            if (college && personType) {
+                loadIssueLimit(college, personType);
+            } else {
+                resetFormState();
+            }
+        }
+
+        // ================= FETCH COLLEGES LIST =================
+        async function fetchColleges() {
+            try {
+                let response = await fetch('/colleges');
+                if (!response.ok) {
+                    response = await fetch('/api/report/colleges');
+                }
+                if (response.ok) {
+                    collegesList = await response.json();
+                    populateDropdown();
+                } else {
+                    throw new Error("Could not fetch colleges from endpoints");
+                }
+            } catch (error) {
+                console.error("Colleges loading error:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Colleges Loading Failed',
+                    text: 'Could not retrieve list of colleges automatically. You can still input custom names.',
+                    confirmButtonColor: 'var(--primary)'
+                });
+                switchToCustomCollege();
+            }
+        }
+
+        // ================= POPULATE COLLEGE DROPDOWN =================
+        function populateDropdown() {
+            const $ddl = $('#ddlCollege');
+            $ddl.empty();
+            $ddl.append('<option value="">-- Select College --</option>');
+            collegesList.forEach(college => {
+                $ddl.append(`<option value="${encodeURIComponent(college)}">${college}</option>`);
+            });
+        }
+
+        // ================= SWITCH TO TEXT INPUT ON API FAIL =================
+        function switchToCustomCollege() {
+            isCustomCollegeInput = true;
+            $('#collegeDropdownContainer').addClass('d-none');
+            $('#collegeTextInputContainer').removeClass('d-none');
+            $('#toggleCollegeInput').addClass('d-none');
+            $('#txtCollege').val('');
+            resetFormState();
+        }
+
+        // ================= LOAD ISSUE LIMIT FROM API =================
+        async function loadIssueLimit(college, personType) {
+            showLoader();
+            try {
+                const response = await $.ajax({
+                    url: '/MasterIssueLimit/GetIssueLimit',
+                    type: 'GET',
+                    data: { collegeName: college, personType: personType }
+                });
+
+                Swal.close();
+
+                if (response && response.success && response.data) {
+                    const limitVal = parseInt(response.data.issueLimit, 10);
+                    $('#txtIssueLimit').val(limitVal);
+                    $('#previewLimit').text(limitVal);
+                    $('#lblCollege').text(college);
+                    $('#lblPersonType').text(personType);
+                    $('#lblStatus').text('Active Configuration');
+                    $('#statusBadge')
+                        .removeClass('badge-modern-primary badge-modern-warning badge-modern-danger')
+                        .addClass('badge-modern-success')
+                        .text('Existing Limit Loaded');
+                    $('#btnSave').prop('disabled', false);
+                } else {
+                    $('#txtIssueLimit').val('');
+                    $('#previewLimit').text('0');
+                    $('#lblCollege').text(college);
+                    $('#lblPersonType').text(personType);
+                    $('#lblStatus').text('No rate configured');
+                    $('#statusBadge')
+                        .removeClass('badge-modern-primary badge-modern-success badge-modern-danger')
+                        .addClass('badge-modern-warning')
+                        .text('New Configuration');
+                    $('#btnSave').prop('disabled', false);
+                }
+            } catch (error) {
+                Swal.close();
+                console.error("Error loading limit:", error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Retrieval Failed',
+                    text: 'Failed to retrieve active issue limit from server.',
+                    confirmButtonColor: 'var(--primary)'
+                });
+            }
+        }
+
+        // ================= SAVE CONFIGURATION =================
+        async function saveIssueLimit() {
+            const college = getSelectedCollege();
+            const personType = getSelectedPersonType();
+            const limitStr = $('#txtIssueLimit').val();
+
+            if (!college) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'College Required',
+                    text: 'Please select or enter a college name first.',
+                    confirmButtonColor: 'var(--warning)'
+                });
+                return;
+            }
+
+            if (!personType) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Person Type Required',
+                    text: 'Please select or enter a person type first.',
+                    confirmButtonColor: 'var(--warning)'
+                });
+                return;
+            }
+
+            if (limitStr === '' || isNaN(limitStr) || parseInt(limitStr, 10) <= 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Invalid Issue Limit',
+                    text: 'Please enter a valid positive integer count (1 or greater) for checkout limits.',
+                    confirmButtonColor: 'var(--warning)'
+                });
+                return;
+            }
+
+            const limitVal = parseInt(limitStr, 10);
+
+            // Disable UI inputs
+            $('#btnSave').prop('disabled', true);
+            $('#btnReset').prop('disabled', true);
+            
+            Swal.fire({
+                title: 'Saving Settings...',
+                text: 'Please wait',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                const response = await $.ajax({
+                    url: '/MasterIssueLimit/Save',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        CollegeName: college,
+                        PersonType: personType,
+                        IssueLimit: limitVal
+                    })
+                });
+
+                Swal.close();
+                $('#btnSave').prop('disabled', false);
+                $('#btnReset').prop('disabled', false);
+
+                if (response && response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Configuration Saved',
+                        text: response.message || 'Issue limit has been configured successfully.',
+                        confirmButtonColor: 'var(--success)'
+                    }).then(() => {
+                        const currentCollege = college;
+                        const currentPersonType = personType;
+                        
+                        // Reload lists and set form state
+                        fetchColleges().then(() => {
+                            if (isCustomCollegeInput) {
+                                $('#txtCollege').val(currentCollege);
+                            } else {
+                                $('#ddlCollege').val(encodeURIComponent(currentCollege));
+                            }
+                            
+                            if (isCustomPersonTypeInput) {
+                                $('#txtPersonType').val(currentPersonType);
+                            } else {
+                                $('#ddlPersonType').val(currentPersonType);
+                            }
+                            
+                            loadIssueLimit(currentCollege, currentPersonType);
+                        });
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Save Failed',
+                        text: response.message || 'An error occurred while saving issue limits.',
+                        confirmButtonColor: 'var(--danger)'
+                    });
+                }
+            } catch (error) {
+                Swal.close();
+                $('#btnSave').prop('disabled', false);
+                $('#btnReset').prop('disabled', false);
+                console.error("Save error:", error);
+                
+                let errMsg = "A network or server error occurred.";
+                if (error.status === 400 && error.responseText) {
+                    errMsg = error.responseText;
+                }
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Request Failed',
+                    text: errMsg,
+                    confirmButtonColor: 'var(--danger)'
+                });
+            }
+        }
+
+        // ================= RESET FORM STATE =================
+        function resetFormState() {
+            $('#txtIssueLimit').val('');
+            $('#previewLimit').text('0');
+            $('#lblCollege').text('None Selected');
+            $('#lblPersonType').text('None Selected');
+            $('#lblStatus').text('No active config');
+            $('#statusBadge')
+                .removeClass('badge-modern-success badge-modern-warning badge-modern-danger')
+                .addClass('badge-modern-primary')
+                .text('Awaiting Selection');
+            $('#btnSave').prop('disabled', true);
+        }
+
+        // ================= SHOW AJAX LOADER =================
+        function showLoader() {
+            Swal.fire({
+                title: 'Loading...',
+                text: 'Please Wait',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+    </script>
+}

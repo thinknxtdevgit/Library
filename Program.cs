@@ -41,7 +41,10 @@ builder.Services.AddScoped<IPersonSearchService, PersonSearchService>();
 builder.Services.AddScoped<ISearchDetailedAccessionService, SearchDetailedAccessionService>();
 builder.Services.AddScoped<ISearchPersonIdService,SearchPersonIdService>();
 builder.Services.AddScoped<ISearchStudentNameService, SearchStudentNameService>();
-
+builder.Services.AddScoped<IMasterFineService, MasterFineService>();
+builder.Services.AddScoped<IMasterIssueLimitService, MasterIssueLimitService>();
+builder.Services.AddScoped<IStudentReportService,StudentReportService>();
+builder.Services.AddScoped<IStaffReportService, StaffReportService>();
 
 
 // =====================================================

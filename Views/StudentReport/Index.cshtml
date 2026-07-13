@@ -1,0 +1,482 @@
+@using Microsoft.AspNetCore.Http
+@using Newtonsoft.Json
+@inject IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Student Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    // Read allowed colleges list from session
+    var collegesJson = Context.Session.GetString("Colleges");
+    List<string> allowedColleges = new();
+    if (!string.IsNullOrEmpty(collegesJson))
+    {
+        allowedColleges = JsonConvert.DeserializeObject<List<string>>(collegesJson) ?? new List<string>();
+    }
+}
+
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="page-header mt-2 mb-4">
+        <div>
+            <h2 class="fw-bold mb-1">
+                <i class="fas fa-file-invoice text-primary me-2"></i>Student Admission Report
+            </h2>
+            <p class="text-muted">Generate and view detailed student admission registers filtered by institution, course, and batch.</p>
+        </div>
+        <div class="d-flex gap-2 w-100-mobile">
+            <button class="btn btn-modern btn-success-modern btn-auto-width text-white" id="btnExport" style="background: linear-gradient(135deg, var(--success) 0%, #15803d 100%); box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);" disabled>
+                <i class="fas fa-file-excel me-2"></i> Export Excel
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters Panel -->
+    <div class="modern-card mb-4 glass border-0">
+        <div class="row g-3 align-items-end">
+            <!-- College Selector -->
+            <div class="col-lg-4 col-md-6">
+                <label class="form-label small fw-bold text-muted mb-2">College / Institution</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-color: var(--border-color);">
+                        <i class="fas fa-university text-muted"></i>
+                    </span>
+                    <select id="ddlCollege" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;">
+                        <option value="">-- Loading Colleges... --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Course Selector -->
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small fw-bold text-muted mb-2">Course</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-color: var(--border-color);">
+                        <i class="fas fa-graduation-cap text-muted"></i>
+                    </span>
+                    <select id="ddlCourse" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" disabled>
+                        <option value="Select">-- Select College First --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Batch Selector -->
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small fw-bold text-muted mb-2">Batch</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-color: var(--border-color);">
+                        <i class="far fa-calendar-alt text-muted"></i>
+                    </span>
+                    <select id="ddlBatch" class="form-input-modern" style="border-top-left-radius:0; border-bottom-left-radius:0;" disabled>
+                        <option value="Select">-- Select Course First --</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Search Action Button -->
+            <div class="col-lg-2 col-md-12">
+                <button class="btn btn-modern btn-primary-modern w-100 py-2 text-white" id="btnSearch" disabled>
+                    <i class="fas fa-search me-2"></i> Search
+                </button>
+            </div>
+        </div>
+    </div>
+
+@*     <!-- Results Table Panel -->
+    <div class="modern-card p-0 overflow-hidden mb-4">
+        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom bg-light">
+            <h5 class="fw-bold mb-0 text-dark">
+                <i class="fas fa-users me-2 text-primary"></i> Student Report
+            </h5>
+            <span class="badge badge-modern badge-modern-primary" id="recordCountDisplay">0 Records Found</span>
+        </div>
+
+        <div class="table-responsive" style="max-height: 520px;">
+            <table class="table table-hover align-middle mb-0" id="resultsTable">
+                <thead class="table-light position-sticky top-0" style="z-index: 1;">
+                    <tr>
+                        <th class="ps-4">ID No</th>
+                        <th>Student Name</th>
+                        <th>Course</th>
+                        <th>Batch</th>
+                        <th>Father's Name</th>
+                        <th>Permanent Address</th>
+                        <th>Phone No</th>
+                        <th>Student Mobile</th>
+                        <th>Father Mobile</th>
+                        <th class="pe-4">Mother Mobile</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr>
+                        <td colspan="10" class="text-center py-5 text-muted">
+                            <div class="py-4">
+                                <i class="fas fa-info-circle fa-2x mb-3 text-info"></i>
+                                <p class="mb-0 fw-semibold">Please select college filters and click Search to display student data.</p>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+ *@
+    <div class="row">
+        <div class="col-12">
+            <div class="modern-card shadow-sm p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0 text-main" id="resultsTitle">Student Report</h5>
+                    <span class="badge badge-modern badge-modern-primary" id="recordCountDisplay">0 Records Found</span>
+                </div>
+
+                <!-- Desktop/Tablet Table View -->
+                <div class="table-responsive-modern d-none d-md-block" id="desktopView">
+                    <table class="table custom-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">ID No</th>
+                                <th>Student Name</th>
+                                <th>Course</th>
+                                <th>Batch</th>
+                                <th>Father's Name</th>
+                                <th>Permanent Address</th>
+                                <th>Phone No</th>
+                                <th>Student Mobile</th>
+                                <th>Father Mobile</th>
+                                <th class="pe-4">Mother Mobile</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">
+                                    <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                                    <p class="mb-0">Enter search criteria to search students.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="d-block d-md-none" id="mobileView">
+                    <div id="mobileCardsContainer">
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                            <p class="mb-0">Enter search criteria to search students.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const allowedColleges = @Html.Raw(JsonConvert.SerializeObject(allowedColleges));
+        let searchResults = [];
+
+        $(document).ready(async function () {
+            await loadColleges();
+
+            // College Change Handler
+            $('#ddlCollege').change(async function () {
+                const college = getSelectedCollege();
+                resetCourseDropdown();
+                resetBatchDropdown();
+                disableSearchButton();
+
+                if (!college) return;
+
+                try {
+                    showLoader();
+                    const response = await fetch(`/StudentReport/Courses?college=${encodeURIComponent(college)}`);
+                    Swal.close();
+
+                    if (!response.ok) throw new Error("Failed to load courses");
+
+                    const courses = await response.json();
+                    const $ddl = $('#ddlCourse');
+                    $ddl.empty();
+                    $ddl.append('<option value="Select">-- All Courses --</option>');
+                    
+                    courses.forEach(c => {
+                        $ddl.append(`<option value="${encodeURIComponent(c.course)}">${c.course}</option>`);
+                    });
+                    $ddl.prop('disabled', false);
+                    $('#btnSearch').prop('disabled', false); // Enable search immediately for the college
+                } catch (err) {
+                    Swal.close();
+                    console.error("Courses loading failed:", err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to retrieve courses for the selected college.'
+                    });
+                }
+            });
+
+            // Course Change Handler
+            $('#ddlCourse').change(async function () {
+                const college = getSelectedCollege();
+                const course = getSelectedCourse();
+                resetBatchDropdown();
+
+                if (!college || !course || course === 'Select') {
+                    return;
+                }
+
+                try {
+                    showLoader();
+                    const response = await fetch(`/StudentReport/Batch?college=${encodeURIComponent(college)}&course=${encodeURIComponent(course)}`);
+                    Swal.close();
+
+                    if (!response.ok) throw new Error("Failed to load batches");
+
+                    const batches = await response.json();
+                    const $ddl = $('#ddlBatch');
+                    $ddl.empty();
+                    $ddl.append('<option value="Select">-- All Batches --</option>');
+                    
+                    batches.forEach(b => {
+                        $ddl.append(`<option value="${encodeURIComponent(b.batch)}">${b.batch}</option>`);
+                    });
+                    $ddl.prop('disabled', false);
+                } catch (err) {
+                    Swal.close();
+                    console.error("Batches loading failed:", err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Failed to retrieve batches for the selected course.'
+                    });
+                }
+            });
+
+            // Search Trigger
+            $('#btnSearch').click(async function () {
+                await executeSearch();
+            });
+
+            // Export Excel Trigger (CSV Format)
+            $('#btnExport').click(function () {
+                exportToExcel();
+            });
+        });
+
+        // ================= GET SELECTIONS =================
+        function getSelectedCollege() {
+            const val = $('#ddlCollege').val();
+            return val ? decodeURIComponent(val) : "";
+        }
+
+        function getSelectedCourse() {
+            const val = $('#ddlCourse').val();
+            return val ? decodeURIComponent(val) : "Select";
+        }
+
+        function getSelectedBatch() {
+            const val = $('#ddlBatch').val();
+            return val ? decodeURIComponent(val) : "Select";
+        }
+
+        // ================= RESET STATE HELPERS =================
+        function resetCourseDropdown() {
+            const $ddl = $('#ddlCourse');
+            $ddl.empty().append('<option value="Select">-- Select College First --</option>').prop('disabled', true);
+        }
+
+        function resetBatchDropdown() {
+            const $ddl = $('#ddlBatch');
+            $ddl.empty().append('<option value="Select">-- Select Course First --</option>').prop('disabled', true);
+        }
+
+        function disableSearchButton() {
+            $('#btnSearch').prop('disabled', true);
+        }
+
+        // ================= DYNAMIC COLLEGE LOAD =================
+        async function loadColleges() {
+            try {
+                const response = await fetch('/StudentReport/Colleges');
+                if (!response.ok) throw new Error("Failed to fetch colleges");
+                
+                const allColleges = await response.json();
+                
+                // Client-side Session College Access Filter
+                let filtered = allColleges;
+                if (allowedColleges && allowedColleges.length > 0) {
+                    filtered = allColleges.filter(c => 
+                        allowedColleges.some(ac => ac.toLowerCase() === c.collegeName.toLowerCase())
+                    );
+                } else {
+                    // No colleges assigned in login session
+                    filtered = [];
+                }
+
+                const $ddl = $('#ddlCollege');
+                $ddl.empty();
+
+                if (filtered.length === 0) {
+                    $ddl.append('<option value="">-- No Colleges Authorized --</option>');
+                    disableSearchButton();
+                    return;
+                }
+
+                $ddl.append('<option value="">-- Select College --</option>');
+                filtered.forEach(c => {
+                    $ddl.append(`<option value="${encodeURIComponent(c.collegeName)}">${c.collegeName}</option>`);
+                });
+
+                // Auto-select if user is authorized for exactly one college
+                if (filtered.length === 1) {
+                    $ddl.val(encodeURIComponent(filtered[0].collegeName)).trigger('change');
+                }
+            } catch (err) {
+                console.error("Colleges loading failed:", err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Retrieval Failed',
+                    text: 'Failed to retrieve college profiles list from server.'
+                });
+            }
+        }
+
+        // ================= SEARCH IMPLEMENTATION =================
+        async function executeSearch() {
+            const college = getSelectedCollege();
+            const course = getSelectedCourse();
+            const batch = getSelectedBatch();
+
+            if (!college) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'College Required',
+                    text: 'Please select a college name to perform search.'
+                });
+                return;
+            }
+
+            showLoader();
+            try {
+                const response = await $.ajax({
+                    url: '/StudentReport/Search',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        CollegeName: college,
+                        Course: course,
+                        Batch: batch
+                    })
+                });
+
+                Swal.close();
+                searchResults = response || [];
+                renderTable();
+            } catch (err) {
+                Swal.close();
+                console.error("Search request failed:", err);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Search Failed',
+                    text: 'A network or server error occurred while retrieving report results.'
+                });
+            }
+        }
+
+        // ================= TABLE RENDER =================
+        function renderTable() {
+            const $tbody = $('#tableBody');
+            $tbody.empty();
+            
+            $('#recordCountDisplay').text(`${searchResults.length} Records Found`);
+
+            if (searchResults.length === 0) {
+                $tbody.append(`
+                    <tr>
+                        <td colspan="10" class="text-center py-5 text-muted">
+                            <div class="py-4">
+                                <i class="fas fa-search-minus fa-2x mb-3 text-muted"></i>
+                                <p class="mb-0 fw-semibold">No student records found matching the selected criteria.</p>
+                            </div>
+                        </td>
+                    </tr>
+                `);
+                $('#btnExport').prop('disabled', true);
+                return;
+            }
+
+            searchResults.forEach(student => {
+                $tbody.append(`
+                    <tr>
+                        <td class="ps-4 fw-medium text-primary">${student.idNo || '-'}</td>
+                        <td class="fw-semibold">${student.studentName || '-'}</td>
+                        <td>${student.course || '-'}</td>
+                        <td>${student.batch || '-'}</td>
+                        <td>${student.fatherName || '-'}</td>
+                        <td class="small text-wrap text-muted" style="max-width: 250px;">${student.permanentAddress || '-'}</td>
+                        <td>${student.phoneNo || '-'}</td>
+                        <td>${student.studentMobileNo || '-'}</td>
+                        <td>${student.fatherMobileNo || '-'}</td>
+                        <td class="pe-4">${student.motherMobileNo || '-'}</td>
+                    </tr>
+                `);
+            });
+
+            $('#btnExport').prop('disabled', false);
+        }
+
+        // ================= EXPORT EXCEL (CSV DOWNLOAD) =================
+        function exportToExcel() {
+            if (searchResults.length === 0) return;
+
+            let csvContent = "\uFEFF"; // UTF-8 BOM
+            // CSV Headers
+            const headers = ["ID No", "Student Name", "Course", "Batch", "Father's Name", "Permanent Address", "Phone No", "Student Mobile", "Father Mobile", "Mother Mobile"];
+            csvContent += headers.map(h => `"${h}"`).join(",") + "\r\n";
+            
+            // CSV Rows
+            searchResults.forEach(row => {
+                const values = [
+                    row.idNo || "",
+                    row.studentName || "",
+                    row.course || "",
+                    row.batch || "",
+                    row.fatherName || "",
+                    row.permanentAddress || "",
+                    row.phoneNo || "",
+                    row.studentMobileNo || "",
+                    row.fatherMobileNo || "",
+                    row.motherMobileNo || ""
+                ].map(val => `"${val.toString().replace(/"/g, '""')}"`);
+                csvContent += values.join(",") + "\r\n";
+            });
+
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            
+            const college = getSelectedCollege();
+            const fileName = `StudentReport_${college.replace(/[^a-z0-9]/gi, '_')}.csv`;
+            
+            link.setAttribute("download", fileName);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ================= DYNAMIC SPINNER =================
+        function showLoader() {
+            Swal.fire({
+                title: 'Loading Data...',
+                text: 'Please Wait',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+        }
+    </script>
+}

@@ -20,14 +20,14 @@ namespace lib.Controllers
         // ==========================
         // Load Colleges
         // ==========================
-        [HttpGet("colleges")]
-        public async Task<IActionResult> GetColleges()
-        {
-            var result =
-                await _service.GetCollegesAsync();
+        //[HttpGet("colleges")]
+        //public async Task<IActionResult> GetColleges()
+        //{
+        //    var result =
+        //        await _service.GetCollegesAsync();
 
-            return Ok(result);
-        }
+        //    return Ok(result);
+        //}
 
         // ==========================
         // Search Student
