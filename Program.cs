@@ -45,6 +45,8 @@ builder.Services.AddScoped<IMasterFineService, MasterFineService>();
 builder.Services.AddScoped<IMasterIssueLimitService, MasterIssueLimitService>();
 builder.Services.AddScoped<IStudentReportService,StudentReportService>();
 builder.Services.AddScoped<IStaffReportService, StaffReportService>();
+builder.Services.AddScoped<IStudentSettingService, StudentSettingService>();
+builder.Services.AddScoped<ITeacherSettingService, TeacherSettingService>();
 
 
 // =====================================================

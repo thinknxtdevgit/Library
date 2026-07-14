@@ -849,7 +849,7 @@ h1, h2, h3, h4, h5, h6 {
     /* TITLE */
     .custom-table td:nth-child(6),
     .custom-table th:nth-child(6) {
-        min-width: 420px;
+        min-width: 190px;
     }
 
     /* AUTHOR */

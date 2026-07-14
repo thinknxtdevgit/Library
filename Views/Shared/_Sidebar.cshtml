@@ -223,14 +223,36 @@
                     </a>
                 </li>
                 <li>
-                    <a asp-controller="Staff" asp-action="Index"
-                           class="menu-sub-item @(currentController == "Staff" && currentAction == "Index" ? "active" : "")">
+                    <a asp-controller="StaffReport" asp-action="Index"
+                           class="menu-sub-item @(currentController == "StaffReport" && currentAction == "Index" ? "active" : "")">
                         Staff
                     </a>
                 </li>
             </ul>
         </div>
-                
+
+        <div class="menu-dropdown">
+            <button class="menu-dropdown-toggle" type="button"
+                    aria-expanded="@(currentController == "Setting" ? "true" : "false")">
+                <div class="menu-icon"><i class="bi bi-gear"></i></div>
+                <span>Setting</span>
+                <i class="fas fa-chevron-right toggle-icon"></i>
+            </button>
+            <ul class="menu-sub @(currentController == "Setting" ? "Index" : "")">
+                <li>
+                    <a asp-controller="StudentSetting" asp-action="Index"
+                           class="menu-sub-item @(currentController == "StudentSetting" && currentAction == "Index" ? "active" : "")">
+                        Student
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="TeacherSetting" asp-action="Index"
+                           class="menu-sub-item @(currentController == "TeacherSetting" && currentAction == "Index" ? "active" : "")">
+                        Teacher
+                    </a>
+                </li>
+            </ul>
+        </div>
 
         <!-- Settings -->
 

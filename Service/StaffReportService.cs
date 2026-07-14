@@ -68,9 +68,9 @@ namespace lib.Service
             response.TotalRecords = response.StaffList.Count;
 
             // Equivalent of VB functions
-            response.Address1 = await GetCollegeAddress1(con, request.CollegeName);
+            //response.Address1 = await GetCollegeAddress1(con, request.CollegeName);
 
-            response.Address2 = await GetCollegeAddress2(con, request.CollegeName);
+            //response.Address2 = await GetCollegeAddress2(con, request.CollegeName);
 
             return response;
         }
