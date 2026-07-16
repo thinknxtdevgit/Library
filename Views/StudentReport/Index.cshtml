@@ -13,17 +13,55 @@
         allowedColleges = JsonConvert.DeserializeObject<List<string>>(collegesJson) ?? new List<string>();
     }
 }
+<!-- Print Header -->
+<div class="d-none d-print-block print-header" id="printReportHeader">
+
+    <div class="text-center">
+
+        <h2 id="printCollegeName">
+            College Name
+        </h2>
+
+        <p id="printAddress1"></p>
+        <p id="printAddress2"></p>
+
+
+        <h3>
+            Student Details Report
+        </h3>
+
+
+        <div class="print-info">
+
+            <span>
+                Generated :
+                @DateTime.Now.ToString("dd-MMM-yyyy hh:mm tt")
+            </span>
+
+
+            <span id="printRecordCount">
+                0 Records
+            </span>
+
+        </div>
+
+    </div>
+
+</div>
 
 <div class="fade-in">
     <!-- Page Header -->
     <div class="page-header mt-2 mb-4">
         <div>
             <h2 class="fw-bold mb-1">
-                <i class="fas fa-file-invoice text-primary me-2"></i>Student Admission Report
+                <i class="fas fa-file-invoice text-primary me-2"></i>Student Details
             </h2>
             <p class="text-muted">Generate and view detailed student admission registers filtered by institution, course, and batch.</p>
         </div>
         <div class="d-flex gap-2 w-100-mobile">
+            <button class="btn btn-modern btn-secondary-modern btn-auto-width" id="btnPrint" disabled style="background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; box-shadow: 0 4px 14px rgba(59, 130, 246, 0.3);">
+                <i class="fas fa-print me-2"></i> Print Report
+            </button>
             <button class="btn btn-modern btn-success-modern btn-auto-width text-white" id="btnExport" style="background: linear-gradient(135deg, var(--success) 0%, #15803d 100%); box-shadow: 0 4px 14px rgba(34, 197, 94, 0.3);" disabled>
                 <i class="fas fa-file-excel me-2"></i> Export Excel
             </button>
@@ -35,7 +73,7 @@
         <div class="row g-3 align-items-end">
             <!-- College Selector -->
             <div class="col-lg-4 col-md-6">
-                <label class="form-label small fw-bold text-muted mb-2">College / Institution</label>
+                <label class="form-label small fw-bold text-muted mb-2">College</label>
                 <div class="input-group">
                     <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md); border-color: var(--border-color);">
                         <i class="fas fa-university text-muted"></i>
@@ -81,46 +119,6 @@
         </div>
     </div>
 
-@*     <!-- Results Table Panel -->
-    <div class="modern-card p-0 overflow-hidden mb-4">
-        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom bg-light">
-            <h5 class="fw-bold mb-0 text-dark">
-                <i class="fas fa-users me-2 text-primary"></i> Student Report
-            </h5>
-            <span class="badge badge-modern badge-modern-primary" id="recordCountDisplay">0 Records Found</span>
-        </div>
-
-        <div class="table-responsive" style="max-height: 520px;">
-            <table class="table table-hover align-middle mb-0" id="resultsTable">
-                <thead class="table-light position-sticky top-0" style="z-index: 1;">
-                    <tr>
-                        <th class="ps-4">ID No</th>
-                        <th>Student Name</th>
-                        <th>Course</th>
-                        <th>Batch</th>
-                        <th>Father's Name</th>
-                        <th>Permanent Address</th>
-                        <th>Phone No</th>
-                        <th>Student Mobile</th>
-                        <th>Father Mobile</th>
-                        <th class="pe-4">Mother Mobile</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr>
-                        <td colspan="10" class="text-center py-5 text-muted">
-                            <div class="py-4">
-                                <i class="fas fa-info-circle fa-2x mb-3 text-info"></i>
-                                <p class="mb-0 fw-semibold">Please select college filters and click Search to display student data.</p>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
- *@
     <div class="row">
         <div class="col-12">
             <div class="modern-card shadow-sm p-4">
@@ -171,11 +169,196 @@
     </div>
 </div>
 
+<div id="printTableWrapper" style="display:none;">
+
+    <table class="print-custom-table">
+
+        <thead>
+            <tr>
+                <th>ID No</th>
+                <th>Student Name</th>
+                <th>Course</th>
+                <th>Batch</th>
+                <th>Father Name</th>
+                <th>Address</th>
+                <th>Student Mobile</th>
+                <th>Father Mobile</th>
+                <th>Mother Mobile</th>
+            </tr>
+        </thead>
+
+
+        <tbody id="printTableBody">
+        </tbody>
+
+    </table>
+
+</div>
+<div class="d-none d-print-block print-footer">
+
+    <span>
+        Library Management System
+    </span>
+
+    <span>
+        Page <span class="pageNumber"></span>
+    </span>
+
+</div>
+<style>
+
+    @@media print {
+
+
+        @@page {
+            size: A4 portrait;
+            margin: 12mm;
+        }
+
+
+        body {
+            background: white !important;
+            font-family: Arial, sans-serif;
+        }
+
+
+
+        .sidebar,
+        .top-navbar,
+        .page-header,
+        .modern-card,
+        .btn,
+        footer {
+            display: none !important;
+        }
+
+
+
+        #printReportHeader {
+            display: block !important;
+        }
+
+
+
+        .print-header h2 {
+            font-size: 26px;
+            margin-bottom: 5px;
+        }
+
+
+
+        .print-header p {
+            margin: 2px;
+            font-size: 14px;
+        }
+
+
+
+        .print-header h3 {
+            margin-top: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+        }
+
+
+
+        .print-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-top: 10px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+        }
+
+
+
+        #printTableWrapper {
+            display: block !important;
+        }
+
+
+
+        .print-custom-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 11px;
+        }
+
+
+
+            .print-custom-table th {
+                background: #eee !important;
+                color: #000;
+                font-weight: bold;
+                font-size:13px;
+            }
+
+
+
+            .print-custom-table th,
+            .print-custom-table td {
+                border: 1px solid #000;
+                padding: 5px;
+                text-align: left;
+            }
+        /* Page Break Control */
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+
+
+        thead {
+            display: table-header-group;
+        }
+
+
+
+        tfoot {
+            display: table-footer-group;
+        }
+    }
+    @@media print {
+
+
+    .print-footer{
+    position:fixed;
+    bottom:0;
+
+width:100%;
+
+font-size:11px;
+
+display:flex;
+justify-content:space-between;
+
+border-top:1px solid #999;
+
+padding-top:5px;
+
+}
+
+
+}
+</style>
+
 @section Scripts {
     <script>
-        const allowedColleges = @Html.Raw(JsonConvert.SerializeObject(allowedColleges));
-        let searchResults = [];
+              const allowedColleges = @Html.Raw(JsonConvert.SerializeObject(allowedColleges));
 
+        let state = {
+            students: [],
+            header: {
+                collegeName:"",
+                address1:"",
+                address2:"",
+                totalRecords:0
+            }
+        };
         $(document).ready(async function () {
             await loadColleges();
 
@@ -257,6 +440,10 @@
             $('#btnSearch').click(async function () {
                 await executeSearch();
             });
+
+             $("#btnPrint").click(function () {
+               printReport();
+             });
 
             // Export Excel Trigger (CSV Format)
             $('#btnExport').click(function () {
@@ -370,9 +557,27 @@
                     })
                 });
 
-                Swal.close();
-                searchResults = response || [];
-                renderTable();
+        Swal.close();
+
+
+        state.students = response.studentList || [];
+
+
+        state.header = {
+
+            collegeName: response.collegeName || "",
+
+            address1: response.address1 || "",
+
+            address2: response.address2 || "",
+
+            totalRecords: response.totalRecords || 0
+
+        };
+
+
+        renderTable();
+                
             } catch (err) {
                 Swal.close();
                 console.error("Search request failed:", err);
@@ -385,87 +590,250 @@
         }
 
         // ================= TABLE RENDER =================
-        function renderTable() {
-            const $tbody = $('#tableBody');
-            $tbody.empty();
-            
-            $('#recordCountDisplay').text(`${searchResults.length} Records Found`);
+            function renderTable(){
 
-            if (searchResults.length === 0) {
-                $tbody.append(`
-                    <tr>
-                        <td colspan="10" class="text-center py-5 text-muted">
-                            <div class="py-4">
-                                <i class="fas fa-search-minus fa-2x mb-3 text-muted"></i>
-                                <p class="mb-0 fw-semibold">No student records found matching the selected criteria.</p>
-                            </div>
-                        </td>
-                    </tr>
-                `);
-                $('#btnExport').prop('disabled', true);
-                return;
-            }
 
-            searchResults.forEach(student => {
-                $tbody.append(`
-                    <tr>
-                        <td class="ps-4 fw-medium text-primary">${student.idNo || '-'}</td>
-                        <td class="fw-semibold">${student.studentName || '-'}</td>
-                        <td>${student.course || '-'}</td>
-                        <td>${student.batch || '-'}</td>
-                        <td>${student.fatherName || '-'}</td>
-                        <td class="small text-wrap text-muted" style="max-width: 250px;">${student.permanentAddress || '-'}</td>
-                        <td>${student.phoneNo || '-'}</td>
-                        <td>${student.studentMobileNo || '-'}</td>
-                        <td>${student.fatherMobileNo || '-'}</td>
-                        <td class="pe-4">${student.motherMobileNo || '-'}</td>
-                    </tr>
-                `);
-            });
+        let tbody=$("#tableBody");
 
-            $('#btnExport').prop('disabled', false);
+        tbody.empty();
+
+
+        let students=state.students;
+
+
+        $("#recordCountDisplay")
+        .text(`${students.length} Records Found`);
+
+
+
+        if(students.length===0){
+
+
+        tbody.html(`
+
+        <tr>
+
+        <td colspan="10"
+        class="text-center py-5">
+
+        No Records Found
+
+        </td>
+
+        </tr>
+
+        `);
+
+
+        $("#btnPrint,#btnExport")
+        .prop("disabled",true);
+
+
+        return;
+
         }
+
+
+
+
+        students.forEach(s=>{
+
+
+        tbody.append(`
+
+        <tr>
+
+        <td>${s.idNo ?? '-'}</td>
+
+        <td>${s.studentName ?? '-'}</td>
+
+        <td>${s.course ?? '-'}</td>
+
+        <td>${s.batch ?? '-'}</td>
+
+        <td>${s.fatherName ?? '-'}</td>
+
+        <td>${s.permanentAddress ?? '-'}</td>
+
+        <td>${s.phoneNo ?? '-'}</td>
+
+        <td>${s.studentMobileNo ?? '-'}</td>
+
+        <td>${s.fatherMobileNo ?? '-'}</td>
+
+        <td>${s.motherMobileNo ?? '-'}</td>
+
+
+        </tr>
+
+
+        `);
+
+
+        });
+
+
+
+        $("#btnPrint,#btnExport")
+        .prop("disabled",false);
+
+
+        }
+
 
         // ================= EXPORT EXCEL (CSV DOWNLOAD) =================
         function exportToExcel() {
-            if (searchResults.length === 0) return;
 
-            let csvContent = "\uFEFF"; // UTF-8 BOM
-            // CSV Headers
-            const headers = ["ID No", "Student Name", "Course", "Batch", "Father's Name", "Permanent Address", "Phone No", "Student Mobile", "Father Mobile", "Mother Mobile"];
-            csvContent += headers.map(h => `"${h}"`).join(",") + "\r\n";
-            
-            // CSV Rows
-            searchResults.forEach(row => {
-                const values = [
-                    row.idNo || "",
-                    row.studentName || "",
-                    row.course || "",
-                    row.batch || "",
-                    row.fatherName || "",
-                    row.permanentAddress || "",
-                    row.phoneNo || "",
-                    row.studentMobileNo || "",
-                    row.fatherMobileNo || "",
-                    row.motherMobileNo || ""
-                ].map(val => `"${val.toString().replace(/"/g, '""')}"`);
-                csvContent += values.join(",") + "\r\n";
+            if(state.students.length===0)
+                return;
+
+
+            let csvContent = "\uFEFF";
+
+
+            const headers=[
+                "ID No",
+                "Student Name",
+                "Course",
+                "Batch",
+                "Father Name",
+                "Permanent Address",
+                "Phone No",
+                "Student Mobile",
+                "Father Mobile",
+                "Mother Mobile"
+            ];
+
+
+            csvContent += headers.map(x=>`"${x}"`).join(",")+"\r\n";
+
+
+            state.students.forEach(row=>{
+
+                let values=[
+                    row.idNo,
+                    row.studentName,
+                    row.course,
+                    row.batch,
+                    row.fatherName,
+                    row.permanentAddress,
+                    row.phoneNo,
+                    row.studentMobileNo,
+                    row.fatherMobileNo,
+                    row.motherMobileNo
+                ];
+
+
+                csvContent += values
+                .map(v=>`"${(v??"").toString().replace(/"/g,'""')}"`)
+                .join(",")+"\r\n";
+
             });
 
-            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            
-            const college = getSelectedCollege();
-            const fileName = `StudentReport_${college.replace(/[^a-z0-9]/gi, '_')}.csv`;
-            
-            link.setAttribute("download", fileName);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
 
+
+            let blob=new Blob(
+                [csvContent],
+                {
+                    type:"text/csv;charset=utf-8;"
+                }
+            );
+
+
+            let url=URL.createObjectURL(blob);
+
+
+            let a=document.createElement("a");
+
+            a.href=url;
+
+            a.download=
+            `StudentReport_${getSelectedCollege()}.csv`;
+
+
+            a.click();
+
+
+            URL.revokeObjectURL(url);
+
+        }
+        function printReport(){
+
+
+        if(state.students.length===0)
+        return;
+
+
+
+        $("#printCollegeName")
+        .text(state.header.collegeName);
+
+
+
+        $("#printAddress1")
+        .text(state.header.address1);
+
+
+
+        $("#printAddress2")
+        .text(state.header.address2);
+
+
+
+        $("#printRecordCount")
+        .text(
+        `${state.header.totalRecords} Records Found`
+        );
+
+
+
+        let tbody=$("#printTableBody");
+
+
+        tbody.empty();
+
+
+
+        state.students.forEach(s=>{
+
+
+        tbody.append(`
+
+        <tr>
+
+        <td>${s.idNo ?? ''}</td>
+
+        <td>${s.studentName ?? ''}</td>
+
+        <td>${s.course ?? ''}</td>
+
+        <td>${s.batch ?? ''}</td>
+
+        <td>${s.fatherName ?? ''}</td>
+
+        <td>${s.permanentAddress ?? ''}</td>
+
+        <td>${s.studentMobileNo ?? ''}</td>
+
+        <td>${s.fatherMobileNo ?? ''}</td>
+
+        <td>${s.motherMobileNo ?? ''}</td>
+
+        </tr>
+
+        `);
+
+
+        });
+
+
+
+        window.print();
+
+
+        }
+    
+                    
         // ================= DYNAMIC SPINNER =================
         function showLoader() {
             Swal.fire({

@@ -60,7 +60,7 @@
                         </span>
                     </div>
  *@
-                    <div class="user-profile d-flex align-items-center gap-2 ms-2">
+                    <a asp-controller="Profile" asp-action="Index" class="user-profile d-flex align-items-center gap-2 ms-2 text-decoration-none" style="cursor: pointer; color: var(--text-main);">
                         <div class="text-end d-none d-sm-block">
                             <div class="fw-semibold small">@Context.Session.GetString("UserName")</div>
                             <div class="text-muted" style="font-size: 0.7rem;">Administrator</div>
@@ -68,7 +68,7 @@
                         <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; font-weight: 600; border: 2px solid var(--border-color);">
                             @Context.Session.GetString("UserName")?[0]
                         </div>
-                    </div>
+                    </a>
                 </div>
             </header>
 

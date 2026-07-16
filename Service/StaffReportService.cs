@@ -67,42 +67,45 @@ namespace lib.Service
 
             response.TotalRecords = response.StaffList.Count;
 
-            // Equivalent of VB functions
-            //response.Address1 = await GetCollegeAddress1(con, request.CollegeName);
+            response.Address1 = await GetCollegeAddress1(con, request.CollegeName);
 
-            //response.Address2 = await GetCollegeAddress2(con, request.CollegeName);
+            response.Address2 = await GetCollegeAddress2(con, request.CollegeName);
 
             return response;
         }
 
-        private async Task<string> GetCollegeAddress1(SqlConnection con, string college)
+        private async Task<string> GetCollegeAddress1(SqlConnection con, string collegeName)
         {
-            string sql = @"SELECT Address1
-                           FROM CollegeMaster
-                           WHERE CollegeName=@College";
+            string sql = @"SELECT AddressLine1
+                   FROM MasterCollege
+                   WHERE CollegeName = @CollegeName";
 
-            SqlCommand cmd = new(sql, con);
+            using SqlCommand cmd = new(sql, con);
 
-            cmd.Parameters.AddWithValue("@College", college);
+            cmd.Parameters.AddWithValue("@CollegeName", collegeName);
 
-            object obj = await cmd.ExecuteScalarAsync();
+            object result = await cmd.ExecuteScalarAsync();
 
-            return obj?.ToString() ?? "";
+            return result == DBNull.Value || result == null
+                ? ""
+                : result.ToString();
         }
 
-        private async Task<string> GetCollegeAddress2(SqlConnection con, string college)
+        private async Task<string> GetCollegeAddress2(SqlConnection con, string collegeName)
         {
-            string sql = @"SELECT Address2
-                           FROM CollegeMaster
-                           WHERE CollegeName=@College";
+            string sql = @"SELECT AddressLine2
+                   FROM MasterCollege
+                   WHERE CollegeName = @CollegeName";
 
-            SqlCommand cmd = new(sql, con);
+            using SqlCommand cmd = new(sql, con);
 
-            cmd.Parameters.AddWithValue("@College", college);
+            cmd.Parameters.AddWithValue("@CollegeName", collegeName);
 
-            object obj = await cmd.ExecuteScalarAsync();
+            object result = await cmd.ExecuteScalarAsync();
 
-            return obj?.ToString() ?? "";
+            return result == DBNull.Value || result == null
+                ? ""
+                : result.ToString();
         }
     }
 }

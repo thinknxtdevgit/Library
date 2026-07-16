@@ -1,0 +1,383 @@
+@model lib.DtoModel.UserProfileDto.UserProfileDto
+
+@{
+    ViewData["Title"] = "User Profile";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@functions {
+    public string FormatDate(string dateStr)
+    {
+        if (string.IsNullOrWhiteSpace(dateStr)) return "N/A";
+        if (DateTime.TryParse(dateStr, out DateTime dt))
+        {
+            return dt.ToString("dd-MMM-yyyy");
+        }
+        return dateStr;
+    }
+
+    public string Fallback(string val)
+    {
+        return string.IsNullOrWhiteSpace(val) ? "N/A" : val;
+    }
+}
+
+<style>
+    .profile-hero {
+        background: linear-gradient(135deg, var(--bg-sidebar) 0%, #1e293b 100%);
+        border-radius: var(--radius-lg);
+        color: #ffffff;
+        padding: 2.5rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: var(--shadow);
+    }
+    
+    .profile-hero::after {
+        content: '';
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: var(--primary-glow);
+        border-radius: 50%;
+        top: -100px;
+        right: -100px;
+        filter: blur(80px);
+        opacity: 0.3;
+        pointer-events: none;
+    }
+
+    .profile-avatar-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: var(--radius-lg);
+        border: 4px solid rgba(255, 255, 255, 0.15);
+        background: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: 700;
+        color: #ffffff;
+        box-shadow: var(--shadow-lg);
+    }
+
+    .info-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: var(--text-main);
+    }
+
+    .na-badge {
+        font-size: 0.75rem;
+        font-weight: 600;
+        background: rgba(100, 116, 139, 0.1);
+        color: var(--text-muted);
+        padding: 0.15rem 0.5rem;
+        border-radius: var(--radius-sm);
+    }
+    
+    .profile-section-card {
+        border-left: 4px solid var(--primary);
+        transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+    }
+    
+    .profile-section-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+</style>
+
+<div class="fade-in">
+    <!-- Header Hero Row -->
+    <div class="profile-hero mb-4">
+        <div class="row align-items-center g-4">
+            <div class="col-md-auto text-center text-md-start">
+                <div class="profile-avatar-wrapper">
+                    @if (!string.IsNullOrEmpty(Model.Snap))
+                    {
+                        <img src="@Model.Snap" alt="Profile Snap" class="profile-avatar object-fit-cover" />
+                    }
+                    else
+                    {
+                        <div class="profile-avatar">
+                            @(string.IsNullOrEmpty(Model.Name) ? "?" : Model.Name[0].ToString().ToUpper())
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="col-md text-center text-md-start">
+                <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2 flex-wrap mb-2">
+                    <span class="badge-modern badge-modern-primary"><i class="fas fa-user-shield me-1"></i> @Model.LoginType</span>
+                    <span class="badge profile-id-badge rounded-pill px-3 py-2">
+                        ID: @Model.IdNo
+                    </span>
+                </div>
+                <h2 class="fw-bold mb-1 text-white">@Fallback(Model.Name)</h2>
+                <p class="mb-2 text-white text-opacity-80 fw-medium">
+                    <i class="fas fa-briefcase me-2 text-info"></i> @Fallback(Model.Designation) &bull; @Fallback(Model.Department)
+                </p>
+                <p class="mb-0 text-white text-opacity-70 small">
+                    <i class="fas fa-university me-2 text-warning"></i> @Fallback(Model.CollegeName)
+                </p>
+            </div>
+            <div class="col-md-auto text-center text-md-end mt-4 mt-md-0">
+                <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-end">
+                    <button class="btn btn-modern btn-light btn-auto-width shadow-sm text-dark fw-semibold" onclick="editProfileAlert()">
+                        <i class="fas fa-user-edit me-2 text-primary"></i> Edit Profile
+                    </button>
+                    <button class="btn btn-modern btn-secondary-modern btn-auto-width border border-white border-opacity-20 text-white fw-semibold" onclick="changePasswordAlert()">
+                        <i class="fas fa-key me-2 text-warning"></i> Passwords
+                    </button>
+                    <a class="btn btn-modern btn-danger-modern btn-auto-width fw-semibold text-white shadow-glow" asp-controller="Login" asp-action="Logout">
+                        <i class="fas fa-sign-out-alt me-2"></i> Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Sections Grid -->
+    <div class="row g-4">
+        <!-- Personal Details -->
+        <div class="col-md-6">
+            <div class="modern-card profile-section-card h-100">
+                <h5 class="fw-bold mb-4 border-bottom pb-3 text-primary">
+                    <i class="fas fa-user me-2"></i> Personal Details
+                </h5>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="info-label">Father's Name</div>
+                        <div class="info-value">@Fallback(Model.FatherName)</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Mother's Name</div>
+                        <div class="info-value">
+                            @if (string.IsNullOrWhiteSpace(Model.MotherName))
+                            {
+                                <span class="na-badge">N/A</span>
+                            }
+                            else
+                            {
+                                @Model.MotherName
+                            }
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Gender</div>
+                        <div class="info-value">@Fallback(Model.Gender)</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Date of Birth</div>
+                        <div class="info-value">@FormatDate(Model.DateOfBirth)</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Blood Group</div>
+                        <div class="info-value">
+                            @if (string.IsNullOrWhiteSpace(Model.BloodGroup))
+                            {
+                                <span class="na-badge">N/A</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger bg-opacity-10 text-danger rounded px-2 py-1 fw-bold">@Model.BloodGroup</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Qualification</div>
+                        <div class="info-value">
+                            @if (string.IsNullOrWhiteSpace(Model.Qualification))
+                            {
+                                <span class="na-badge">N/A</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info bg-opacity-10 text-info rounded px-2 py-1 fw-bold">@Model.Qualification</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job & Staff Details -->
+        <div class="col-md-6">
+            <div class="modern-card profile-section-card h-100" style="border-left-color: var(--success);">
+                <h5 class="fw-bold mb-4 border-bottom pb-3 text-success">
+                    <i class="fas fa-id-badge me-2"></i> Job & Staff Details
+                </h5>
+                <div class="row g-3">
+                    <div class="col-sm-6">
+                        <div class="info-label">Staff Category / Type</div>
+                        <div class="info-value">@Fallback(Model.Type)</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Date of Joining</div>
+                        <div class="info-value">@FormatDate(Model.DateOfJoining)</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Shift Name</div>
+                        <div class="info-value">
+                            @if (string.IsNullOrWhiteSpace(Model.ShiftName))
+                            {
+                                <span class="na-badge">N/A</span>
+                            }
+                            else
+                            {
+                                @Model.ShiftName
+                            }
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Card ID</div>
+                        <div class="info-value">
+                            @if (string.IsNullOrWhiteSpace(Model.CardId))
+                            {
+                                <span class="na-badge">N/A</span>
+                            }
+                            else
+                            {
+                                @Model.CardId
+                            }
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Designation</div>
+                        <div class="info-value">@Fallback(Model.Designation)</div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Department</div>
+                        <div class="info-value">@Fallback(Model.Department)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Details -->
+        <div class="col-md-6">
+            <div class="modern-card profile-section-card h-100" style="border-left-color: var(--warning);">
+                <h5 class="fw-bold mb-4 border-bottom pb-3 text-warning">
+                    <i class="fas fa-envelope me-2"></i> Contact Details
+                </h5>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="info-label">Email ID</div>
+                        <div class="info-value text-break">
+                            @if (string.IsNullOrWhiteSpace(Model.EmailId))
+                            {
+                                <span class="na-badge">N/A</span>
+                            }
+                            else
+                            {
+                                <a href="mailto:@Model.EmailId" class="text-decoration-none text-primary fw-semibold"><i class="far fa-envelope me-1"></i> @Model.EmailId</a>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Mobile Number</div>
+                        <div class="info-value">
+                            @if (string.IsNullOrWhiteSpace(Model.MobileNo))
+                            {
+                                <span class="na-badge">N/A</span>
+                            }
+                            else
+                            {
+                                <a href="tel:@Model.MobileNo" class="text-decoration-none text-success fw-semibold"><i class="fas fa-phone-alt me-1"></i> @Model.MobileNo</a>
+                            }
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="info-label">Alternate Contact</div>
+                        <div class="info-value">
+                            @if (string.IsNullOrWhiteSpace(Model.ContactNo))
+                            {
+                                <span class="na-badge">N/A</span>
+                            }
+                            else
+                            {
+                                <a href="tel:@Model.ContactNo" class="text-decoration-none text-secondary fw-semibold"><i class="fas fa-tty me-1"></i> @Model.ContactNo</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Address Details -->
+        <div class="col-md-6">
+            <div class="modern-card profile-section-card h-100" style="border-left-color: var(--info);">
+                <h5 class="fw-bold mb-4 border-bottom pb-3 text-info">
+                    <i class="fas fa-map-marked-alt me-2"></i> Address Details
+                </h5>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="info-label">Correspondence Address</div>
+                        <div class="info-value">
+                            <i class="fas fa-map-marker-alt text-muted me-1"></i> @Fallback(Model.CorrespondanceAddress)
+                        </div>
+                    </div>
+                    <div class="col-12 mt-3">
+                        <div class="info-label">Permanent Address</div>
+                        <div class="info-value">
+                            <i class="fas fa-home text-muted me-1"></i> @Fallback(Model.PermanentAddress)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function editProfileAlert() {
+            Swal.fire({
+                title: 'Edit Profile Info',
+                text: 'Profile edits are managed by the Administrator. Please contact HR or IT Department to update your records.',
+                icon: 'info',
+                confirmButtonColor: 'var(--primary)'
+            });
+        }
+
+        function changePasswordAlert() {
+            Swal.fire({
+                title: 'Change Password',
+                text: 'Are you sure you want to change your login password?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: 'var(--primary)',
+                cancelButtonColor: 'var(--text-muted)',
+                confirmButtonText: 'Yes, proceed',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Notice',
+                        text: 'Redirecting to self-service password settings...',
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.href = '@Url.Action("Index", "Settings")';
+                    });
+                }
+            });
+        }
+    </script>
+}

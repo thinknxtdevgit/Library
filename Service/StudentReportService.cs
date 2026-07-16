@@ -77,16 +77,15 @@ namespace lib.Service
             return list;
         }
 
-        public async Task<List<StudentReportDto>> SearchAsync(StudentReportRequestDto request)
+        public async Task<StudentReportResponseDto> SearchAsync(StudentReportRequestDto request)
         {
             List<StudentReportDto> list = new();
 
             using SqlConnection con = new(_connectionString);
-
             await con.OpenAsync();
 
             string sql = @"
-            select
+        SELECT
             CollegeName,
             IDNo,
             StudentName,
@@ -98,22 +97,18 @@ namespace lib.Service
             StudentMobileNo,
             FatherMobileNo,
             MotherMobileNo
-            from Admissions
-            where CollegeName=@College";
+        FROM Admissions
+        WHERE CollegeName=@College";
 
             if (request.Course != "Select")
-            {
-                sql += " and Course=@Course";
-            }
+                sql += " AND Course=@Course";
 
             if (request.Batch != "Select")
-            {
-                sql += " and Batch=@Batch";
-            }
+                sql += " AND Batch=@Batch";
 
-            sql += " order by IDNo";
+            sql += " ORDER BY IDNo";
 
-            SqlCommand cmd = new(sql, con);
+            using SqlCommand cmd = new(sql, con);
 
             cmd.Parameters.AddWithValue("@College", request.CollegeName);
 
@@ -123,37 +118,55 @@ namespace lib.Service
             if (request.Batch != "Select")
                 cmd.Parameters.AddWithValue("@Batch", request.Batch);
 
-            SqlDataReader dr = await cmd.ExecuteReaderAsync();
+            using SqlDataReader dr = await cmd.ExecuteReaderAsync();
 
             while (await dr.ReadAsync())
             {
                 list.Add(new StudentReportDto
                 {
-                    CollegeName = dr["CollegeName"].ToString(),
-
-                    IDNo = dr["IDNo"].ToString(),
-
-                    StudentName = dr["StudentName"].ToString(),
-
-                    Course = dr["Course"].ToString(),
-
-                    Batch = dr["Batch"].ToString(),
-
-                    FatherName = dr["FatherName"].ToString(),
-
-                    PermanentAddress = dr["PermanentAddress"].ToString(),
-
-                    PhoneNo = dr["PhoneNo"].ToString(),
-
-                    StudentMobileNo = dr["StudentMobileNo"].ToString(),
-
-                    FatherMobileNo = dr["FatherMobileNo"].ToString(),
-
-                    MotherMobileNo = dr["MotherMobileNo"].ToString()
+                    CollegeName = dr["CollegeName"]?.ToString(),
+                    IDNo = dr["IDNo"]?.ToString(),
+                    StudentName = dr["StudentName"]?.ToString(),
+                    Course = dr["Course"]?.ToString(),
+                    Batch = dr["Batch"]?.ToString(),
+                    FatherName = dr["FatherName"]?.ToString(),
+                    PermanentAddress = dr["PermanentAddress"]?.ToString(),
+                    PhoneNo = dr["PhoneNo"]?.ToString(),
+                    StudentMobileNo = dr["StudentMobileNo"]?.ToString(),
+                    FatherMobileNo = dr["FatherMobileNo"]?.ToString(),
+                    MotherMobileNo = dr["MotherMobileNo"]?.ToString()
                 });
             }
 
-            return list;
+            await dr.CloseAsync();
+
+            // Fetch College Address
+            string address1 = "";
+            string address2 = "";
+
+            using SqlCommand addressCmd = new(@"
+        SELECT AddressLine1, AddressLine2
+        FROM MasterCollege
+        WHERE CollegeName=@CollegeName", con);
+
+            addressCmd.Parameters.AddWithValue("@CollegeName", request.CollegeName);
+
+            using SqlDataReader addressReader = await addressCmd.ExecuteReaderAsync();
+
+            if (await addressReader.ReadAsync())
+            {
+                address1 = addressReader["AddressLine1"]?.ToString() ?? "";
+                address2 = addressReader["AddressLine2"]?.ToString() ?? "";
+            }
+
+            return new StudentReportResponseDto
+            {
+                CollegeName = request.CollegeName,
+                Address1 = address1,
+                Address2 = address2,
+                TotalRecords = list.Count,
+                StudentList = list
+            };
         }
     }
 }

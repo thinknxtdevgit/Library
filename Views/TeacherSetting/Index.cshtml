@@ -59,18 +59,33 @@
                 <!-- Desktop/Tablet Table View -->
                 <div class="table-responsive-modern d-none d-md-block" id="desktopView">
                     <table class="table custom-table mb-0" id="resultsTable">
-                        <thead>
+                       @*  <thead>
                             <tr>
                                 <th class="ps-4">ID No</th>
                                 <th>Name</th>
                                 <th>Designation</th>
                                 <th>Father Name</th>
                                 <th>Permanent Address</th>
-                                <th>Contact & Mobile</th>
+                                <th>Mobile No</th>
+                                <th>Contact No</th>
                                 <th>Email</th>
                                 <th class="pe-4 text-center">Actions</th>
                             </tr>
+                        </thead> *@
+                        <thead>
+                            <tr>
+                                <th class="text-center fw-bold" style="width:8%;">ID No</th>
+                                <th class="text-center fw-bold" style="width:15%;">Name</th>
+                                <th class="text-center fw-bold" style="width:15%;">Designation</th>
+                                <th class="text-center fw-bold" style="width:15%;">Father Name</th>
+                                <th class="text-center fw-bold" style="width:20%;">Permanent Address</th>
+                                <th class="text-center fw-bold" style="width:10%;">Mobile No</th>
+                                <th class="text-center fw-bold" style="width:10%;">Contact No</th>
+                                <th class="text-center fw-bold" style="width:15%;">Email</th>
+                                <th class="text-center fw-bold" style="width:12%;">Actions</th>
+                            </tr>
                         </thead>
+                    
                         <tbody id="tableBody">
                             <tr>
                                 <td colspan="8" class="text-center py-5 text-muted">
@@ -316,10 +331,8 @@
                         <td class="fw-semibold text-primary">${teacher.designation || '-'}</td>
                         <td>${teacher.fatherName || '-'}</td>
                         <td class="small text-wrap text-muted" style="max-width: 200px;">${teacher.permanentAddress || '-'}</td>
-                        <td>
-                            <div class="small text-main"><i class="fas fa-mobile-alt me-1 text-muted"></i> ${teacher.mobileNo || '-'}</div>
-                            <div class="small text-muted"><i class="fas fa-phone me-1 text-muted"></i> ${teacher.contactNo || '-'}</div>
-                        </td>
+                        <td><i class="fas fa-mobile-alt me-1 text-muted"></i>${teacher.mobileNo || '-'}</td>
+                        <td><i class="fas fa-phone me-1 text-muted"></i>${teacher.contactNo || '-'}</td>
                         <td class="small">${teacher.eMailID || '-'}</td>
                         <td class="pe-4 text-center">
                             <button class="btn btn-sm btn-outline-primary" style="border-radius:var(--radius-sm);" onclick="openModalForEdit(${teacher.idNo})">

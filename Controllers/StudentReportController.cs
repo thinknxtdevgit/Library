@@ -35,9 +35,8 @@ namespace lib.Controllers
         {
             return Json(await _service.GetBatchAsync(college, course));
         }
-
         [HttpPost("Search")]
-        public async Task<IActionResult> Search([FromBody]StudentReportRequestDto request)
+        public async Task<IActionResult> Search([FromBody] StudentReportRequestDto request)
         {
             var result = await _service.SearchAsync(request);
 

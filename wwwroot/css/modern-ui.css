@@ -668,14 +668,15 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-secondary-modern {
-    background: var(--bg-card);
-    border-color: var(--border-color);
-    color: var(--text-main);
+    background: rgba(255, 255, 255, .15);
+    border: 1px solid rgba(255, 255, 255, .2);
+    color: #0f0f11 !important;
 }
+
 .btn-secondary-modern:hover {
-    background: var(--border-color);
-    border-color: var(--border-hover);
-}
+        background: rgba(255,255,255,.25);
+        color: #fff !important;
+ }
 
 .btn-danger-modern {
     background: linear-gradient(135deg, var(--danger) 0%, #DC2626 100%);
@@ -808,6 +809,7 @@ h1, h2, h3, h4, h5, h6 {
     .custom-table th:last-child,
     .custom-table td:last-child {
         border-right: none;
+        min-width: 100px;
     }
 
     /* DATE */
@@ -829,7 +831,7 @@ h1, h2, h3, h4, h5, h6 {
     /* NAME */
     .custom-table td:nth-child(3),
     .custom-table th:nth-child(3) {
-        min-width: 180px;
+        min-width: 215px;
     }
 
     /* DISCIPLINE */
@@ -842,20 +844,20 @@ h1, h2, h3, h4, h5, h6 {
     /* ACCESSION */
     .custom-table td:nth-child(5),
     .custom-table th:nth-child(5) {
-        min-width: 120px;
+        min-width: 200px;
         white-space: nowrap;
     }
 
     /* TITLE */
     .custom-table td:nth-child(6),
     .custom-table th:nth-child(6) {
-        min-width: 190px;
+        min-width: 100px;
     }
 
     /* AUTHOR */
     .custom-table td:nth-child(7),
     .custom-table th:nth-child(7) {
-        min-width: 220px;
+        min-width: 150px;
     }
 
     /* TYPE */
@@ -1387,6 +1389,12 @@ h1, h2, h3, h4, h5, h6 {
         width: 120px !important;
         min-width: 120px !important;
     }
-    
-    
+.profile-id-badge {
+    background: rgba(255,255,255,.18);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
 

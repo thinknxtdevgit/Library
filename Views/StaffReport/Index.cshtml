@@ -4,15 +4,30 @@
 }
 
 <!-- Print-Only Header Block -->
-<div class="d-none d-print-block w-100 mb-4" id="printReportHeader">
+<div class="d-none d-print-block print-header" id="printReportHeader">
+
     <div class="text-center">
-        <h2 class="fw-bold mb-1" id="printCollegeName">College Name</h2>
-        <h4 class="text-secondary mb-2">Staff Directory Report</h4>
-        <div class="d-flex justify-content-between border-bottom pb-2 mt-3 text-muted small">
-            <span>Generated on: @DateTime.Now.ToString("dd-MMM-yyyy hh:mm tt")</span>
-            <span id="printRecordCount">0 Records Found</span>
+
+        <h2 id="printCollegeName"></h2>
+
+        <p id="printAddress1"></p>
+        <p id="printAddress2"></p>
+
+        <h3>Staff Report</h3>
+
+        <div class="print-info">
+            <span>
+                Generated :
+                @DateTime.Now.ToString("dd-MMM-yyyy hh:mm tt")
+            </span>
+
+            <span id="printRecordCount">
+                0 Records
+            </span>
         </div>
+
     </div>
+
 </div>
 
 <div class="fade-in d-print-none">
@@ -107,112 +122,151 @@
     </div>
 </div>
 
+
 <!-- Print Stylesheet -->
 <style>
     @@media print {
-        /* General page configuration */
+
         @@page {
             size: A4 portrait;
-            margin: 15mm 10mm 15mm 10mm;
+            margin: 12mm;
         }
 
-        /* Hide all UI layout components */
-        .app-container,
+        body {
+            background: #fff !important;
+            font-family: Arial,sans-serif;
+            font-size: 12px;
+        }
+
         .sidebar,
         .top-navbar,
-        .main-content,
-        .content-body,
-        footer,
-        .d-print-none,
         .page-header,
         .modern-card,
         .btn,
-        #toggleSidebar,
-        .sidebar-overlay {
+        footer {
             display: none !important;
         }
 
-        /* Reset body visibility & typography for printer */
-        body {
-            visibility: visible !important;
-            background: #fff !important;
-            color: #000 !important;
-            font-family: Arial, Helvetica, sans-serif !important;
-            font-size: 11px !important;
-            margin: 0 !important;
-            padding: 0 !important;
-        }
-
-        /* Explicitly show the print-only container and place it at root */
         #printReportHeader {
             display: block !important;
-            margin-bottom: 20px !important;
         }
 
-        /* Format print table for perfect layout */
-        .print-table-container {
+        .print-header h2 {
+            font-size: 22px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .print-header p {
+            margin: 2px;
+            font-size: 13px;
+        }
+
+        .print-header h3 {
+            margin-top: 12px;
+            font-size: 18px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5px;
+        }
+
+        .print-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            border-bottom: 1px solid #000;
+            padding-bottom: 5px;
+            font-size: 12px;
+        }
+
+        #printTableWrapper {
             display: block !important;
-            width: 100% !important;
+            margin-top: 15px;
         }
 
         .print-custom-table {
-            width: 100% !important;
-            border-collapse: collapse !important;
-            margin-top: 10px !important;
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            font-size: 11px;
         }
 
-        .print-custom-table th {
-            border: 1px solid #333 !important;
-            background-color: #f2f2f2 !important;
-            color: #000 !important;
-            font-size: 10px !important;
-            font-weight: bold !important;
-            text-transform: uppercase !important;
-            padding: 8px 6px !important;
-            text-align: left !important;
+            .print-custom-table th {
+                background: #eee !important;
+                color: #000;
+                font-weight: bold;
+                text-align: center;
+            }
+
+            .print-custom-table th,
+            .print-custom-table td {
+                border: 1px solid #000;
+                padding: 5px;
+                vertical-align: top;
+                word-wrap: break-word;
+            }
+
+        thead {
+            display: table-header-group;
         }
 
-        .print-custom-table td {
-            border: 1px solid #333 !important;
-            font-size: 10px !important;
-            padding: 8px 6px !important;
-            color: #000 !important;
-            background: transparent !important;
-            vertical-align: top !important;
-            word-wrap: break-word !important;
-        }
-
-        /* Control page breaks */
         tr {
-            page-break-inside: avoid !important;
+            page-break-inside: avoid;
+        }
+
+        .print-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            border-top: 1px solid #999;
+            padding-top: 5px;
+            font-size: 10px;
+            display: flex;
+            justify-content: space-between;
         }
     }
 </style>
 
 <!-- Hidden print helper container to render native tables at print-time -->
-<div class="d-none d-print-block print-table-container" id="printTableWrapper">
+<div id="printTableWrapper" style="display:none;">
     <table class="print-custom-table">
+
         <thead>
+
             <tr>
-                <th style="width: 10%;">ID No</th>
-                <th style="width: 20%;">Staff Name</th>
-                <th style="width: 15%;">Designation</th>
-                <th style="width: 15%;">Department</th>
-                <th style="width: 24%;">Permanent Address</th>
-                <th style="width: 8%;">Contact No</th>
-                <th style="width: 8%;">Mobile No</th>
+
+                <th style="width:10%">ID No</th>
+                <th style="width:20%">Staff Name</th>
+                <th style="width:15%">Designation</th>
+                <th style="width:15%">Department</th>
+                <th style="width:25%">Permanent Address</th>
+                <th style="width:7%">Contact</th>
+                <th style="width:8%">Mobile</th>
+
             </tr>
+
         </thead>
-        <tbody id="printTableBody">
-            <!-- Programmatically populated when printing -->
-        </tbody>
+
+        <tbody id="printTableBody"></tbody>
+
     </table>
+</div>
+<div class="d-none d-print-block print-footer">
+
+    <span>
+        Library Management System
+    </span>
+
+    <span>
+        Page <span class="pageNumber"></span>
+    </span>
+
 </div>
 
 @section Scripts {
     <script>
-        let searchResults = [];
-
+           let searchResults = [];
+            let reportData = {};
         $(document).ready(async function () {
             await loadColleges();
 
@@ -309,7 +363,8 @@
 
                 Swal.close();
                 // Response matches StaffReportResponseDto which has StaffList
-                searchResults = response?.staffList || [];
+                reportData = response;
+                searchResults = response.staffList || [];
                 renderResults();
             } catch (err) {
                 Swal.close();
@@ -338,8 +393,16 @@
             $('#recordCountDisplay').text(`${count} Records Found`);
             
             // Set values for print header
-            $('#printRecordCount').text(`${count} Records Found`);
-            $('#printCollegeName').text(getSelectedCollege() || 'Staff Directory');
+                if (reportData) {
+
+                    $("#printCollegeName").text(reportData.collegeName || "");
+
+                    $("#printAddress1").text(reportData.address1 || "");
+
+                    $("#printAddress2").text(reportData.address2 || "");
+
+                    $("#printRecordCount").text((reportData.totalRecords || 0) + " Records Found");
+                }
 
             if (count === 0) {
                 $tbody.append(`
@@ -442,30 +505,45 @@
         }
 
         // ================= PRINTING LAYOUT POPULATION =================
-        function triggerPrint() {
-            if (searchResults.length === 0) return;
+         function triggerPrint() {
 
-            const $printBody = $('#printTableBody');
-            $printBody.empty();
+                    if (searchResults.length == 0)
+                        return;
+
+                    $("#printCollegeName").text(reportData.collegeName || "");
+
+                    $("#printAddress1").text(reportData.address1 || "");
+
+                    $("#printAddress2").text(reportData.address2 || "");
+
+                    $("#printRecordCount").text((reportData.totalRecords || 0) + " Records Found");
+
+                    let body = $("#printTableBody");
+
+                    body.empty();
 
             searchResults.forEach(staff => {
-                $printBody.append(`
-                    <tr>
-                        <td>${staff.idNo || '-'}</td>
-                        <td style="font-weight: bold;">${staff.name || '-'}</td>
-                        <td>${staff.designation || '-'}</td>
-                        <td>${staff.department || '-'}</td>
-                        <td>${staff.permanentAddress || '-'}</td>
-                        <td>${staff.contactNo || '-'}</td>
-                        <td>${staff.mobileNo || '-'}</td>
+
+               body.append(`
+                  <tr>
+                      <td>${staff.idNo ?? ""}</td>
+                       <td>${staff.name ?? ""}</td>
+                       <td>${staff.designation ?? ""}</td>
+                      <td>${staff.department ?? ""}</td>
+                      <td>${staff.permanentAddress ?? ""}</td>
+                       <td>${staff.contactNo ?? ""}</td>
+                       <td>${staff.mobileNo ?? ""}</td>
                     </tr>
-                `);
+               `);
+
             });
 
-            // Call native browser print
-            window.print();
-        }
+                    $("#printTableWrapper").show();
 
+                    window.print();
+
+                    $("#printTableWrapper").hide();
+                }
         // ================= DYNAMIC SPINNER =================
         function showLoader() {
             Swal.fire({

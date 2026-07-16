@@ -3,26 +3,70 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<style>
+    .border-end-md {
+        border-right: none;
+    }
+    @@media (min-width: 768px) {
+        .border-end-md {
+            border-right: 1px solid var(--border-color) !important;
+        }
+    }
+    
+    .form-input-modern:focus {
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 4px var(--primary-glow) !important;
+    }
+    
+    .input-group:focus-within .input-group-text {
+        border-color: var(--primary) !important;
+        color: var(--primary) !important;
+    }
+    
+    .input-group:focus-within .form-input-modern {
+        border-color: var(--primary) !important;
+    }
+    
+    .input-group-text {
+        transition: border-color var(--transition-fast), color var(--transition-fast);
+        border: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: transparent;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+</style>
+
 <div class="fade-in">
-    <!-- ========== ADDED: Hidden state fields ========== -->
+    <!-- Hidden state fields -->
     <input type="hidden" id="hdnCollegeId" value="0" />
     <input type="hidden" id="hdnAccessionId" value="0" />
     <input type="hidden" id="hdnEditMode" value="false" />
 
-    <div class="page-header mt-2 mb-4">
+    <!-- Page Header & Global Controls -->
+    <div class="page-header mt-2 mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <h2 class="fw-bold mb-1">Add To Stock Register</h2>
-            <p class="text-muted">Manage your library's inventory, register new titles, and track stock details.</p>
+            <div class="d-flex align-items-center gap-3">
+                <h2 class="fw-bold mb-0">Add To Stock Register</h2>
+                <span id="badgeMode" class="badge-modern badge-modern-primary">
+                    <i class="fas fa-plus-circle"></i> Add Mode
+                </span>
+            </div>
+            <p class="text-muted mb-0 mt-1">Manage library inventory, register new titles, and track stock details.</p>
         </div>
-        <div class="d-flex gap-2 w-100-mobile">
-            <!-- ========== ADDED: Add New Button ========== -->
-            <button class="btn btn-modern btn-secondary-modern btn-auto-width" onclick="resetForm()" id="btnAddNew">
+        <div class="d-flex gap-2 w-100-mobile justify-content-md-end">
+            <button class="btn btn-modern btn-secondary-modern btn-auto-width shadow-sm" onclick="resetForm()" id="btnAddNew">
                 <i class="fas fa-plus-circle me-2 text-success"></i> Add New
             </button>
-            <button class="btn btn-modern btn-secondary-modern btn-auto-width" onclick="clearForm()">
+            <button class="btn btn-modern btn-secondary-modern btn-auto-width shadow-sm" onclick="clearForm()">
                 <i class="fas fa-eraser me-2 text-danger"></i> Clear
             </button>
-            <button class="btn btn-modern btn-primary-modern btn-auto-width text-white" onclick="saveBook()" id="btnSave">
+            <button class="btn btn-modern btn-primary-modern btn-auto-width text-white shadow-glow" onclick="saveBook()" id="btnSave">
                 <i class="fas fa-save me-2"></i> Save Record
             </button>
         </div>
@@ -32,230 +76,361 @@
         <!-- Main Form Section -->
         <div class="col-lg-8">
 
-            <!-- ===== General Information ===== -->
+            <!-- General Information Card -->
             <div class="modern-card">
-                <h5 class="fw-bold mb-4 border-bottom pb-3"><i class="fas fa-info-circle me-2 text-primary"></i> General Information</h5>
+                <h5 class="fw-bold mb-4 border-bottom pb-3 text-primary">
+                    <i class="fas fa-info-circle me-2"></i> General Information
+                </h5>
+                
                 <div class="row g-3">
+                    <!-- College Name select -->
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">College Name</label>
-                        <select id="txtCollegeName"
-                                class="form-input-modern">
-                            <option value="">
-                                Select College
-                            </option>
-                        </select>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-university text-muted"></i></span>
+                            <select id="txtCollegeName" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                <option value="">Select College</option>
+                            </select>
+                        </div>
                     </div>
+                    
+                    <!-- Accession No with Search button -->
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Accession No</label>
                         <div class="input-group">
-                            <input type="text" id="txtAccessionNo" class="form-input-modern" style="border-top-right-radius:0; border-bottom-right-radius:0;" @* placeholder="ACET101"  *@/>
-                            <button class="btn btn-modern btn-primary-modern input-group-modern-btn px-4" onclick="loadBook()">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-hashtag text-muted"></i></span>
+                            <input type="text" id="txtAccessionNo" class="form-input-modern" style="border-radius: 0;" placeholder="e.g. ACET101" />
+                            <button class="btn btn-modern btn-primary-modern input-group-modern-btn px-3" onclick="loadBook()">
                                 <i class="fas fa-search"></i>
                             </button>
                         </div>
                     </div>
+                    
+                    <!-- Date of Entry -->
                     <div class="col-md-4">
-                        <!-- ========== ADDED: Date of Entry ========== -->
                         <label class="form-label small fw-bold text-muted">Date of Entry</label>
-                        <input type="date" id="txtDateEntry" class="form-input-modern" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-calendar-alt text-muted"></i></span>
+                            <input type="date" id="txtDateEntry" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" />
+                        </div>
                     </div>
+                    
+                    <!-- Book Title -->
                     <div class="col-md-8">
                         <label class="form-label small fw-bold text-muted">Book Title</label>
-                        <!-- ========== ADDED: datalist for title autocomplete ========== -->
-                        <input type="text" id="txtTitle" class="form-input-modern" placeholder="Enter full book title" list="titleList" autocomplete="off" />
-                        <datalist id="titleList"></datalist>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-book text-muted"></i></span>
+                            <input type="text" id="txtTitle" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Enter full book title" list="titleList" autocomplete="off" />
+                            <datalist id="titleList"></datalist>
+                        </div>
                     </div>
+                    
+                    <!-- Sub Title -->
                     <div class="col-md-4">
-                        <!-- ========== ADDED: SubTitle field ========== -->
                         <label class="form-label small fw-bold text-muted">Sub Title</label>
-                        <input type="text" id="txtSubTitle" class="form-input-modern" placeholder="Optional" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-heading text-muted"></i></span>
+                            <input type="text" id="txtSubTitle" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Optional" />
+                        </div>
                     </div>
+                    
+                    <!-- Author(s) - Readonly -->
                     <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">Author(s)</label>
-                        <input type="text" id="txtAuthor" class="form-input-modern" @* placeholder="Auto-built from author details below" *@ readonly />
+                        <label class="form-label small fw-bold text-muted">Author(s) <span class="badge bg-secondary bg-opacity-10 text-muted ms-1 small">Readonly</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-users text-muted"></i></span>
+                            <input type="text" id="txtAuthor" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Auto-generated from authors below..." readonly />
+                        </div>
                     </div>
+                    
+                    <!-- Publisher -->
                     <div class="col-md-6">
                         <label class="form-label small fw-bold text-muted">Publisher</label>
-                        <!-- ========== ADDED: datalist for publisher auto-bind ========== -->
-                        <input type="text" id="txtPublisher" class="form-input-modern" @* placeholder="Publication house" *@ list="publisherList" />
-                        <datalist id="publisherList"></datalist>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-building text-muted"></i></span>
+                            <input type="text" id="txtPublisher" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Publication house" list="publisherList" />
+                            <datalist id="publisherList"></datalist>
+                        </div>
                     </div>
+                    
+                    <!-- Category -->
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Category</label>
-                        <!-- ========== ADDED: datalist for category auto-bind ========== -->
-                        <input type="text" id="txtCategory" class="form-input-modern"@*  placeholder="e.g. Science, Fiction" *@ list="categoryList" />
-                        <datalist id="categoryList"></datalist>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-tags text-muted"></i></span>
+                            <input type="text" id="txtCategory" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="e.g. Science, Fiction" list="categoryList" />
+                            <datalist id="categoryList"></datalist>
+                        </div>
                     </div>
+                    
+                    <!-- Source -->
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Source</label>
-                        <!-- ========== ADDED: datalist for source auto-bind ========== -->
-                        <input type="text" id="txtSource" class="form-input-modern"@*  placeholder="Vendor or Donor" *@ list="sourceList" />
-                        <datalist id="sourceList"></datalist>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-truck text-muted"></i></span>
+                            <input type="text" id="txtSource" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Vendor or Donor" list="sourceList" />
+                            <datalist id="sourceList"></datalist>
+                        </div>
                     </div>
+                    
+                    <!-- Type select -->
                     <div class="col-md-4">
-                        <!-- ========== ADDED: Type field ========== -->
                         <label class="form-label small fw-bold text-muted">Type</label>
-                        <select id="txtType" class="form-input-modern">
-                            <option value="">-- Select Type --</option>
-                            <option value="General">General</option>
-                            <option value="Reference">Reference</option>
-                            <option value="Text Book">Text Book</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ========== ADDED: Author Details Section ========== -->
-            <div class="modern-card mt-4">
-                <h5 class="fw-bold mb-4 border-bottom pb-3"><i class="fas fa-user-edit me-2 text-primary"></i> Author Details</h5>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">1st Author Forename</label>
-                        <input type="text" id="txtFirstAuthorForeName" class="form-input-modern author-field" placeholder="Forename" list="firstAuthorList" autocomplete="off" />
-                        <datalist id="firstAuthorList"></datalist>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">1st Author Surname</label>
-                        <input type="text" id="txtFirstAuthorSirName" class="form-input-modern author-field" placeholder="Surname" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">2nd Author Forename</label>
-                        <input type="text" id="txtSecondAuthorForeName" class="form-input-modern author-field" placeholder="Forename" list="secondAuthorList" autocomplete="off" />
-                        <datalist id="secondAuthorList"></datalist>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">2nd Author Surname</label>
-                        <input type="text" id="txtSecondAuthorSirName" class="form-input-modern author-field" placeholder="Surname" />
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">3rd Author Forename</label>
-                        <input type="text" id="txtThirdAuthorForeName" class="form-input-modern author-field" placeholder="Forename" list="thirdAuthorList" autocomplete="off" />
-                        <datalist id="thirdAuthorList"></datalist>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label small fw-bold text-muted">3rd Author Surname</label>
-                        <input type="text" id="txtThirdAuthorSirName" class="form-input-modern author-field" placeholder="Surname" />
-                    </div>
-                    <div class="col-12">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="chkMoreAuthors" />
-                            <label class="form-check-label small text-muted" for="chkMoreAuthors">More than 3 authors</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-info-circle text-muted"></i></span>
+                            <select id="txtType" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                <option value="">-- Select Type --</option>
+                                <option value="General">General</option>
+                                <option value="Reference">Reference</option>
+                                <option value="Text Book">Text Book</option>
+                            </select>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ===== Technical Details (existing structure, enhanced with new fields) ===== -->
+            <!-- Author Details Section -->
+            <div class="modern-card mt-4" style="border-left: 4px solid var(--primary);">
+                <h5 class="fw-bold mb-4 border-bottom pb-3 text-primary">
+                    <i class="fas fa-user-edit me-2"></i> Author Details
+                </h5>
+                
+                <div class="row g-4">
+                    <!-- 1st Author Block -->
+                    <div class="col-md-4 border-end-md pb-3 pb-md-0">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill me-2 p-2"><i class="fas fa-user-tie"></i></span>
+                            <h6 class="fw-bold mb-0">1st Author (Primary)</h6>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Forename</label>
+                            <input type="text" id="txtFirstAuthorForeName" class="form-input-modern author-field" placeholder="Forename" list="firstAuthorList" autocomplete="off" />
+                            <datalist id="firstAuthorList"></datalist>
+                        </div>
+                        <div>
+                            <label class="form-label small fw-bold text-muted">Surname</label>
+                            <input type="text" id="txtFirstAuthorSirName" class="form-input-modern author-field" placeholder="Surname" />
+                        </div>
+                    </div>
+
+                    <!-- 2nd Author Block -->
+                    <div class="col-md-4 border-end-md pb-3 pb-md-0">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill me-2 p-2"><i class="fas fa-user"></i></span>
+                            <h6 class="fw-bold mb-0">2nd Author</h6>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Forename</label>
+                            <input type="text" id="txtSecondAuthorForeName" class="form-input-modern author-field" placeholder="Forename" list="secondAuthorList" autocomplete="off" />
+                            <datalist id="secondAuthorList"></datalist>
+                        </div>
+                        <div>
+                            <label class="form-label small fw-bold text-muted">Surname</label>
+                            <input type="text" id="txtSecondAuthorSirName" class="form-input-modern author-field" placeholder="Surname" />
+                        </div>
+                    </div>
+
+                    <!-- 3rd Author Block -->
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill me-2 p-2"><i class="fas fa-user"></i></span>
+                            <h6 class="fw-bold mb-0">3rd Author</h6>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold text-muted">Forename</label>
+                            <input type="text" id="txtThirdAuthorForeName" class="form-input-modern author-field" placeholder="Forename" list="thirdAuthorList" autocomplete="off" />
+                            <datalist id="thirdAuthorList"></datalist>
+                        </div>
+                        <div>
+                            <label class="form-label small fw-bold text-muted">Surname</label>
+                            <input type="text" id="txtThirdAuthorSirName" class="form-input-modern author-field" placeholder="Surname" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="form-check p-3 rounded bg-light border border-dashed text-start">
+                            <input class="form-check-input ms-0 me-2" type="checkbox" id="chkMoreAuthors" />
+                            <label class="form-check-label small text-muted fw-semibold" for="chkMoreAuthors">
+                                <i class="fas fa-users-cog me-1"></i> More than 3 authors are associated with this title
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Technical Details Card -->
             <div class="modern-card mt-4">
-                <h5 class="fw-bold mb-4 border-bottom pb-3"><i class="fas fa-tag me-2 text-primary"></i> Technical Details</h5>
+                <h5 class="fw-bold mb-4 border-bottom pb-3 text-primary">
+                    <i class="fas fa-tag me-2"></i> Technical Details
+                </h5>
+                
                 <div class="row g-3">
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-sm-6">
                         <label class="form-label small fw-bold text-muted">Edition</label>
-                        <input type="text" id="txtEdition" class="form-input-modern" @* placeholder="1st" *@ />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-code-branch text-muted"></i></span>
+                            <input type="text" id="txtEdition" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="e.g. 1st" />
+                        </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-sm-6">
                         <label class="form-label small fw-bold text-muted">Price (₹)</label>
-                        <input type="number" id="txtPrice" class="form-input-modern" placeholder="0.00" step="0.01" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-rupee-sign text-muted"></i></span>
+                            <input type="number" id="txtPrice" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="0.00" step="0.01" />
+                        </div>
                     </div>
-                    <!-- ========== ADDED: Discount & NetPrice ========== -->
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-sm-6">
                         <label class="form-label small fw-bold text-muted">Discount (%)</label>
-                        <input type="number" id="txtDiscount" class="form-input-modern" placeholder="0" step="0.01" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-percentage text-muted"></i></span>
+                            <input type="number" id="txtDiscount" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="0" step="0.01" />
+                        </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-sm-6">
                         <label class="form-label small fw-bold text-muted">Net Price (₹)</label>
-                        <input type="number" id="txtNetPrice" class="form-input-modern" placeholder="Auto" readonly />
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0 text-success" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-calculator"></i></span>
+                            <input type="number" id="txtNetPrice" class="form-input-modern bg-light fw-bold text-success" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Auto" readonly />
+                        </div>
                     </div>
-                    <div class="col-md-3">
+                    
+                    <div class="col-md-3 col-sm-6">
                         <label class="form-label small fw-bold text-muted">Year</label>
-                        <input type="text" id="txtYear" class="form-input-modern" placeholder="YYYY" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-calendar text-muted"></i></span>
+                            <input type="text" id="txtYear" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="YYYY" />
+                        </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-sm-6">
                         <label class="form-label small fw-bold text-muted">Pages</label>
-                        <input type="text" id="txtPages" class="form-input-modern" placeholder="000" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-file-alt text-muted"></i></span>
+                            <input type="text" id="txtPages" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="000" />
+                        </div>
                     </div>
-                    <!-- ========== ADDED: Volume, Size ========== -->
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-sm-6">
                         <label class="form-label small fw-bold text-muted">Volume</label>
-                        <input type="text" id="txtVolume" class="form-input-modern" placeholder="Vol." />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-bookmark text-muted"></i></span>
+                            <input type="text" id="txtVolume" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Vol." />
+                        </div>
                     </div>
-                    <div class="col-md-3">
+                    <div class="col-md-3 col-sm-6">
                         <label class="form-label small fw-bold text-muted">Size</label>
-                        <input type="text" id="txtSize" class="form-input-modern" placeholder="e.g. 00cm" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-ruler-combined text-muted"></i></span>
+                            <input type="text" id="txtSize" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="e.g. 23cm" />
+                        </div>
                     </div>
-                    <!-- ========== ADDED: ISBN, Place, Series ========== -->
+                    
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">ISBN</label>
-                        <input type="text" id="txtISBN" class="form-input-modern" placeholder="ISBN number" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-barcode text-muted"></i></span>
+                            <input type="text" id="txtISBN" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="ISBN number" />
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Place</label>
-                        <input type="text" id="txtPlace" class="form-input-modern"@*  placeholder="Publication place *@" list="placeList" autocomplete="off" />
-                        <datalist id="placeList"></datalist>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-map-marker-alt text-muted"></i></span>
+                            <input type="text" id="txtPlace" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Publication place" list="placeList" autocomplete="off" />
+                            <datalist id="placeList"></datalist>
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Series</label>
-                        <input type="text" id="txtSeries" class="form-input-modern" placeholder="Series name" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-list-ol text-muted"></i></span>
+                            <input type="text" id="txtSeries" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Series name" />
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ========== ADDED: Billing & Classification Section ========== -->
+            <!-- Billing & Classification Card -->
             <div class="modern-card mt-4">
-                <h5 class="fw-bold mb-4 border-bottom pb-3"><i class="fas fa-receipt me-2 text-primary"></i> Billing & Classification</h5>
+                <h5 class="fw-bold mb-4 border-bottom pb-3 text-primary">
+                    <i class="fas fa-receipt me-2"></i> Billing & Classification
+                </h5>
+                
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Bill No</label>
-                        <input type="text" id="txtBillNo" class="form-input-modern" placeholder="Invoice No" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-file-invoice text-muted"></i></span>
+                            <input type="text" id="txtBillNo" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Invoice No" />
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Bill Date</label>
-                        <input type="text" id="txtBillDate" class="form-input-modern" placeholder="DD/MM/YYYY" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-calendar-day text-muted"></i></span>
+                            <input type="text" id="txtBillDate" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="DD/MM/YYYY" />
+                        </div>
                     </div>
                     <div class="col-md-4">
                         <label class="form-label small fw-bold text-muted">Location</label>
-                        <input type="text" id="txtLocation" class="form-input-modern" @* placeholder="Shelf / Rack *@" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-compass text-muted"></i></span>
+                            <input type="text" id="txtLocation" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Shelf / Rack" />
+                        </div>
                     </div>
+                    
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted">Class No</label>
-                        <input type="text" id="txtClassNo" class="form-input-modern"@*  placeholder="DDC"  *@/>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-folder text-muted"></i></span>
+                            <input type="text" id="txtClassNo" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="DDC Class" />
+                        </div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted">Book No</label>
-                        <input type="text" id="txtBookNo" class="form-input-modern" placeholder="Book No" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-book-reader text-muted"></i></span>
+                            <input type="text" id="txtBookNo" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Book No" />
+                        </div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted">Subject 1</label>
-                        <input type="text" id="txtSubject1" class="form-input-modern" placeholder="Primary" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-scroll text-muted"></i></span>
+                            <input type="text" id="txtSubject1" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Primary" />
+                        </div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small fw-bold text-muted">Subject 2</label>
-                        <input type="text" id="txtSubject2" class="form-input-modern" placeholder="Secondary" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-scroll text-muted"></i></span>
+                            <input type="text" id="txtSubject2" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Secondary" />
+                        </div>
                     </div>
+                    
                     <div class="col-md-4">
-                        <!-- ========== ADDED: BindingBook field ========== -->
                         <label class="form-label small fw-bold text-muted">BindingBook</label>
-                        <select id="txtBindingBook" class="form-input-modern">
-                            <option value="">-- Select Binding --</option>
-                            <option value="Yes">Yes</option>
-                            <option value="No">No</option>                        
-                        </select>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-book-dead text-muted"></i></span>
+                            <select id="txtBindingBook" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;">
+                                <option value="">-- Select Binding --</option>
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>                        
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-8">
                         <label class="form-label small fw-bold text-muted">Remarks</label>
-                        <input type="text" id="txtRemarks" class="form-input-modern" placeholder="Remarks" />
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0" style="border-top-left-radius: var(--radius-md); border-bottom-left-radius: var(--radius-md);"><i class="fas fa-comment-alt text-muted"></i></span>
+                            <input type="text" id="txtRemarks" class="form-input-modern" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" placeholder="Additional notes..." />
+                        </div>
                     </div>
-
-                   @*  <div class="col-3">
-                        <label class="form-label small fw-bold text-muted">Remarks</label>
-                        <textarea id="txtRemarks" class="form-input-modern" rows="2" placeholder="Additional notes..."></textarea>
-                    </div> *@
                 </div>
             </div>
-
         </div>
 
-        <!-- Sidebar Actions/Stats -->
+        <!-- Sidebar Actions Column -->
         <div class="col-lg-4">
             <div class="modern-card glass mb-4 sticky-lg-top" style="top: 100px;">
                 <h6 class="fw-bold mb-3"><i class="fas fa-bolt me-2 text-warning"></i> Quick Operations</h6>
@@ -263,22 +438,24 @@
                     <button class="btn btn-modern btn-secondary-modern w-100 text-start border bg-white" onclick="loadBook()">
                         <i class="fas fa-search text-primary me-2"></i> Find Book by Accession
                     </button>
-                    <button class="btn btn-modern btn-secondary-modern w-100 text-start border bg-white">
-                        <i class="fas fa-print text-muted me-2"></i> Print Labe`l
+                    <button class="btn btn-modern btn-secondary-modern w-100 text-start border bg-white" style="cursor: not-allowed; opacity: 0.7;">
+                        <i class="fas fa-print text-muted me-2"></i> Print Label
                     </button>
-                    <button class="btn btn-modern btn-secondary-modern w-100 text-start border bg-white">
+                    <button class="btn btn-modern btn-secondary-modern w-100 text-start border bg-white" style="cursor: not-allowed; opacity: 0.7;">
                         <i class="fas fa-barcode text-muted me-2"></i> Generate Barcode
                     </button>
                 </div>
 
-                <!-- ========== ADDED: Accession Info Panel ========== -->
-              @*   <div class="mt-4 p-3 rounded-3" style="background: var(--bg-main); border: 1px solid var(--border-color);">
-                    <h6 class="fw-bold small mb-2"><i class="fas fa-hashtag me-2 text-primary"></i> Accession Info</h6>
-                    <div class="d-flex justify-content-between small text-muted mb-1">
+                <!-- Accession Info Panel (styled as status dashboard) -->
+                <div class="mt-4 p-3 rounded-3" style="background: var(--bg-main); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+                    <h6 class="fw-bold small mb-3 border-bottom pb-2 text-primary">
+                        <i class="fas fa-info-circle me-2"></i> Accession Details
+                    </h6>
+                    <div class="d-flex justify-content-between small text-muted mb-2">
                         <span>College ID:</span>
                         <span class="fw-bold" id="lblCollegeId">&mdash;</span>
                     </div>
-                    <div class="d-flex justify-content-between small text-muted mb-1">
+                    <div class="d-flex justify-content-between small text-muted mb-2">
                         <span>Next Accession ID:</span>
                         <span class="fw-bold text-primary" id="lblAccessionId">&mdash;</span>
                     </div>
@@ -286,19 +463,29 @@
                         <span>Accession Code:</span>
                         <span class="fw-bold text-success" id="lblAccessionCode">&mdash;</span>
                     </div>
-                </div> *@
+                </div>
             </div>
             
-           @*  <div class="modern-card text-white bg-primary bg-opacity-95 shadow-glow" style="border: none;">
-                <h6 class="fw-bold opacity-90 mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i> Cataloging Best Practices</h6>
-                <p class="small mb-0 opacity-85">Always cross-check the ISBN number and ensure all accession identifiers are sequentially correct. Standardizing author names avoids duplication in the global search system.</p>
-            </div> *@
+            <div class="modern-card text-white shadow-glow" style="border: none; background: linear-gradient(135deg, var(--primary) 0%, #1D4ED8 100%);">
+                <h6 class="fw-bold opacity-90 mb-3"><i class="fas fa-lightbulb me-2 text-warning"></i> Cataloging Tip</h6>
+                <p class="small mb-0 opacity-85">Always double-check accession codes and ISBN. Standardizing authors' names avoids duplications in multi-college searches.</p>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
     <script>
+        // Resolve MVC actions using Url.Action helper to ensure proper routing
+        const Urls = {
+            colleges: '@Url.Action("GetColleges", "AddStockRegister")',
+            init: '@Url.Action("GetInitialData", "AddStockRegister")',
+            autocomplete: '@Url.Action("AutoComplete", "AddStockRegister")',
+            bookDetail: '@Url.Action("GetBookDetail", "AddStockRegister")',
+            get: '@Url.Action("GetByAccession", "AddStockRegister")',
+            add: '@Url.Action("AddBook", "AddStockRegister")',
+            update: '@Url.Action("UpdateBook", "AddStockRegister")'
+        };
 
         let _collegeId = 0;
         let _accessionId = 0;
@@ -306,25 +493,20 @@
         let _isEditMode = false;
 
         $(document).ready(function () {
-            
             loadColleges();
             let today = new Date().toISOString().split('T')[0];
             $('#txtDateEntry').val(today);
 
             $('#txtCollegeName').on('change blur', function () {
-
                 let college = $(this).val().trim();
-
                 if (college !== '') {
                     loadCollegeData();
                 }
             });
 
             $('#txtTitle').on('change', function () {
-
                 let title = $(this).val().trim();
                 let college = $('#txtCollegeName').val().trim();
-
                 if (title && college && _titles.includes(title)) {
                     loadBookDetail(college, title);
                 }
@@ -344,73 +526,41 @@
             setupAutocomplete('txtPlace', 'place');
         });
 
-
-               // =====================================================
+        // =====================================================
         // COLLEGE 
         // =====================================================
-
-                function loadColleges() {
-
+        function loadColleges() {
             $.ajax({
-
-                url: '/colleges',
+                url: Urls.colleges,
                 type: 'GET',
-
                 success: function (res) {
-
                     $('#txtCollegeName').empty();
-
-                    $('#txtCollegeName').append(
-                        '<option value="">Select College</option>'
-                    );
-
+                    $('#txtCollegeName').append('<option value="">Select College</option>');
                     res.forEach(function (college) {
-
                         $('#txtCollegeName').append(
-                            `<option value="${college}">
-                                ${college}
-                            </option>`
+                            `<option value="${college}">${college}</option>`
                         );
                     });
-
-                    // if (res.length === 1) {
-
-                    //     $('#txtCollegeName')
-                    //         .val(res[0])
-                    //         .trigger('change');
-                    // }
                 }
             });
         }
+
         // =====================================================
         // LOAD INITIAL COLLEGE DATA
         // =====================================================
-
         function loadCollegeData() {
-
             let collegeName = $('#txtCollegeName').val().trim();
-
-            if (!collegeName)
-                return;
+            if (!collegeName) return;
 
             $.ajax({
-
-                url: '/init',
+                url: Urls.init,
                 type: 'GET',
-
-                data: {
-                    collegeName: collegeName
-                },
-
+                data: { collegeName: collegeName },
                 success: function (res) {
-
                     _collegeId = res.collegeId ?? res.CollegeId ?? 0;
                     _accessionId = res.accessionId ?? res.AccessionId ?? 0;
 
-                    let accessionNo =
-                        res.accessionNo ??
-                        res.AccessionNo ??
-                        '';
+                    let accessionNo = res.accessionNo ?? res.AccessionNo ?? '';
 
                     $('#hdnCollegeId').val(_collegeId);
                     $('#hdnAccessionId').val(_accessionId);
@@ -423,37 +573,24 @@
                     $('#lblAccessionId').text(_accessionId);
                     $('#lblAccessionCode').text(accessionNo);
 
-                    let publishers =
-                        res.publishers ??
-                        res.Publishers ??
-                        [];
-
-                    let sources =
-                        res.sources ??
-                        res.Sources ??
-                        [];
-
-                    let categories =
-                        res.categories ??
-                        res.Categories ??
-                        [];
-
-                    _titles =
-                        res.titles ??
-                        res.Titles ??
-                        [];
+                    let publishers = res.publishers ?? res.Publishers ?? [];
+                    let sources = res.sources ?? res.Sources ?? [];
+                    let categories = res.categories ?? res.Categories ?? [];
+                    _titles = res.titles ?? res.Titles ?? [];
 
                     bindDatalist('publisherList', publishers);
                     bindDatalist('sourceList', sources);
                     bindDatalist('categoryList', categories);
                     bindDatalist('titleList', _titles);
                 },
-
                 error: function (err) {
-
                     console.log(err);
-
-                    alert('College data load failed');
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'College data load failed',
+                        icon: 'error',
+                        confirmButtonColor: 'var(--primary)'
+                    });
                 }
             });
         }
@@ -461,23 +598,14 @@
         // =====================================================
         // BIND DATALIST
         // =====================================================
-
         function bindDatalist(datalistId, items) {
-
             let dl = $('#' + datalistId);
-
             dl.empty();
-
-            if (!items || items.length === 0)
-                return;
+            if (!items || items.length === 0) return;
 
             items.forEach(function (item) {
-
                 if (item) {
-
-                    dl.append(
-                        `<option value="${item}"></option>`
-                    );
+                    dl.append(`<option value="${item}"></option>`);
                 }
             });
         }
@@ -485,53 +613,35 @@
         // =====================================================
         // AUTOCOMPLETE
         // =====================================================
-
         let _autocompleteTimers = {};
 
         function setupAutocomplete(fieldId, fieldType) {
-
             let datalistId = fieldId + 'List';
-
             if ($('#' + datalistId).length === 0) {
-
-                $('<datalist id="' + datalistId + '"></datalist>')
-                    .insertAfter('#' + fieldId);
+                $('<datalist id="' + datalistId + '"></datalist>').insertAfter('#' + fieldId);
             }
-
             $('#' + fieldId).attr('list', datalistId);
 
             $('#' + fieldId).on('input', function () {
-
                 let search = $(this).val().trim();
+                let collegeName = $('#txtCollegeName').val().trim();
 
-                let collegeName =
-                    $('#txtCollegeName').val().trim();
-
-                if (search.length < 2 || !collegeName)
-                    return;
+                if (search.length < 2 || !collegeName) return;
 
                 clearTimeout(_autocompleteTimers[fieldId]);
-
                 _autocompleteTimers[fieldId] = setTimeout(function () {
-
                     $.ajax({
-
-                        url: '/autocomplete',
-
+                        url: Urls.autocomplete,
                         type: 'GET',
-
                         data: {
                             collegeName: collegeName,
                             field: fieldType,
                             search: search
                         },
-
                         success: function (res) {
-
                             bindDatalist(datalistId, res);
                         }
                     });
-
                 }, 300);
             });
         }
@@ -539,22 +649,15 @@
         // =====================================================
         // LOAD BOOK DETAIL
         // =====================================================
-
         function loadBookDetail(collegeName, title) {
-
             $.ajax({
-
-                url: '/book-detail',
-
+                url: Urls.bookDetail,
                 type: 'GET',
-
                 data: {
                     collegeName: collegeName,
                     title: title
                 },
-
                 success: function (res) {
-
                     $('#txtAuthor').val(res.Author ?? '');
                     $('#txtPublisher').val(res.Publisher ?? '');
                     $('#txtSource').val(res.Source ?? '');
@@ -570,72 +673,35 @@
         // =====================================================
         // NET PRICE
         // =====================================================
-
         function autoCalculateNetPrice() {
-
-            let price =
-                parseFloat($('#txtPrice').val()) || 0;
-
-            let discount =
-                parseFloat($('#txtDiscount').val()) || 0;
-
-            let netPrice =
-                price - ((price * discount) / 100);
-
+            let price = parseFloat($('#txtPrice').val()) || 0;
+            let discount = parseFloat($('#txtDiscount').val()) || 0;
+            let netPrice = price - ((price * discount) / 100);
             $('#txtNetPrice').val(netPrice.toFixed(2));
         }
 
         // =====================================================
         // BUILD AUTHOR FIELD
         // =====================================================
-
         function buildAuthorField() {
-
             let authors = [];
 
-            let fn1 =
-                $('#txtFirstAuthorForeName').val().trim();
-
-            let sn1 =
-                $('#txtFirstAuthorSirName').val().trim();
-
+            let fn1 = $('#txtFirstAuthorForeName').val().trim();
+            let sn1 = $('#txtFirstAuthorSirName').val().trim();
             if (fn1 || sn1) {
-
-                authors.push(
-                    [sn1, fn1]
-                        .filter(Boolean)
-                        .join(', ')
-                );
+                authors.push([sn1, fn1].filter(Boolean).join(', '));
             }
 
-            let fn2 =
-                $('#txtSecondAuthorForeName').val().trim();
-
-            let sn2 =
-                $('#txtSecondAuthorSirName').val().trim();
-
+            let fn2 = $('#txtSecondAuthorForeName').val().trim();
+            let sn2 = $('#txtSecondAuthorSirName').val().trim();
             if (fn2 || sn2) {
-
-                authors.push(
-                    [sn2, fn2]
-                        .filter(Boolean)
-                        .join(', ')
-                );
+                authors.push([sn2, fn2].filter(Boolean).join(', '));
             }
 
-            let fn3 =
-                $('#txtThirdAuthorForeName').val().trim();
-
-            let sn3 =
-                $('#txtThirdAuthorSirName').val().trim();
-
+            let fn3 = $('#txtThirdAuthorForeName').val().trim();
+            let sn3 = $('#txtThirdAuthorSirName').val().trim();
             if (fn3 || sn3) {
-
-                authors.push(
-                    [sn3, fn3]
-                        .filter(Boolean)
-                        .join(', ')
-                );
+                authors.push([sn3, fn3].filter(Boolean).join(', '));
             }
 
             $('#txtAuthor').val(authors.join(' ; '));
@@ -644,11 +710,9 @@
         // =====================================================
         // SAVE BOOK
         // =====================================================
-
         function saveBook() {
-
             let data = {
-                 collegeId: parseInt($('#hdnCollegeId').val()) || 0,
+                collegeId: parseInt($('#hdnCollegeId').val()) || 0,
                 accessionId: parseInt($('#hdnAccessionId').val()) || 0,
                 collegeName: $('#txtCollegeName').val(),
                 accessionNo: $('#txtAccessionNo').val(),
@@ -656,7 +720,6 @@
 
                 title: $('#txtTitle').val(),
                 subtitle: $('#txtSubTitle').val(),
-
                 author: $('#txtAuthor').val(),
 
                 publisher: $('#txtPublisher').val(),
@@ -666,8 +729,12 @@
                 type: $('#txtType').val(),
                 category: $('#txtCategory').val(),
 
-                year: $('#txtYear').val(),
-                pages: $('#txtPages').val(),
+               year: $('#txtYear').val() === "" ? null:parseInt($('#txtYear').val()),
+             
+               
+               pages: $('#txtPages').val() === ""? null:parseInt($('#txtPages').val()),
+    
+    
                 volume: $('#txtVolume').val(),
 
                 price: parseFloat($('#txtPrice').val()) || 0,
@@ -692,86 +759,76 @@
                 series: $('#txtSeries').val(),
                 remarks: $('#txtRemarks').val(),
 
-                firstAuthorForename:
-                    $('#txtFirstAuthorForeName').val(),
+                firstAuthorForename: $('#txtFirstAuthorForeName').val(),
+                firstAuthorSirName: $('#txtFirstAuthorSirName').val(),
 
-                firstAuthorSirName:
-                    $('#txtFirstAuthorSirName').val(),
+                secondAuthorForename: $('#txtSecondAuthorForeName').val(),
+                secondAuthorSurname: $('#txtSecondAuthorSirName').val(),
 
-                secondAuthorForename:
-                    $('#txtSecondAuthorForeName').val(),
+                thirdAuthorForename: $('#txtThirdAuthorForeName').val(),
+                thirdAuthorSurname: $('#txtThirdAuthorSirName').val(),
 
-                secondAuthorSurname:
-                    $('#txtSecondAuthorSirName').val(),
-
-                thirdAuthorForename:
-                    $('#txtThirdAuthorForeName').val(),
-
-                thirdAuthorSurname:
-                    $('#txtThirdAuthorSirName').val(),
-
-                moreThanThreeAuthors:
-                    $('#chkMoreAuthors').is(':checked')
-                        ? 'True'
-                        : 'False'
+                moreThanThreeAuthors: $('#chkMoreAuthors').is(':checked') ? 'True' : 'False'
             };
 
             if (!data.collegeName) {
-
-                alert('College Name required');
+                Swal.fire({
+                    title: 'Validation Error',
+                    text: 'College Name is required',
+                    icon: 'warning',
+                    confirmButtonColor: 'var(--primary)'
+                });
                 return;
             }
 
             if (!data.accessionNo) {
-
-                alert('Accession No required');
+                Swal.fire({
+                    title: 'Validation Error',
+                    text: 'Accession No is required',
+                    icon: 'warning',
+                    confirmButtonColor: 'var(--primary)'
+                });
                 return;
             }
 
             if (!data.title) {
-
-                alert('Title required');
+                Swal.fire({
+                    title: 'Validation Error',
+                    text: 'Book Title is required',
+                    icon: 'warning',
+                    confirmButtonColor: 'var(--primary)'
+                });
                 return;
             }
 
-            let url =
-                _isEditMode
-                    ? '/update'
-                    : '/add';
-
-            let method =
-                _isEditMode
-                    ? 'PUT'
-                    : 'POST';
+            let url = _isEditMode ? Urls.update : Urls.add;
+            let method = _isEditMode ? 'PUT' : 'POST';
 
             $.ajax({
-
                 url: url,
-
                 type: method,
-
                 contentType: 'application/json',
-
                 data: JSON.stringify(data),
-
                 success: function (res) {
-
-                    alert(res);
+                    Swal.fire({
+                        title: 'Success!',
+                        text: res,
+                        icon: 'success',
+                        confirmButtonColor: 'var(--primary)'
+                    });
 
                     if (!_isEditMode) {
-
                         resetForm();
                     }
                 },
-
                 error: function (err) {
-
                     console.log(err);
-
-                    alert(
-                        err.responseText ||
-                        'Save failed'
-                    );
+                    Swal.fire({
+                        title: 'Error!',
+                        text: err.responseText || 'Save failed',
+                        icon: 'error',
+                        confirmButtonColor: 'var(--primary)'
+                    });
                 }
             });
         }
@@ -779,51 +836,43 @@
         // =====================================================
         // LOAD BOOK
         // =====================================================
-
         function loadBook() {
-
-            let collegeName =
-                $('#txtCollegeName').val();
-
-            let accessionNo =
-                $('#txtAccessionNo').val();
+            let collegeName = $('#txtCollegeName').val();
+            let accessionNo = $('#txtAccessionNo').val();
 
             if (!accessionNo) {
-
-                alert('Enter Accession No');
+                Swal.fire({
+                    title: 'Validation Error',
+                    text: 'Enter Accession No to search',
+                    icon: 'warning',
+                    confirmButtonColor: 'var(--primary)'
+                });
                 return;
             }
 
             $.ajax({
-
-                url: '/get',
-
+                url: Urls.get,
                 type: 'GET',
-
                 data: {
                     collegeName: collegeName,
                     accessionNo: accessionNo
                 },
-
                 success: function (res) {
-
                     _isEditMode = true;
-
                     $('#hdnEditMode').val('true');
 
-                    $('#btnSave').html(
-                        '<i class="fas fa-pen me-2"></i> Update Record'
-                    );
+                    $('#btnSave').html('<i class="fas fa-pen me-2"></i> Update Record');
+                    
+                    // Switch page badge to Edit Mode
+                    $('#badgeMode')
+                        .html('<i class="fas fa-edit"></i> Edit Mode')
+                        .removeClass('badge-modern-primary')
+                        .addClass('badge-modern-warning');
 
-                    $('#txtDateEntry').val(
-                        formatDate(res.DateEntry)
-                    );
-
+                    $('#txtDateEntry').val(formatDate(res.DateEntry));
                     $('#txtTitle').val(res.Title ?? '');
                     $('#txtSubTitle').val(res.SubTitle ?? '');
-
                     $('#txtAuthor').val(res.Author ?? '');
-
                     $('#txtPublisher').val(res.Publisher ?? '');
                     $('#txtSource').val(res.Source ?? '');
                     $('#txtEdition').val(res.Edition ?? '');
@@ -849,7 +898,6 @@
 
                     $('#txtClassNo').val(res.ClassNo ?? '');
                     $('#txtBookNo').val(res.BookNo ?? '');
-
                     $('#txtLocation').val(res.Location ?? '');
 
                     $('#txtSubject1').val(res.Subject1 ?? '');
@@ -871,15 +919,14 @@
                         (res.MoreThanThreeAuthors ?? '') === 'True'
                     );
                 },
-
                 error: function (err) {
-
                     console.log(err);
-
-                    alert(
-                        err.responseText ||
-                        'Book not found'
-                    );
+                    Swal.fire({
+                        title: 'Error!',
+                        text: err.responseText || 'Book not found',
+                        icon: 'error',
+                        confirmButtonColor: 'var(--primary)'
+                    });
                 }
             });
         }
@@ -887,82 +934,67 @@
         // =====================================================
         // RESET FORM
         // =====================================================
-
         function resetForm() {
-
-            let college =
-                $('#txtCollegeName').val();
-
+            let college = $('#txtCollegeName').val();
             clearForm();
-
             $('#txtCollegeName').val(college);
 
             if (college && college.trim()) {
-
                 loadCollegeData();
             }
 
-            let today =
-                new Date()
-                    .toISOString()
-                    .split('T')[0];
-
+            let today = new Date().toISOString().split('T')[0];
             $('#txtDateEntry').val(today);
 
             _isEditMode = false;
-
             $('#hdnEditMode').val('false');
 
-            $('#btnSave').html(
-                '<i class="fas fa-save me-2"></i> Save Record'
-            );
+            $('#btnSave').html('<i class="fas fa-save me-2"></i> Save Record');
+            
+            // Switch page badge back to Add Mode
+            $('#badgeMode')
+                .html('<i class="fas fa-plus-circle"></i> Add Mode')
+                .removeClass('badge-modern-warning')
+                .addClass('badge-modern-primary');
         }
 
         // =====================================================
         // CLEAR FORM
         // =====================================================
-
         function clearForm() {
-
             $('input[type=text]').val('');
             $('input[type=number]').val('');
             $('textarea').val('');
 
             $('#txtDateEntry').val('');
             $('#txtType').val('');
-
             $('#chkMoreAuthors').prop('checked', false);
 
             _isEditMode = false;
-
             $('#hdnEditMode').val('false');
 
-            $('#btnSave').html(
-                '<i class="fas fa-save me-2"></i> Save Record'
-            );
+            $('#btnSave').html('<i class="fas fa-save me-2"></i> Save Record');
+            
+            // Switch page badge back to Add Mode
+            $('#badgeMode')
+                .html('<i class="fas fa-plus-circle"></i> Add Mode')
+                .removeClass('badge-modern-warning')
+                .addClass('badge-modern-primary');
 
             $('#lblCollegeId').text('—');
             $('#lblAccessionId').text('—');
             $('#lblAccessionCode').text('—');
         }
 
+
         // =====================================================
         // FORMAT DATE
         // =====================================================
-
         function formatDate(dateValue) {
-
-            if (!dateValue)
-                return '';
-
+            if (!dateValue) return '';
             let date = new Date(dateValue);
-
-            if (isNaN(date))
-                return '';
-
+            if (isNaN(date)) return '';
             return date.toISOString().split('T')[0];
         }
-
     </script>
 }
-

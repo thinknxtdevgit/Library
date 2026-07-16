@@ -10,6 +10,6 @@ namespace lib.Interface
 
         Task<List<BatchDto>> GetBatchAsync(string collegeName, string course);
 
-        Task<List<StudentReportDto>> SearchAsync(StudentReportRequestDto request);
+        Task<StudentReportResponseDto> SearchAsync(StudentReportRequestDto request);
     }
 }

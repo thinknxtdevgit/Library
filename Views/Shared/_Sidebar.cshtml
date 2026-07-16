@@ -33,24 +33,18 @@
         <!-- Book Management Dropdown -->
         <div class="menu-dropdown">
             <button class="menu-dropdown-toggle" type="button" 
-                    aria-expanded="@(currentController == "Books" ? "true" : "false")">
+                    aria-expanded="@(currentController == "Books" || currentController == "AddStockRegister" ? "true" : "false")">
                 <div class="menu-icon"><i class="fas fa-book"></i></div>
                 <span>Stock</span>
                 <i class="fas fa-chevron-right toggle-icon"></i>
             </button>
-            <ul class="menu-sub @(currentController == "Books" ? "show" : "")">
+            <ul class="menu-sub @(currentController == "Books" || currentController == "AddStockRegister" ? "show" : "")">
                 <li>
                     <a asp-controller="Books" asp-action="Index" 
-                       class="menu-sub-item @(currentController == "Books" && currentAction == "Index" ? "active" : "")">
+                       class="menu-sub-item @((currentController == "Books" && currentAction == "Index") || currentController == "AddStockRegister" ? "active" : "")">
                         Add Books
                     </a>
                 </li>
-               @*  <li>
-                    <a asp-controller="Books" asp-action="Create" 
-                       class="menu-sub-item @(currentController == "Books" && currentAction == "Create" ? "active" : "")">
-                        Add New Book
-                    </a>
-                </li> *@
             </ul>
         </div>
 
