@@ -246,9 +246,9 @@
                 });
 
                 // Auto-select if there is exactly 1 authorized college
-                if (colleges.length === 1) {
-                    $ddl.val(colleges[0]).trigger('change');
-                }
+                // if (colleges.length === 1) {
+                //     $ddl.val(colleges[0]).trigger('change');
+                // }
             } catch (err) {
                 console.error("Colleges loading failed:", err);
                 Swal.fire({

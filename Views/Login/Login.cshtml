@@ -13,96 +13,540 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Login - LibMaster Pro</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/modern-ui.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --primary: #4F81BD;
+            --accent: #2575fc;
+            --bg-color: #f4f6fb;
+            --text-main: #1f385c;
+            --text-muted: #5c6f84;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.8);
+            --input-bg: #ffffff;
+            --input-border: #dce4ec;
+            --font-family: 'Plus Jakarta Sans', sans-serif;
+            --font-heading: 'Outfit', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            font-family: var(--font-family);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Abstract soft light glow background elements */
+        .bg-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(79, 129, 189, 0.08) 0%, rgba(37, 117, 252, 0.0) 70%);
+            filter: blur(60px);
+            z-index: 0;
+            pointer-events: none;
+            animation: floatGlow 10s ease-in-out infinite alternate;
+        }
+        .bg-glow-1 { top: -10%; left: -10%; }
+        .bg-glow-2 { bottom: -10%; right: -10%; animation-delay: 5s; }
+
+        @@keyframes floatGlow {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-40px) scale(1.1); }
+        }
+
+        .login-container {
+            display: flex;
+            width: 1120px;
+            max-width: 95%;
+            min-height: 680px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            overflow: hidden;
+            z-index: 10;
+            box-shadow: 0 20px 50px rgba(31, 56, 92, 0.08);
+            position: relative;
+        }
+
+        /* Left Visual Section */
+        .login-visual {
+            flex: 1.15;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background: linear-gradient(135deg, rgba(79, 129, 189, 0.05) 0%, rgba(37, 117, 252, 0.01) 100%);
+            border-right: 1px solid rgba(0, 0, 0, 0.06);
+            position: relative;
+            z-index: 2;
+        }
+
+        .visual-logo {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .visual-logo-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.35rem;
+            color: #ffffff;
+            box-shadow: 0 8px 20px rgba(79, 129, 189, 0.25);
+        }
+
+        .visual-logo-title {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 1.6rem;
+            letter-spacing: -0.03em;
+            color: var(--text-main);
+        }
+
+        .visual-main-text h1 {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 3rem;
+            line-height: 1.25;
+            letter-spacing: -0.04em;
+            margin-bottom: 24px;
+            color: var(--text-main);
+        }
+
+        .visual-main-text h1 span {
+            color: var(--primary);
+        }
+
+        .visual-main-text p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.7;
+            margin-bottom: 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .stat-item {
+            padding: 20px 16px;
+            background: rgba(255, 255, 255, 0.4);
+            border: 1px solid rgba(0, 0, 0, 0.04);
+            border-radius: 18px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-5px);
+            border-color: rgba(79, 129, 189, 0.25);
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 10px 20px rgba(31, 56, 92, 0.05);
+        }
+
+        .stat-number {
+            font-family: var(--font-heading);
+            font-weight: 800;
+            font-size: 1.6rem;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #7a8e9e;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+        }
+
+        /* Right Form Section */
+        .login-form-area {
+            flex: 0.85;
+            padding: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            position: relative;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .form-header {
+            margin-bottom: 35px;
+        }
+
+        .form-header h2 {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 2.1rem;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+            color: var(--text-main);
+        }
+
+        .form-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 0;
+        }
+
+        /* Floating Input Group */
+        .input-group-modern {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .input-group-modern label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            letter-spacing: 0.03em;
+        }
+
+        .input-wrapper-modern {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(31, 56, 92, 0.02);
+        }
+
+        .input-icon-left {
+            position: absolute;
+            left: 18px;
+            color: #8c9ba5;
+            pointer-events: none;
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .form-input-modern {
+            width: 100%;
+            padding: 15px 18px 15px 48px;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 14px;
+            color: var(--text-main);
+            font-family: var(--font-family);
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        select.form-input-modern {
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .select-chevron {
+            position: absolute;
+            right: 18px;
+            color: #8c9ba5;
+            pointer-events: none;
+        }
+
+        .form-input-modern:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 129, 189, 0.15);
+        }
+
+        .form-input-modern:focus ~ .input-icon-left {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        select.form-input-modern option {
+            background-color: #ffffff !important;
+            color: var(--text-main) !important;
+        }
+
+        .input-wrapper-modern input[type="password"] {
+            padding-right: 48px;
+        }
+
+        .pwd-toggle-btn {
+            position: absolute;
+            right: 18px;
+            background: none;
+            border: none;
+            color: #8c9ba5;
+            cursor: pointer;
+            outline: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.3s ease;
+        }
+
+        .pwd-toggle-btn:hover {
+            color: var(--text-main);
+        }
+
+        /* Checkbox Options */
+        .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .check-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .check-input {
+            width: 18px;
+            height: 18px;
+            border-radius: 6px;
+            border: 1px solid var(--input-border);
+            background: var(--input-bg);
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .forgot-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .forgot-link:hover {
+            color: #2575fc;
+            text-decoration: underline;
+        }
+
+        /* Login Action Button */
+        .btn-login-modern {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: #ffffff;
+            font-family: var(--font-heading);
+            font-weight: 600;
+            font-size: 1.05rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 8px 20px rgba(79, 129, 189, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-login-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(79, 129, 189, 0.35);
+            filter: brightness(1.08);
+        }
+
+        .btn-login-modern:active {
+            transform: translateY(0);
+        }
+
+        /* Footer Copyright */
+        .form-footer-text {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 0.825rem;
+            color: var(--text-muted);
+        }
+
+        /* Slide Transition Animations */
+        .fade-in {
+            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @@keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Layout Responsiveness */
+        @@media (max-width: 991px) {
+            body {
+                align-items: flex-start;
+                padding: 40px 10px;
+                height: auto;
+            }
+            .login-visual {
+                display: none !important;
+            }
+            .login-container {
+                flex-direction: column;
+                max-width: 500px;
+                width: 100%;
+                min-height: auto !important;
+                height: auto !important;
+            }
+            .login-form-area {
+                width: 100% !important;
+                flex: 1 !important;
+                padding: 45px 35px;
+            }
+        }
+
+        @@media (max-width: 576px) {
+            body {
+                padding: 20px 10px;
+            }
+            .login-container {
+                border-radius: 20px;
+                margin: 0;
+            }
+            .login-form-area {
+                padding: 35px 20px;
+            }
+            .form-header {
+                margin-bottom: 25px;
+            }
+            .form-header h2 {
+                font-size: 1.75rem;
+            }
+            .form-input-modern {
+                padding: 13px 16px 13px 44px;
+            }
+            .btn-login-modern {
+                padding: 14px;
+            }
+            .form-options {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                margin-bottom: 24px;
+            }
+        }
+    </style>
 </head>
 <body>
 
-    <div class="login-screen">
-        <!-- Left Side: Visuals -->
-        <div class="login-left d-none d-lg-flex">
-            <div class="login-left-content">
-              @*   <div class="badge bg-primary mb-3 px-3 py-2 rounded-pill shadow-glow" style="border: 1px solid rgba(255,255,255,0.15);">Version 2.0</div> *@
-                <h1 class="display-4 fw-bold mb-4"
-                    style="font-family: 'Poppins', sans-serif; letter-spacing: -0.04em; color: #ffffff !important;">
-                    Manage Your Library <br />
-                    <span style="color: var(--accent);">With Precision.</span>
-                </h1>
-                <p class="lead mb-5" style="color: rgba(255, 255, 255, 0.7); font-size: 1.1rem; line-height: 1.7;">Professional, efficient, and exceptionally modern SaaS solution built specifically for academic cataloging, resource issuance registries, and institutional records management.</p>
-                
-                <div class="features d-flex gap-4">
-                    <div class="feature-item" style="animation: float 4s ease-in-out infinite;">
-                        <div class="h3 mb-1 fw-bold text-white">10k+</div>
-                        <div class="small" style="color: rgba(255,255,255,0.5);">Books Managed</div>
-                    </div>
-                    <div class="feature-item border-start ps-4" style="animation: float 4.5s ease-in-out infinite;">
-                        <div class="h3 mb-1 fw-bold text-white">2.5k</div>
-                        <div class="small" style="color: rgba(255,255,255,0.5);">Active Cohorts</div>
-                    </div>
-                    <div class="feature-item border-start ps-4" style="animation: float 5s ease-in-out infinite;">
-                        <div class="h3 mb-1 fw-bold text-white">99.9%</div>
-                        <div class="small" style="color: rgba(255,255,255,0.5);">System Uptime</div>
-                    </div>
+    <!-- Soft background glow circles -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <div class="login-container fade-in">
+        <!-- Visual Panel (Left) -->
+        <div class="login-visual">
+            <div class="visual-logo">
+                <div class="visual-logo-icon">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <div class="visual-logo-title">LibMaster Pro</div>
+            </div>
+
+            <div class="visual-main-text">
+                <h1>Manage Your Library <br /><span>With Absolute Precision.</span></h1>
+                <p>Professional, efficient, and exceptionally modern SaaS solution built specifically for academic cataloging, resource issuance registries, and institutional records management.</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">10k+</div>
+                    <div class="stat-label">Books Managed</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">2.5k</div>
+                    <div class="stat-label">Active Cohorts</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">99.9%</div>
+                    <div class="stat-label">System Uptime</div>
                 </div>
             </div>
         </div>
 
-        <!-- Right Side: Login Form -->
-        <div class="login-right shadow-lg">
-            <div class="login-logo mb-4">
-                <div class="logo-icon">
-                    <i class="fas fa-book-reader fa-lg"></i>
-                </div>
-                <div>
-                    <h3 class="mb-0 fw-bold" style="font-family: 'Poppins', sans-serif; font-size: 1.4rem;">LibMaster Pro</h3>
-                    <p class="text-muted small mb-0">Modern Library Management System</p>
-                </div>
+        <!-- Credentials Form (Right) -->
+        <div class="login-form-area">
+            <div class="form-header">
+                <h2>Welcome Back</h2>
+                <p>Please enter your administrative credentials to continue.</p>
             </div>
 
-            <div class="login-form-card fade-in">
-                <h4 class="mb-1 fw-bold" style="font-family: 'Poppins', sans-serif; letter-spacing: -0.02em;">Welcome Back</h4>
-                <p class="text-muted mb-4" style="font-size: 0.9rem;">Please enter your administrative credentials to continue.</p>
-
-                <div class="floating-input">
-                    <label>User Name</label>
-                    <input type="text" id="txtUserName" class="form-input-modern" placeholder="Enter username" />
+            <form onsubmit="event.preventDefault(); login();">
+                <!-- Username Input -->
+                <div class="input-group-modern">
+                    <label for="txtUserName">User Name</label>
+                    <div class="input-wrapper-modern">
+                        <i class="fas fa-user input-icon-left"></i>
+                        <input type="text" id="txtUserName" class="form-input-modern" placeholder="Enter username" required autocomplete="username" />
+                    </div>
                 </div>
 
-                <div class="floating-input">
-                    <label>Password</label>
-                    <div class="position-relative">
-                        <input type="password" id="txtPassword" class="form-input-modern" placeholder="••••••••" style="padding-right: 3rem;" />
-                        <button class="btn btn-link position-absolute end-0 top-50 translate-middle-y text-muted" style="outline: none; box-shadow: none; border: none; text-decoration: none;" type="button" onclick="togglePassword()">
-                            <i class="fas fa-eye" id="eyeIcon" style="font-size: 0.95rem;"></i>
+                <!-- Password Input -->
+                <div class="input-group-modern">
+                    <label for="txtPassword">Password</label>
+                    <div class="input-wrapper-modern">
+                        <i class="fas fa-lock input-icon-left"></i>
+                        <input type="password" id="txtPassword" class="form-input-modern" placeholder="••••••••" required autocomplete="current-password" />
+                        <button class="pwd-toggle-btn" type="button" onclick="togglePassword()" title="Toggle password visibility">
+                            <i class="fas fa-eye" id="eyeIcon"></i>
                         </button>
                     </div>
                 </div>
 
-                <div class="floating-input">
-                    <label>Login Type</label>
-                    <select id="ddlLoginType" class="form-input-modern">
-                        <option value="">Loading...</option>
-                    </select>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="rememberMe" style="cursor: pointer;">
-                        <label class="form-check-label small text-muted" for="rememberMe" style="cursor: pointer;">Remember me</label>
+                <!-- Account Type Dropdown -->
+                <div class="input-group-modern">
+                    <label for="ddlLoginType">Login Type</label>
+                    <div class="input-wrapper-modern">
+                        <i class="fas fa-shield-alt input-icon-left"></i>
+                        <select id="ddlLoginType" class="form-input-modern" required>
+                            <option value="">Loading...</option>
+                        </select>
+                        <i class="fas fa-chevron-down select-chevron"></i>
                     </div>
-                    <a href="#" class="small text-primary text-decoration-none fw-semibold">Forgot Password?</a>
                 </div>
 
-                <button class="btn btn-modern btn-primary-modern w-100 py-3 mb-3 text-white" onclick="login()">
+                <!-- Options -->
+                <div class="form-options">
+                    <label class="check-container">
+                        <input type="checkbox" id="rememberMe" class="check-input">
+                        <span>Remember me</span>
+                    </label>
+                    <a href="#" class="forgot-link">Forgot Password?</a>
+                </div>
+
+                <!-- Login Button -->
+                <button type="submit" class="btn-login-modern">
                     <span>Login to Dashboard</span>
-                    <i class="fas fa-arrow-right ms-2"></i>
+                    <i class="fas fa-arrow-right"></i>
                 </button>
+            </form>
 
-                <div id="message" class="message small mt-2"></div>
-
-                <div class="login-footer text-center mt-5">
-                    <p class="mb-0 text-muted small">&copy; 2026 BG Library Solutions &bull; UI Redesign</p>
-                </div>
+            <div class="form-footer-text">
+                &copy; 2026 BG Library Solutions &bull; UI Redesign
             </div>
         </div>
     </div>
@@ -111,230 +555,129 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-
         // ================= PASSWORD TOGGLE =================
-
         function togglePassword() {
+            const pwd = document.getElementById('txtPassword');
+            const icon = document.getElementById('eyeIcon');
 
-        const pwd =
-        document.getElementById('txtPassword');
-
-        const icon =
-        document.getElementById('eyeIcon');
-
-        if (pwd.type === 'password') {
-
-        pwd.type = 'text';
-
-        icon.className =
-        'fas fa-eye-slash';
-
-        }
-        else {
-
-        pwd.type = 'password';
-
-        icon.className =
-        'fas fa-eye';
-        }
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                pwd.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
         }
 
         // ================= PAGE LOAD =================
-
         window.onload = function () {
-
-        loadLoginTypes();
+            loadLoginTypes();
         };
 
         // ================= LOAD LOGIN TYPES =================
-
         async function loadLoginTypes() {
+            try {
+                let response = await fetch('/api/Login/GetLoginTypes');
+                let data = await response.json();
+                let ddl = document.getElementById("ddlLoginType");
 
-        try {
-
-        let response =
-        await fetch(
-        '/api/Login/GetLoginTypes');
-
-        let data =
-        await response.json();
-
-        let ddl =
-        document.getElementById(
-        "ddlLoginType");
-
-        ddl.innerHTML =
-        '<option value="">Select Account Type</option>';
-
-        data.forEach(item => {
-
-        ddl.innerHTML += `
-        <option value="${item}">
-        ${item}
-        </option>`;
-        });
-
-        }
-        catch (err) {
-
-        Swal.fire({
-
-        icon: 'error',
-
-        title: 'System Error',
-
-        text:
-        'Unable to load login types.',
-
-        confirmButtonColor: '#dc3545'
-        });
-        }
+                ddl.innerHTML = '<option value="">Select Account Type</option>';
+                data.forEach(item => {
+                    ddl.innerHTML += `<option value="${item}">${item}</option>`;
+                });
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'System Error',
+                    text: 'Unable to load login types.',
+                    confirmButtonColor: '#4F81BD'
+                });
+            }
         }
 
         // ================= LOGIN =================
-
         async function login() {
+            let userName = document.getElementById("txtUserName").value.trim();
+            let password = document.getElementById("txtPassword").value.trim();
+            let loginType = document.getElementById("ddlLoginType").value;
 
-        let userName =
-        document.getElementById(
-        "txtUserName")
-        .value.trim();
+            // ================= VALIDATION =================
+            if (!userName || !password || !loginType) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Oops! Missing Information',
+                    text: 'Please complete all required fields to continue.',
+                    confirmButtonColor: '#f39c12'
+                });
+                return;
+            }
 
-        let password =
-        document.getElementById(
-        "txtPassword")
-        .value.trim();
+            // ================= LOADING =================
+            Swal.fire({
+                title: 'Authenticating...',
+                text: 'Please wait while verifying credentials',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-        let loginType =
-        document.getElementById(
-        "ddlLoginType")
-        .value;
+            try {
+                let response = await fetch('/api/Login/EnterOk', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        userName: userName,
+                        password: password,
+                        loginType: loginType
+                    })
+                });
 
-        // ================= VALIDATION =================
+                let result = await response.json();
 
-        if (!userName ||
-        !password ||
-        !loginType) {
+                // ================= LOGIN FAILED =================
+                if (!response.ok) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: "Oops...",
+                        html: `
+                            <div style="font-size:14px; color:#333;">
+                                Invalid Username, Password, or Login Type.
+                                <br><br>
+                                Please check your credentials and try again.
+                            </div>
+                        `,
+                        confirmButtonText: 'Try Again',
+                        confirmButtonColor: '#dc3545'
+                    });
+                    return;
+                }
 
-        Swal.fire({
-        icon: 'warning',
-        title: 'Oops! Missing Information',
-        text: 'Please complete all required fields to continue.',
-        confirmButtonColor: '#f39c12'
-        });
+                // ================= LOGIN SUCCESS =================
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Login Successful',
+                    text: 'Redirecting you to dashboard...',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
 
-        return;
+                setTimeout(() => {
+                    window.location.href = "/Dashboard";
+                }, 1800);
+
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Connection Error',
+                    text: 'Unable to connect to server. Please try again later.',
+                    confirmButtonColor: '#dc3545'
+                });
+            }
         }
-
-        // ================= LOADING =================
-
-        Swal.fire({
-
-        title: 'Authenticating...',
-
-        text:
-        'Please wait while verifying credentials',
-
-        allowOutsideClick: false,
-
-        didOpen: () => {
-
-        Swal.showLoading();
-        }
-        });
-
-        try {
-
-        let response =
-        await fetch(
-        '/api/Login/EnterOk',
-        {
-        method: 'POST',
-
-        headers: {
-        'Content-Type':
-        'application/json'
-        },
-
-        body: JSON.stringify({
-
-        userName: userName,
-
-        password: password,
-
-        loginType: loginType
-        })
-        });
-
-        let result =
-        await response.json();
-
-        // ================= LOGIN FAILED =================
-
-        if (!response.ok) {
-
-        Swal.fire({
-
-        icon: 'error',
-
-        title: "Oops...",
-        html: `
-        <div style="font-size:14px;">
-        Invalid Username,
-        Password,
-        or Login Type.
-        <br><br>
-        Please check your
-        credentials and
-        try again.
-        </div>
-        `,
-
-        confirmButtonText:
-        'Try Again',
-
-        confirmButtonColor:
-        '#dc3545'
-        });
-
-        return;
-        }
-
-        // ================= LOGIN SUCCESS =================
-        Swal.fire({
-        icon: 'success',
-        title: 'Login Successful',
-        text: 'Login successful. Redirecting you...',
-        showConfirmButton: false,
-        timer: 2000,
-        timerProgressBar: true
-        });
-
-        setTimeout(() =>
- {
-
-        window.location.href =
-        "/Dashboard";
-
-        }, 1800);
-
-        }
-        catch (err) {
-
-        Swal.fire({
-
-        icon: 'error',
-
-        title: 'Connection Error',
-
-        text:
-        'Unable to connect to server. Please try again later.',
-
-        confirmButtonColor: '#dc3545'
-        });
-        }
-        }
-
     </script>
 </body>
 </html>

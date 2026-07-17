@@ -252,9 +252,9 @@
                 });
 
                 // Auto-select if there is exactly 1 authorized college
-                if (colleges.length === 1) {
-                    $ddl.val(colleges[0]).trigger('change');
-                }
+                // if (colleges.length === 1) {
+                //     $ddl.val(colleges[0]).trigger('change');
+                // }
             } catch (err) {
                 console.error("Colleges loading failed:", err);
                 Swal.fire({
@@ -346,10 +346,11 @@
             <td>${student.eMailID || '-'}</td>
 
             <td class="pe-4 text-center">
-                <button class="btn btn-sm btn-outline-primary"
-                        onclick="openModalForEdit(${student.idNo})">
-                    <i class="fas fa-pen"></i> Edit
-                </button>
+                      <button class="btn btn-sm btn-outline-primary"
+                style="border-radius:var(--radius-sm);"
+                onclick="openModalForEdit(${student.idNo})">
+            <i class="fas fa-pen"></i> Edit
+        </button>
             </td>
         </tr>
         `);

@@ -516,9 +516,9 @@ padding-top:5px;
                 });
 
                 // Auto-select if user is authorized for exactly one college
-                if (filtered.length === 1) {
-                    $ddl.val(encodeURIComponent(filtered[0].collegeName)).trigger('change');
-                }
+                // if (filtered.length === 1) {
+                //     $ddl.val(encodeURIComponent(filtered[0].collegeName)).trigger('change');
+                // }
             } catch (err) {
                 console.error("Colleges loading failed:", err);
                 Swal.fire({

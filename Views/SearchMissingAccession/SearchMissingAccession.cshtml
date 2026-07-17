@@ -1,0 +1,338 @@
+@{
+    ViewData["Title"] = "Search Missing Accession No";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="page-header mt-2 mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fas fa-exclamation-triangle me-2 text-danger"></i>Search Missing Accession No</h2>
+            <p class="text-muted">Generate temp accession sequences and locate missing gaps in the stock register catalog.</p>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="modern-card glass shadow-lg p-4" style="border-top: 4px solid var(--danger);">
+                <form id="searchForm" novalidate onsubmit="event.preventDefault(); loadMissingAccession();">
+                    <div class="row align-items-end g-3">
+                        <div class="col-md-7">
+                            <label for="collegeName" class="form-label small fw-bold text-muted mb-2">College Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 input-group-text-modern">
+                                    <i class="fas fa-university text-muted"></i>
+                                </span>
+                                <select id="collegeName" class="form-input-modern border-start-0" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" required onchange="onCollegeSelectChange()">
+                                    <option value="">-- Select College --</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a college.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-5 d-flex gap-2">
+                            <button type="submit" id="btnSearch" class="btn btn-modern btn-danger-modern flex-grow-1" style="height: 48px;">
+                                <i class="fas fa-search me-2" id="searchIcon"></i>
+                                <span class="spinner-border spinner-border-sm me-2 d-none" id="searchSpinner" role="status" aria-hidden="true"></span>
+                                Find Missing
+                            </button>
+                            <button type="button" id="btnCancel" class="btn btn-modern btn-secondary-modern" onclick="location.href='/Dashboard/Index'" style="height: 48px;" title="Close">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert / Validation Message Label -->
+    <div class="row d-none" id="msgRow">
+        <div class="col-12">
+            <div class="alert alert-danger" role="alert" id="lblmsg"></div>
+        </div>
+    </div>
+
+    <!-- Generation Progress Overlay (Mocking the legacy ProgressBar) -->
+    <div class="row d-none" id="progressRow">
+        <div class="col-12">
+            <div class="modern-card p-4 text-center shadow-sm mb-4">
+                <h6 class="fw-bold mb-2 text-danger animate-pulse" id="progressStatus">Please wait... calculating maximum sequence and checking stock register records...</h6>
+                <div class="progress" style="height: 24px;">
+                    <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-danger" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row">
+        <div class="col-md-6 offset-md-3 col-sm-12">
+            <div class="modern-card shadow-sm p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-main" id="resultsTitle">Gaps & Missing Gaps</h5>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-danger px-3 py-2">Total Missing: <span id="lbltotalmissing">0</span></span>
+                        <button type="button" id="btnExport" class="btn btn-modern btn-success-modern btn-sm d-none" onclick="exportToExcel()" title="Export to Excel">
+                            <i class="fas fa-file-excel me-1"></i> Export
+                        </button>
+                        <button type="button" id="btnPrint" class="btn btn-modern btn-info-modern btn-sm d-none" onclick="printResults()" title="Print Grid">
+                            <i class="fas fa-print me-1"></i> Print
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Desktop/Tablet Table View -->
+                <div class="table-responsive-modern" id="missingTableView">
+                    <table class="table custom-table mb-0 text-center">
+                        <thead>
+                            <tr>
+                                <th style="width: 100%;">Missing Accession No.</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td class="py-5 text-muted">
+                                    <i class="fas fa-exclamation-circle fa-3x mb-3 opacity-25"></i>
+                                    <p class="mb-0">Select a college to list missing accession numbers.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let progressInterval = null;
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            await loadColleges();
+        });
+
+        // Load colleges for the dropdown
+        async function loadColleges() {
+            try {
+                const response = await fetch('/api/report/colleges');
+                if (!response.ok) throw new Error("Failed to load colleges");
+
+                const colleges = await response.json();
+                const ddl = document.getElementById("collegeName");
+                ddl.innerHTML = '<option value="">-- Select College --</option>';
+
+                colleges.forEach(college => {
+                    const option = document.createElement("option");
+                    option.value = college;
+                    option.textContent = college;
+                    ddl.appendChild(option);
+                });
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Unable to load colleges dropdown list.'
+                });
+            }
+        }
+
+        // Trigger search instantly when college changes (legacy SelectedIndexChanged behavior)
+        function onCollegeSelectChange() {
+            const collegeName = document.getElementById("collegeName").value;
+            if (collegeName && collegeName !== "") {
+                loadMissingAccession();
+            } else {
+                clearResults();
+            }
+        }
+
+        // Handle progress bar animation states
+        function startProgressAnimation() {
+            document.getElementById("progressRow").classList.remove("d-none");
+            const progressBar = document.getElementById("progressBar");
+            progressBar.style.width = "0%";
+            progressBar.innerText = "0%";
+            progressBar.setAttribute("aria-valuenow", 0);
+
+            let percent = 0;
+            progressInterval = setInterval(() => {
+                if (percent < 90) {
+                    percent += Math.floor(Math.random() * 15) + 5;
+                    if (percent > 90) percent = 90;
+                    progressBar.style.width = percent + "%";
+                    progressBar.innerText = percent + "%";
+                    progressBar.setAttribute("aria-valuenow", percent);
+                }
+            }, 300);
+        }
+
+        function endProgressAnimation(success = true) {
+            clearInterval(progressInterval);
+            const progressBar = document.getElementById("progressBar");
+            if (success) {
+                progressBar.style.width = "100%";
+                progressBar.innerText = "100% Complete";
+                progressBar.setAttribute("aria-valuenow", 100);
+            }
+            setTimeout(() => {
+                document.getElementById("progressRow").classList.add("d-none");
+            }, 800);
+        }
+
+        // Show validation message
+        function showValidationMsg(msg) {
+            const msgRow = document.getElementById("msgRow");
+            const lblmsg = document.getElementById("lblmsg");
+            lblmsg.textContent = msg;
+            msgRow.classList.remove("d-none");
+        }
+
+        // Hide validation message
+        function hideValidationMsg() {
+            const msgRow = document.getElementById("msgRow");
+            const lblmsg = document.getElementById("lblmsg");
+            lblmsg.textContent = "";
+            msgRow.classList.add("d-none");
+        }
+
+        // Fetch search results
+        async function loadMissingAccession() {
+            const collegeName = document.getElementById("collegeName").value;
+
+            if (!collegeName || collegeName === "") {
+                showValidationMsg("Select College Name");
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Validation Error',
+                    text: 'Select College Name'
+                });
+                return;
+            }
+
+            hideValidationMsg();
+            startProgressAnimation();
+
+            try {
+                const response = await fetch('/api/SearchMissingAccession/Search?collegeName=' + encodeURIComponent(collegeName), {
+                    method: 'POST'
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || "Error searching missing accession numbers");
+                }
+
+                const result = await response.json();
+                endProgressAnimation(true);
+
+                const missingList = result.data || [];
+                document.getElementById("lbltotalmissing").innerText = missingList.length;
+
+                renderTable(missingList);
+
+                if (missingList.length > 0) {
+                    document.getElementById("btnExport").classList.remove("d-none");
+                    document.getElementById("btnPrint").classList.remove("d-none");
+                    document.getElementById("resultsTitle").innerText = "Missing Numbers in " + collegeName;
+                } else {
+                    document.getElementById("btnExport").classList.add("d-none");
+                    document.getElementById("btnPrint").classList.add("d-none");
+                    document.getElementById("resultsTitle").innerText = "Gaps & Missing Gaps";
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'No Missing Numbers',
+                        text: 'No missing accession numbers were found.'
+                    });
+                }
+
+            } catch (error) {
+                console.error(error);
+                endProgressAnimation(false);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Process Failed',
+                    text: error.message || 'An error occurred while generating missing numbers.'
+                });
+                clearResults();
+            }
+        }
+
+        // Reset elements
+        function clearResults() {
+            document.getElementById("btnExport").classList.add("d-none");
+            document.getElementById("btnPrint").classList.add("d-none");
+            document.getElementById("lbltotalmissing").innerText = "0";
+            document.getElementById("resultsTitle").innerText = "Gaps & Missing Gaps";
+            document.getElementById("tableBody").innerHTML = '<tr><td class="py-5 text-muted"><i class="fas fa-exclamation-circle fa-3x mb-3 opacity-25"></i><p class="mb-0">Select a college to list missing accession numbers.</p></td></tr>';
+        }
+
+        // Render Table Rows
+        function renderTable(numbers) {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
+
+            if (numbers.length === 0) {
+                tbody.innerHTML = '<tr><td class="py-5 text-success"><i class="fas fa-check-circle fa-2x mb-2"></i><p class="mb-0">No gaps found! All accession sequences are contiguous.</p></td></tr>';
+                return;
+            }
+
+            numbers.forEach(num => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = '<td class="fw-bold text-danger">' + num + '</td>';
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Export data to Excel
+        function exportToExcel() {
+            const collegeName = document.getElementById("collegeName").value;
+
+            if (!collegeName) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Warning',
+                    text: 'Select College Name first.'
+                });
+                return;
+            }
+
+            window.location.href = '/api/SearchMissingAccession/ExportExcel?collegeName=' + encodeURIComponent(collegeName);
+        }
+
+        // Print Grid Results
+        function printResults() {
+            const collegeName = document.getElementById("collegeName").value;
+            const printContent = document.getElementById("missingTableView").innerHTML;
+
+            const win = window.open('', '', 'height=700,width=600');
+            win.document.write('<html><head><title>Missing Accession Report</title>');
+            win.document.write('<link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css">');
+            win.document.write('<style>');
+            win.document.write('body { font-family: sans-serif; padding: 20px; }');
+            win.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
+            win.document.write('th, td { border: 1px solid #dee2e6; padding: 10px; text-align: center; font-size: 13px; }');
+            win.document.write('th { background-color: #f8f9fa; font-weight: bold; }');
+            win.document.write('td { font-weight: bold; color: #d9534f; }');
+            win.document.write('.header { margin-bottom: 25px; text-align: center; }');
+            win.document.write('<\/style><\/head><body>');
+            win.document.write('<div class="header">');
+            win.document.write('<h3>Missing Accession Numbers Report</h3>');
+            win.document.write('<h5>College: ' + collegeName + '</h5>');
+            win.document.write('<h6>Generated on: ' + new Date().toLocaleString() + '</h6>');
+            win.document.write('<\/div>');
+            win.document.write(printContent);
+            win.document.write('<\/body><\/html>');
+            win.document.close();
+            
+            setTimeout(() => {
+                win.print();
+                win.close();
+            }, 500);
+        }
+    </script>
+}

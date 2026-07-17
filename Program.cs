@@ -48,6 +48,14 @@ builder.Services.AddScoped<IStaffReportService, StaffReportService>();
 builder.Services.AddScoped<IStudentSettingService, StudentSettingService>();
 builder.Services.AddScoped<ITeacherSettingService, TeacherSettingService>();
 builder.Services.AddScoped<IProfileService, ProfileService>();
+builder.Services.AddScoped<IFacultySearchService, FacultySearchService>();
+builder.Services.AddScoped<ISearchIssueDatesService, SearchIssueDatesService>();
+builder.Services.AddScoped<ISearchBookNoService, SearchBookNoService>();
+builder.Services.AddScoped<ISearchClassNoService, SearchClassNoService>();
+builder.Services.AddScoped<ISearchAccessionService, SearchAccessionService>();
+builder.Services.AddScoped<IMissingAccessionService, MissingAccessionService>();
+builder.Services.AddScoped<ISearchISBNService, SearchISBNService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 
 // =====================================================

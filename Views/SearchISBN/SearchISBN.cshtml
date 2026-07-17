@@ -1,0 +1,455 @@
+@{
+    ViewData["Title"] = "Search ISBN No";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="page-header mt-2 mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fas fa-barcode me-2 text-primary"></i>Search ISBN No</h2>
+            <p class="text-muted">Search and view details of books registered in the stock catalog by ISBN Number.</p>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="modern-card glass shadow-lg p-4" style="border-top: 4px solid var(--primary);">
+                <form id="searchForm" novalidate onsubmit="event.preventDefault(); loadISBNSearch();">
+                    <div class="row align-items-end g-3">
+                        <div class="col-md-5">
+                            <label for="collegeName" class="form-label small fw-bold text-muted mb-2">College Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 input-group-text-modern">
+                                    <i class="fas fa-university text-muted"></i>
+                                </span>
+                                <select id="collegeName" class="form-input-modern border-start-0" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" required>
+                                    <option value="">-- Select College --</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a college.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="isbnInput" class="form-label small fw-bold text-muted mb-2">ISBN No.</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 input-group-text-modern">
+                                    <i class="fas fa-barcode text-muted"></i>
+                                </span>
+                                <input type="text" id="isbnInput" class="form-input-modern border-start-0" placeholder="Enter ISBN No..." style="border-top-left-radius: 0; border-bottom-left-radius: 0;" />
+                            </div>
+                        </div>
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" id="btnSearch" class="btn btn-modern btn-primary-modern flex-grow-1" style="height: 48px;">
+                                <i class="fas fa-search me-2" id="searchIcon"></i>
+                                <span class="spinner-border spinner-border-sm me-2 d-none" id="searchSpinner" role="status" aria-hidden="true"></span>
+                                Search
+                            </button>
+                            <button type="button" id="btnClose" class="btn btn-modern btn-secondary-modern" onclick="location.href='/Dashboard/Index'" style="height: 48px;" title="Close">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert / Validation Message Label -->
+    <div class="row d-none" id="msgRow">
+        <div class="col-12">
+            <div class="alert alert-danger" role="alert" id="lblmsg"></div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="modern-card shadow-sm p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-main" id="resultsTitle">Search Results</h5>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-primary px-3 py-2">Total: <span id="lbltotalnoofISBNno">0</span> Books</span>
+                        <button type="button" id="btnExport" class="btn btn-modern btn-success-modern btn-sm d-none" onclick="exportToExcel()" title="Export to Excel">
+                            <i class="fas fa-file-excel me-1"></i> Export
+                        </button>
+                        <button type="button" id="btnPrint" class="btn btn-modern btn-info-modern btn-sm d-none" onclick="printResults()" title="Print Grid">
+                            <i class="fas fa-print me-1"></i> Print
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Desktop/Tablet Table View -->
+                <div class="table-responsive-modern d-none d-md-block" id="desktopView">
+                    <table class="table custom-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Accession No.</th>
+                                <th>Author</th>
+                                <th>Publisher</th>
+                                <th>Edition</th>
+                                <th>ISBN</th>
+                                <th>Class No.</th>
+                                <th>Book No.</th>
+                                <th>Year</th>
+                                <th>Pages</th>
+                                <th>Price</th>
+                                <th>Net Price</th>
+                                <th>Location</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="13" class="text-center py-5 text-muted">
+                                    <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                                    <p class="mb-0">Enter search criteria to view book records.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="d-block d-md-none" id="mobileView">
+                    <div id="mobileCardsContainer">
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                            <p class="mb-0">Enter search criteria to view book records.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            await loadColleges();
+
+            // Set up Enter key listener in search input
+            const isbnInput = document.getElementById("isbnInput");
+            isbnInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    loadISBNSearch();
+                }
+            });
+        });
+
+        // Load colleges for the dropdown
+        async function loadColleges() {
+            try {
+                const response = await fetch('/api/report/colleges');
+                if (!response.ok) throw new Error("Failed to load colleges");
+
+                const colleges = await response.json();
+                const ddl = document.getElementById("collegeName");
+                ddl.innerHTML = '<option value="">-- Select College --</option>';
+
+                colleges.forEach(college => {
+                    const option = document.createElement("option");
+                    option.value = college;
+                    option.textContent = college;
+                    ddl.appendChild(option);
+                });
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Unable to load colleges dropdown list.'
+                });
+            }
+        }
+
+        // Toggle search button loading state
+        function setLoading(isLoading) {
+            const btnSearch = document.getElementById("btnSearch");
+            const searchIcon = document.getElementById("searchIcon");
+            const searchSpinner = document.getElementById("searchSpinner");
+
+            if (isLoading) {
+                btnSearch.disabled = true;
+                searchIcon.classList.add("d-none");
+                searchSpinner.classList.remove("d-none");
+            } else {
+                btnSearch.disabled = false;
+                searchIcon.classList.remove("d-none");
+                searchSpinner.classList.add("d-none");
+            }
+        }
+
+        // Show validation message
+        function showValidationMsg(msg) {
+            const msgRow = document.getElementById("msgRow");
+            const lblmsg = document.getElementById("lblmsg");
+            lblmsg.textContent = msg;
+            msgRow.classList.remove("d-none");
+        }
+
+        // Hide validation message
+        function hideValidationMsg() {
+            const msgRow = document.getElementById("msgRow");
+            const lblmsg = document.getElementById("lblmsg");
+            lblmsg.textContent = "";
+            msgRow.classList.add("d-none");
+        }
+
+        // Fetch search results
+        async function loadISBNSearch() {
+            const collegeName = document.getElementById("collegeName").value;
+            const isbn = document.getElementById("isbnInput").value.trim();
+
+            const form = document.getElementById("searchForm");
+            if (!collegeName || collegeName === "") {
+                form.classList.add("was-validated");
+                showValidationMsg("Select College Name");
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Validation Error',
+                    text: 'Select College Name'
+                });
+                return;
+            }
+
+            hideValidationMsg();
+            form.classList.remove("was-validated");
+            setLoading(true);
+
+            try {
+                const response = await fetch('/api/SearchISBN/Search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        collegeName: collegeName,
+                        isbn: isbn
+                    })
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || "Error searching ISBN catalog");
+                }
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    showValidationMsg("No Records Found");
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'No Records Found',
+                        text: 'No records found matching the specified ISBN.'
+                    });
+                    clearResults();
+                    return;
+                }
+
+                const bookList = result.data || [];
+
+                // Render Results
+                document.getElementById("lbltotalnoofISBNno").innerText = bookList.length;
+                renderTable(bookList);
+                renderMobileCards(bookList);
+                
+                // Show Export, Print and change results title
+                document.getElementById("btnExport").classList.remove("d-none");
+                document.getElementById("btnPrint").classList.remove("d-none");
+                document.getElementById("resultsTitle").innerText = "Stock Catalog in " + collegeName;
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Search Failed',
+                    text: error.message || 'An error occurred while searching records.'
+                });
+                clearResults();
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Reset elements
+        function clearResults() {
+            document.getElementById("btnExport").classList.add("d-none");
+            document.getElementById("btnPrint").classList.add("d-none");
+            document.getElementById("lbltotalnoofISBNno").innerText = "0";
+            document.getElementById("resultsTitle").innerText = "Search Results";
+
+            // Reset Desktop Table
+            document.getElementById("tableBody").innerHTML = '<tr><td colspan="13" class="text-center py-5 text-muted"><i class="fas fa-search fa-3x mb-3 opacity-25"></i><p class="mb-0">No records found.</p></td></tr>';
+
+            // Reset Mobile Cards
+            document.getElementById("mobileCardsContainer").innerHTML = '<div class="text-center py-5 text-muted"><i class="fas fa-search fa-3x mb-3 opacity-25"></i><p class="mb-0">No records found.</p></div>';
+        }
+
+        // Render Desktop Table
+        function renderTable(books) {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
+
+            if (books.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="13" class="text-center py-5">No Records Found</td></tr>';
+                return;
+            }
+
+            books.forEach(b => {
+                const tr = document.createElement("tr");
+                const titleVal = b.title || '';
+                const accessionNoVal = b.accessionNo || '-';
+                const authorVal = b.author || '-';
+                const publisherVal = b.publisher || '-';
+                const editionVal = b.edition || '-';
+                const isbnVal = b.isbn || '-';
+                const classNoVal = b.classNo || '-';
+                const bookNoVal = b.bookNo || '-';
+                const yearVal = b.year || '-';
+                const pagesVal = b.pages || '-';
+                const priceVal = b.price || '-';
+                const netPriceVal = b.netPrice != null ? b.netPrice.toFixed(2) : '-';
+                const locationVal = b.location || '-';
+
+                tr.innerHTML = 
+                    '<td class="fw-semibold text-main" style="max-width: 200px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="' + titleVal.replace(/"/g, '&quot;') + '">' + (b.title || '-') + '</td>' +
+                    '<td><span class="badge bg-light text-dark border">' + accessionNoVal + '</span></td>' +
+                    '<td>' + authorVal + '</td>' +
+                    '<td>' + publisherVal + '</td>' +
+                    '<td>' + editionVal + '</td>' +
+                    '<td class="fw-semibold text-primary">' + isbnVal + '</td>' +
+                    '<td class="fw-semibold text-secondary">' + classNoVal + '</td>' +
+                    '<td>' + bookNoVal + '</td>' +
+                    '<td>' + yearVal + '</td>' +
+                    '<td>' + pagesVal + '</td>' +
+                    '<td>' + priceVal + '</td>' +
+                    '<td class="fw-bold">' + netPriceVal + '</td>' +
+                    '<td style="max-width: 150px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="' + locationVal.replace(/"/g, '&quot;') + '">' + locationVal + '</td>';
+                
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render Mobile Cards
+        function renderMobileCards(books) {
+            const container = document.getElementById("mobileCardsContainer");
+            container.innerHTML = "";
+
+            if (books.length === 0) {
+                container.innerHTML = '<div class="text-center py-5 text-muted">No Records Found</div>';
+                return;
+            }
+
+            books.forEach(b => {
+                const card = document.createElement("div");
+                card.className = "modern-card mb-3 p-3 shadow-sm border-start border-4";
+                card.style.borderLeftColor = "var(--primary)";
+                
+                const titleVal = b.title || '-';
+                const authorVal = b.author || '-';
+                const isbnVal = b.isbn || '-';
+                const accessionNoVal = b.accessionNo || '-';
+                const publisherVal = b.publisher || '-';
+                const editionVal = b.edition || '-';
+                const classNoVal = b.classNo || '-';
+                const bookNoVal = b.bookNo || '-';
+                const yearVal = b.year || '-';
+                const pagesVal = b.pages || '-';
+                const priceVal = b.price || '-';
+                const netPriceVal = b.netPrice != null ? b.netPrice.toFixed(2) : '-';
+                const locationVal = b.location || '-';
+
+                card.innerHTML = 
+                    '<div class="d-flex justify-content-between align-items-start mb-2">' +
+                        '<div>' +
+                            '<h6 class="fw-bold mb-0 text-main">' + titleVal + '</h6>' +
+                            '<small class="text-muted">Author: ' + authorVal + '</small>' +
+                        '</div>' +
+                        '<div>' +
+                            '<span class="badge bg-light text-dark border small me-1">ISBN: ' + isbnVal + '</span>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="row g-2 pt-2 border-top mt-2 text-muted" style="font-size: 0.825rem;">' +
+                        '<div class="col-6">' +
+                            '<span class="text-muted small d-block">Accession No.</span>' +
+                            '<span class="fw-semibold text-main">' + accessionNoVal + '</span>' +
+                        '</div>' +
+                        '<div class="col-6">' +
+                            '<span class="text-muted small d-block">Publisher (Ed)</span>' +
+                            '<span class="fw-semibold text-main">' + publisherVal + ' (' + editionVal + ')</span>' +
+                        '</div>' +
+                        '<div class="col-6">' +
+                            '<span class="text-muted small d-block">Class / Book No.</span>' +
+                            '<span class="fw-semibold text-main">' + classNoVal + ' / ' + bookNoVal + '</span>' +
+                        '</div>' +
+                        '<div class="col-6">' +
+                            '<span class="text-muted small d-block">Year / Pages</span>' +
+                            '<span class="fw-semibold text-main">' + yearVal + ' / ' + pagesVal + '</span>' +
+                        '</div>' +
+                        '<div class="col-6">' +
+                            '<span class="text-muted small d-block">Price / Net Price</span>' +
+                            '<span class="fw-semibold text-main">' + priceVal + ' / ' + netPriceVal + '</span>' +
+                        '</div>' +
+                        '<div class="col-6">' +
+                            '<span class="text-muted small d-block">Location</span>' +
+                            '<span class="fw-semibold text-main">' + locationVal + '</span>' +
+                        '</div>' +
+                    '</div>';
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Export data to Excel spreadsheet
+        function exportToExcel() {
+            const collegeName = document.getElementById("collegeName").value;
+            const isbn = document.getElementById("isbnInput").value.trim();
+
+            if (!collegeName) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Warning',
+                    text: 'Select College Name first.'
+                });
+                return;
+            }
+
+            window.location.href = '/api/SearchISBN/ExportExcel?collegeName=' + encodeURIComponent(collegeName) + '&isbn=' + encodeURIComponent(isbn);
+        }
+
+        // Print Grid Results
+        function printResults() {
+            const collegeName = document.getElementById("collegeName").value;
+            const printContent = document.getElementById("desktopView").innerHTML;
+
+            const win = window.open('', '', 'height=700,width=900');
+            win.document.write('<html><head><title>ISBN Report</title>');
+            win.document.write('<link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css">');
+            win.document.write('<style>');
+            win.document.write('body { font-family: sans-serif; padding: 20px; }');
+            win.document.write('table { width: 100%; border-collapse: collapse; margin-top: 20px; }');
+            win.document.write('th, td { border: 1px solid #dee2e6; padding: 8px; text-align: left; font-size: 11px; }');
+            win.document.write('th { background-color: #f8f9fa; font-weight: bold; }');
+            win.document.write('.header { margin-bottom: 20px; text-align: center; }');
+            win.document.write('<\/style><\/head><body>');
+            win.document.write('<div class="header">');
+            win.document.write('<h3>ISBN Search Report</h3>');
+            win.document.write('<h5>College: ' + collegeName + '</h5>');
+            win.document.write('<h6>Generated on: ' + new Date().toLocaleString() + '</h6>');
+            win.document.write('<\/div>');
+            win.document.write(printContent);
+            win.document.write('<\/body><\/html>');
+            win.document.close();
+            
+            setTimeout(() => {
+                win.print();
+                win.close();
+            }, 500);
+        }
+    </script>
+}

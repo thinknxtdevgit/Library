@@ -19,7 +19,7 @@
 
     <nav class="sidebar-menu">
         <!-- Dashboard -->
-      @*   <a asp-controller="Dashboard"
+        <a asp-controller="Dashboard"
                asp-action="Index"
                class="menu-item">
 
@@ -29,7 +29,7 @@
 
             <span>Dashboard</span>
         </a>
- *@
+ 
         <!-- Book Management Dropdown -->
         <div class="menu-dropdown">
             <button class="menu-dropdown-toggle" type="button" 
@@ -138,7 +138,7 @@
         <!-- Search Dropdown -->
         <div class="menu-dropdown">
             <button class="menu-dropdown-toggle" type="button"
-                    aria-expanded="@(currentController == "Search" ? "true" : "false")">
+                    aria-expanded="@(currentController == "Search" || currentController == "PersonSearch" || currentController == "SearchDetailedAccession" || currentController == "SearchPersonId" || currentController == "SearchStudentName" || currentController == "FacultySearch" || currentController == "SearchIssueDates" || currentController == "SearchBookNo" || currentController == "SearchClassNo" || currentController == "SearchAccession" || currentController == "SearchMissingAccession" || currentController == "SearchISBN" ? "true" : "false")">
 
                 <div class="menu-icon">
                     <i class="fas fa-search"></i>
@@ -149,7 +149,7 @@
                 <i class="fas fa-chevron-right toggle-icon"></i>
             </button>
 
-            <ul class="menu-sub @(currentController == "Search" ? "show" : "")">
+            <ul class="menu-sub @(currentController == "Search" || currentController == "PersonSearch" || currentController == "SearchDetailedAccession" || currentController == "SearchPersonId" || currentController == "SearchStudentName" || currentController == "FacultySearch" || currentController == "SearchIssueDates" || currentController == "SearchBookNo" || currentController == "SearchClassNo" || currentController == "SearchAccession" || currentController == "SearchMissingAccession" || currentController == "SearchISBN" ? "show" : "")">
                 <li>
                     <a asp-controller="PersonSearch" asp-action="Index"
                            class="menu-sub-item @(currentController == "PersonSearch" ? "active" : "")">
@@ -172,6 +172,48 @@
                     <a asp-controller="SearchStudentName" asp-action="Index"
                            class="menu-sub-item @(currentController == "SearchStudentName" ? "active" : "")">
                         Student Name
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="FacultySearch" asp-action="Index"
+                           class="menu-sub-item @(currentController == "FacultySearch" ? "active" : "")">
+                        Faculty Name
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="SearchIssueDates" asp-action="Index"
+                           class="menu-sub-item @(currentController == "SearchIssueDates" ? "active" : "")">
+                        Issue Dates
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="SearchBookNo" asp-action="Index"
+                           class="menu-sub-item @(currentController == "SearchBookNo" ? "active" : "")">
+                        Book No
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="SearchClassNo" asp-action="Index"
+                           class="menu-sub-item @(currentController == "SearchClassNo" ? "active" : "")">
+                        Class No
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="SearchAccession" asp-action="Index"
+                           class="menu-sub-item @(currentController == "SearchAccession" ? "active" : "")">
+                        Accession No
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="SearchMissingAccession" asp-action="Index"
+                           class="menu-sub-item @(currentController == "SearchMissingAccession" ? "active" : "")">
+                        Missing Accession No
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="SearchISBN" asp-action="Index"
+                           class="menu-sub-item @(currentController == "SearchISBN" ? "active" : "")">
+                        ISBN No
                     </a>
                 </li>
             </ul>

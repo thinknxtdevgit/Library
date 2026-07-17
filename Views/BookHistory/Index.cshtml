@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Book History";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -295,16 +295,57 @@
                 return;
             }
 
+            let shouldHideLoader = true;
+
             try {
 
                 showLoader();
 
+                // 1. Verify if the Accession No exists in Stock Register
+                try {
+                    const verifyResponse = await fetch(`/api/SearchAccession/Search?collegeName=${encodeURIComponent(collegeName)}&accessionNo=${encodeURIComponent(accessionNo)}`);
+                    if (verifyResponse.ok) {
+                        const verifyResult = await verifyResponse.json();
+                        if (verifyResult && verifyResult.success === false) {
+                            hideLoader();
+                            shouldHideLoader = false;
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Invalid Accession No',
+                                text: 'Wrong Accession No! This book is not registered in the selected college.',
+                                confirmButtonColor: '#f39c12'
+                            });
+                            return;
+                        }
+                    }
+                } catch (verifyErr) {
+                    console.warn("Accession verification endpoint bypass: ", verifyErr);
+                }
+
+                // 2. Fetch Transaction History
                 const response =
                     await fetch(
                         `/BookHistory/search?collegeName=${encodeURIComponent(collegeName)}&accessionNo=${encodeURIComponent(accessionNo)}`
                     );
 
                 if (!response.ok) {
+                    if (response.status === 404) {
+                        // Book is valid, but has no transaction history records
+                        renderTable([]);
+                        document.getElementById("totalTransactions").innerText = "0";
+                        document.getElementById("totalRenew").innerText = "0";
+                        document.getElementById("totalReturn").innerText = "0";
+                        document.getElementById("rowCount").innerText = "0 Records";
+                        hideLoader();
+                        shouldHideLoader = false;
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'No Transaction History',
+                            text: 'This book exists in the catalog but has no transactions (issuances or returns) recorded yet.',
+                            confirmButtonColor: '#4F81BD'
+                        });
+                        return;
+                    }
 
                     const error =
                         await response.text();
@@ -314,7 +355,7 @@
 
                 const data =
                     await response.json();
-                            document.getElementById("totalTransactions").innerText =
+                document.getElementById("totalTransactions").innerText =
             data.length;
 
         // Renew Count
@@ -354,7 +395,9 @@
             }
             finally {
 
-                hideLoader();
+                if (shouldHideLoader) {
+                    hideLoader();
+                }
             }
         }
 

@@ -1,0 +1,898 @@
+@{
+    ViewData["Title"] = "Search Accession No";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="page-header mt-2 mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fas fa-search me-2 text-primary"></i>Search Accession No</h2>
+            <p class="text-muted">Search, view, and update book catalog details by Accession Number along with current student issue status.</p>
+        </div>
+    </div>
+
+    <!-- Filter & Accession Input Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="modern-card glass shadow-lg p-4" style="border-top: 4px solid var(--primary);">
+                <form id="filterForm" novalidate onsubmit="event.preventDefault(); loadAccessionSearch();">
+                    <div class="row align-items-end g-3">
+                        <div class="col-md-5">
+                            <label for="collegeName" class="form-label small fw-bold text-muted mb-2">College Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 input-group-text-modern">
+                                    <i class="fas fa-university text-muted"></i>
+                                </span>
+                                <select id="collegeName" class="form-input-modern border-start-0" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" required onchange="onCollegeChange()">
+                                    <option value="">-- Select College --</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a college.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="accessionNoInput" class="form-label small fw-bold text-muted mb-2">Accession No.</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 input-group-text-modern">
+                                    <i class="fas fa-fingerprint text-muted"></i>
+                                </span>
+                                <input type="text" id="accessionNoInput" class="form-input-modern border-start-0" placeholder="Enter Accession No..." style="border-top-left-radius: 0; border-bottom-left-radius: 0;" required onkeypress="return isNumberKey(event)" />
+                                <div class="invalid-feedback">Please enter a valid numeric accession number.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" id="btnSearch" class="btn btn-modern btn-primary-modern flex-grow-1" style="height: 48px;">
+                                <i class="fas fa-search me-2" id="searchIcon"></i>
+                                <span class="spinner-border spinner-border-sm me-2 d-none" id="searchSpinner" role="status" aria-hidden="true"></span>
+                                Search
+                            </button>
+                            <button type="button" id="btnNewEntry" class="btn btn-modern btn-secondary-modern" onclick="clearAllFields()" style="height: 48px;" title="Clear Form">
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert / Validation Message Label -->
+    <div class="row d-none" id="msgRow">
+        <div class="col-12">
+            <div class="alert alert-danger" role="alert" id="lblmsg"></div>
+        </div>
+    </div>
+
+    <!-- Main Two-Panel Layout -->
+    <div class="row g-4">
+        <!-- Left Panel: Book Details (Updateable) -->
+        <div class="col-lg-8">
+            <div class="modern-card shadow-sm p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-2">
+                    <h5 class="fw-bold mb-0 text-main"><i class="fas fa-book me-2 text-primary"></i>Book Details</h5>
+                    <span class="badge bg-secondary px-3 py-2" id="bookAccessionBadge">No Book Loaded</span>
+                </div>
+                
+                <form id="bookDetailsForm" novalidate onsubmit="event.preventDefault(); updateBookDetails();">
+                    <!-- General Details -->
+                    <div class="row g-3">
+                        <div class="col-md-9">
+                            <label for="txttitle" class="form-label small fw-bold text-muted mb-1">Title</label>
+                            <input type="text" id="txttitle" class="form-control" placeholder="Book Title" required />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="cmbBinding" class="form-label small fw-bold text-muted mb-1">Binding Book</label>
+                            <select id="cmbBinding" class="form-select">
+                                <option value="Yes">Yes</option>
+                                <option value="No">No</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-12">
+                            <label for="txtsubtitle" class="form-label small fw-bold text-muted mb-1">Sub-Title</label>
+                            <input type="text" id="txtsubtitle" class="form-control" placeholder="Book Subtitle" />
+                        </div>
+
+                        <!-- Authors Block -->
+                        <div class="col-12">
+                            <div class="p-3 border rounded bg-light">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="small fw-bold text-primary"><i class="fas fa-users me-1"></i>Authors Information</span>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="chkboxother" onchange="onAuthorsCheckboxChange()">
+                                        <label class="form-check-label small fw-semibold text-muted" for="chkboxother">
+                                            More than 3 authors
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="txtforename1" class="form-label small fw-semibold text-muted mb-1">Author 1 Forename</label>
+                                        <input type="text" id="txtforename1" class="form-control form-control-sm" placeholder="Forename 1" onkeyup="generateAuthorName()" />
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="txtsirname1" class="form-label small fw-semibold text-muted mb-1">Author 1 Surname</label>
+                                        <input type="text" id="txtsirname1" class="form-control form-control-sm" placeholder="Surname 1" onkeyup="generateAuthorName()" />
+                                    </div>
+
+                                    <div class="col-md-6 author2-field">
+                                        <label for="txtforename2" class="form-label small fw-semibold text-muted mb-1">Author 2 Forename</label>
+                                        <input type="text" id="txtforename2" class="form-control form-control-sm" placeholder="Forename 2" onkeyup="generateAuthorName()" />
+                                    </div>
+                                    <div class="col-md-6 author2-field">
+                                        <label for="txtsirname2" class="form-label small fw-semibold text-muted mb-1">Author 2 Surname</label>
+                                        <input type="text" id="txtsirname2" class="form-control form-control-sm" placeholder="Surname 2" onkeyup="generateAuthorName()" />
+                                    </div>
+
+                                    <div class="col-md-6 author3-field">
+                                        <label for="txtforename3" class="form-label small fw-semibold text-muted mb-1">Author 3 Forename</label>
+                                        <input type="text" id="txtforename3" class="form-control form-control-sm" placeholder="Forename 3" onkeyup="generateAuthorName()" />
+                                    </div>
+                                    <div class="col-md-6 author3-field">
+                                        <label for="txtsirname3" class="form-label small fw-semibold text-muted mb-1">Author 3 Surname</label>
+                                        <input type="text" id="txtsirname3" class="form-control form-control-sm" placeholder="Surname 3" onkeyup="generateAuthorName()" />
+                                    </div>
+
+                                    <div class="col-12 mt-2">
+                                        <label for="txtauthor" class="form-label small fw-semibold text-muted mb-1">Full Generated Author Name</label>
+                                        <input type="text" id="txtauthor" class="form-control form-control-sm bg-light" readonly placeholder="concatenated author name" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Publisher, Category, Type, Source -->
+                        <div class="col-md-6">
+                            <label for="cmbpublisher" class="form-label small fw-bold text-muted mb-1">Publisher</label>
+                            <select id="cmbpublisher" class="form-select">
+                                <option value="Select">Select</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="cmbcategory" class="form-label small fw-bold text-muted mb-1">Category</label>
+                            <select id="cmbcategory" class="form-select">
+                                <option value="Select">Select</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="cmbtype" class="form-label small fw-bold text-muted mb-1">Type</label>
+                            <select id="cmbtype" class="form-select">
+                                <option value="Select">Select</option>
+                                <option value="General">General</option>
+                                <option value="Reference">Reference</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="cmbsource" class="form-label small fw-bold text-muted mb-1">Source</label>
+                            <select id="cmbsource" class="form-select">
+                                <option value="Select">Select</option>
+                            </select>
+                        </div>
+
+                        <!-- Pricing Fields -->
+                        <div class="col-md-4">
+                            <label for="txtprice" class="form-label small fw-bold text-muted mb-1">Price</label>
+                            <input type="text" id="txtprice" class="form-control text-end" placeholder="0" onblur="calculateNetPrice()" onkeypress="return isDecimalKey(event)" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="txtdiscount" class="form-label small fw-bold text-muted mb-1">Discount (%)</label>
+                            <input type="text" id="txtdiscount" class="form-control text-end" placeholder="0" onblur="calculateNetPrice()" onkeypress="return isDecimalKey(event)" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="txtnetprice" class="form-label small fw-bold text-muted mb-1">Net Price</label>
+                            <input type="text" id="txtnetprice" class="form-control text-end bg-light" readonly placeholder="0" onkeypress="return isDecimalKey(event)" />
+                        </div>
+
+                        <!-- Technical Specs -->
+                        <div class="col-md-3">
+                            <label for="txtyear" class="form-label small fw-bold text-muted mb-1">Year</label>
+                            <input type="text" id="txtyear" class="form-control" placeholder="Year" onkeypress="return isNumberKey(event)" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="txtpages" class="form-label small fw-bold text-muted mb-1">Pages</label>
+                            <input type="text" id="txtpages" class="form-control" placeholder="Pages" onkeypress="return isNumberKey(event)" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="txtbillno" class="form-label small fw-bold text-muted mb-1">Bill No.</label>
+                            <input type="text" id="txtbillno" class="form-control" placeholder="Bill No" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="txtBillDate" class="form-label small fw-bold text-muted mb-1">Bill Date</label>
+                            <input type="text" id="txtBillDate" class="form-control" placeholder="DD/MM/YYYY" />
+                        </div>
+
+                        <!-- Location & catalog indexing -->
+                        <div class="col-md-3">
+                            <label for="txtclassno" class="form-label small fw-bold text-muted mb-1">Class No.</label>
+                            <input type="text" id="txtclassno" class="form-control" placeholder="Class No" onkeypress="return isDecimalKey(event)" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="txtbookno" class="form-label small fw-bold text-muted mb-1">Book No.</label>
+                            <input type="text" id="txtbookno" class="form-control" placeholder="Book No" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="txtISBN" class="form-label small fw-bold text-muted mb-1">ISBN</label>
+                            <input type="text" id="txtISBN" class="form-control" placeholder="ISBN" onkeypress="return isISBNKey(event)" />
+                        </div>
+                        <div class="col-md-3">
+                            <label for="txtlocation" class="form-label small fw-bold text-muted mb-1">Location</label>
+                            <input type="text" id="txtlocation" class="form-control" placeholder="Shelf/Room" />
+                        </div>
+
+                        <!-- Place, size, series, subjects -->
+                        <div class="col-md-4">
+                            <label for="txtplace" class="form-label small fw-bold text-muted mb-1">Place</label>
+                            <input type="text" id="txtplace" class="form-control" placeholder="Place" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="txtsize" class="form-label small fw-bold text-muted mb-1">Book Size</label>
+                            <input type="text" id="txtsize" class="form-control" placeholder="Size" />
+                        </div>
+                        <div class="col-md-4">
+                            <label for="txtseries" class="form-label small fw-bold text-muted mb-1">Series</label>
+                            <input type="text" id="txtseries" class="form-control" placeholder="Series" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="txtsubjectheading1" class="form-label small fw-bold text-muted mb-1">Subject Heading 1</label>
+                            <input type="text" id="txtsubjectheading1" class="form-control" placeholder="Subject 1" />
+                        </div>
+                        <div class="col-md-6">
+                            <label for="txtsubjectheading2" class="form-label small fw-bold text-muted mb-1">Subject Heading 2</label>
+                            <input type="text" id="txtsubjectheading2" class="form-control" placeholder="Subject 2" />
+                        </div>
+
+                        <div class="col-12">
+                            <label for="txtremarks" class="form-label small fw-bold text-muted mb-1">Remarks</label>
+                            <textarea id="txtremarks" class="form-control" rows="2" placeholder="General Remarks"></textarea>
+                        </div>
+                        
+                        <div class="col-12 mt-4">
+                            <button type="submit" id="btnUpdate" class="btn btn-modern btn-primary-modern w-100" style="height: 48px;">
+                                <i class="fas fa-save me-2"></i> Update Book Details
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Right Panel: Student Snap & Issue details -->
+        <div class="col-lg-4">
+            <div class="row g-4">
+                <!-- Student Snap Photo Panel -->
+                <div class="col-12">
+                    <div class="modern-card shadow-sm p-4 text-center">
+                        <h6 class="fw-bold mb-3 text-muted text-uppercase" style="letter-spacing: 1px;">Student Photograph</h6>
+                        <div class="d-inline-block border rounded p-2 bg-light mb-2 shadow-inner" style="width: 170px; height: 190px; overflow: hidden;">
+                            <img id="PicStuImage" class="img-fluid h-100 w-100 object-fit-cover d-none" alt="Student Snap" />
+                            <div id="imagePlaceholder" class="w-100 h-100 d-flex flex-column justify-content-center align-items-center text-muted border border-dashed rounded">
+                                <i class="fas fa-user-circle fa-4x opacity-25"></i>
+                                <span class="small mt-2 opacity-50">No Photo</span>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <span class="badge bg-danger px-3 py-2" id="lblissuemsg">Not Issued</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Issue Details Panel -->
+                <div class="col-12">
+                    <div class="modern-card shadow-sm p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+                            <h5 class="fw-bold mb-0 text-main"><i class="fas fa-info-circle me-2 text-danger"></i>Issue Details</h5>
+                        </div>
+                        <form id="issueDetailsForm" novalidate onsubmit="event.preventDefault(); updateIssueRemarks();">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="txtissuedate" class="form-label small fw-semibold text-muted mb-1">Issue Date</label>
+                                    <input type="text" id="txtissuedate" class="form-control form-control-sm bg-light" readonly />
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="txtreturndate" class="form-label small fw-semibold text-muted mb-1">Return Date</label>
+                                    <input type="text" id="txtreturndate" class="form-control form-control-sm bg-light" readonly />
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="txtwhomissue" class="form-label small fw-semibold text-muted mb-1">Whom Issued</label>
+                                    <input type="text" id="txtwhomissue" class="form-control form-control-sm bg-light" readonly />
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="txtidno" class="form-label small fw-semibold text-muted mb-1">ID No.</label>
+                                    <input type="text" id="txtidno" class="form-control form-control-sm bg-light" readonly />
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="txtdiscipline" class="form-label small fw-semibold text-muted mb-1">Discipline</label>
+                                    <input type="text" id="txtdiscipline" class="form-control form-control-sm bg-light" readonly />
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="txtClassRollno" class="form-label small fw-semibold text-muted mb-1">Class Roll No.</label>
+                                    <input type="text" id="txtClassRollno" class="form-control form-control-sm bg-light" readonly />
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="txtUniRollNo" class="form-label small fw-semibold text-muted mb-1">Uni Roll No.</label>
+                                    <input type="text" id="txtUniRollNo" class="form-control form-control-sm bg-light" readonly />
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="txtissueremarks" class="form-label small fw-bold text-muted mb-1">Issue Remarks</label>
+                                    <textarea id="txtissueremarks" class="form-control form-control-sm" rows="3" placeholder="Issue Remarks"></textarea>
+                                </div>
+
+                                <div class="col-12 mt-3">
+                                    <button type="submit" id="btnUpdateIssue" class="btn btn-modern btn-danger-modern w-100" style="height: 40px;" disabled>
+                                        <i class="fas fa-edit me-1"></i> Update Issue Remarks
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let hasMoreThanThreeAuthors = false;
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            await loadColleges();
+
+            // Set up Enter key listener in accession input
+            const accessionNoInput = document.getElementById("accessionNoInput");
+            accessionNoInput.addEventListener("keypress", (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    loadAccessionSearch();
+                }
+            });
+        });
+
+        // Regex helpers for key presses
+        function isNumberKey(evt) {
+            const charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+
+        function isDecimalKey(evt) {
+            const charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode === 46) return true; // '.'
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+
+        function isISBNKey(evt) {
+            const charCode = (evt.which) ? evt.which : evt.keyCode;
+            if (charCode === 45 || charCode === 46) return true; // '-' or '.'
+            if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                return false;
+            }
+            return true;
+        }
+
+        // Load colleges for the filter dropdown
+        async function loadColleges() {
+            try {
+                const response = await fetch('/api/report/colleges');
+                if (!response.ok) throw new Error("Failed to load colleges");
+
+                const colleges = await response.json();
+                const ddl = document.getElementById("collegeName");
+                ddl.innerHTML = '<option value="">-- Select College --</option>';
+
+                colleges.forEach(college => {
+                    const option = document.createElement("option");
+                    option.value = college;
+                    option.textContent = college;
+                    ddl.appendChild(option);
+                });
+            } catch (error) {
+                console.error(error);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Unable to load colleges list.' });
+            }
+        }
+
+        // Dropdown loading on College change
+        async function onCollegeChange() {
+            const collegeName = document.getElementById("collegeName").value;
+            if (!collegeName) {
+                resetDropdowns();
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/SearchAccession/Dropdowns?collegeName=' + encodeURIComponent(collegeName));
+                if (!response.ok) throw new Error("Failed to load dropdown items");
+
+                const data = await response.json();
+
+                populateSelect("cmbpublisher", data.publishers);
+                populateSelect("cmbcategory", data.categories);
+                populateSelect("cmbsource", data.sources);
+            } catch (error) {
+                console.error(error);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to retrieve college dropdown variables.' });
+            }
+        }
+
+        function populateSelect(selectId, items) {
+            const ddl = document.getElementById(selectId);
+            ddl.innerHTML = '<option value="Select">Select</option>';
+            if (items && items.length > 0) {
+                items.forEach(item => {
+                    const opt = document.createElement("option");
+                    opt.value = item;
+                    opt.textContent = item;
+                    ddl.appendChild(opt);
+                });
+            }
+        }
+
+        function resetDropdowns() {
+            document.getElementById("cmbpublisher").innerHTML = '<option value="Select">Select</option>';
+            document.getElementById("cmbcategory").innerHTML = '<option value="Select">Select</option>';
+            document.getElementById("cmbsource").innerHTML = '<option value="Select">Select</option>';
+        }
+
+        // Author generation logic matches legacy GenAuthorName
+        function onAuthorsCheckboxChange() {
+            const chk = document.getElementById("chkboxother");
+            hasMoreThanThreeAuthors = chk.checked;
+
+            if (hasMoreThanThreeAuthors) {
+                document.getElementById("txtforename2").value = "";
+                document.getElementById("txtsirname2").value = "";
+                document.getElementById("txtforename3").value = "";
+                document.getElementById("txtsirname3").value = "";
+                
+                // Hide fields
+                document.querySelectorAll(".author2-field, .author3-field").forEach(el => el.classList.add("d-none"));
+            } else {
+                // Show fields
+                document.querySelectorAll(".author2-field, .author3-field").forEach(el => el.classList.remove("d-none"));
+            }
+            generateAuthorName();
+        }
+
+        function generateAuthorName() {
+            const fore1 = document.getElementById("txtforename1").value.trim();
+            const sir1 = document.getElementById("txtsirname1").value.trim();
+            const fore2 = document.getElementById("txtforename2").value.trim();
+            const sir2 = document.getElementById("txtsirname2").value.trim();
+            const fore3 = document.getElementById("txtforename3").value.trim();
+            const sir3 = document.getElementById("txtsirname3").value.trim();
+
+            let author = "";
+
+            if (hasMoreThanThreeAuthors) {
+                author = sir1 + " " + fore1 + " and others";
+            } else {
+                author = sir1 + " " + fore1;
+                if (sir2.length > 0 || fore2.length > 0) {
+                    author += ", " + sir2 + " " + fore2;
+                }
+                if (sir3.length > 0 || fore3.length > 0) {
+                    author += ", " + sir3 + " " + fore3;
+                }
+            }
+
+            document.getElementById("txtauthor").value = author.trim();
+        }
+
+        // Net Price calculations
+        function calculateNetPrice() {
+            let priceText = document.getElementById("txtprice").value.trim();
+            let discountText = document.getElementById("txtdiscount").value.trim();
+
+            if (priceText === "" || isNaN(priceText)) {
+                priceText = "0";
+                document.getElementById("txtprice").value = "0";
+            }
+            if (discountText === "" || isNaN(discountText)) {
+                discountText = "0";
+                document.getElementById("txtdiscount").value = "0";
+            }
+
+            const price = parseFloat(priceText);
+            const discount = parseFloat(discountText);
+            const netPrice = price - (price * (discount / 100));
+
+            document.getElementById("txtnetprice").value = netPrice.toFixed(0);
+        }
+
+        // Set Loading state
+        function setLoading(isLoading) {
+            const btnSearch = document.getElementById("btnSearch");
+            const searchIcon = document.getElementById("searchIcon");
+            const searchSpinner = document.getElementById("searchSpinner");
+
+            if (isLoading) {
+                btnSearch.disabled = true;
+                searchIcon.classList.add("d-none");
+                searchSpinner.classList.remove("d-none");
+            } else {
+                btnSearch.disabled = false;
+                searchIcon.classList.remove("d-none");
+                searchSpinner.classList.add("d-none");
+            }
+        }
+
+        // Message functions
+        function showValidationMsg(msg) {
+            const msgRow = document.getElementById("msgRow");
+            const lblmsg = document.getElementById("lblmsg");
+            lblmsg.textContent = msg;
+            msgRow.classList.remove("d-none");
+        }
+
+        function hideValidationMsg() {
+            const msgRow = document.getElementById("msgRow");
+            const lblmsg = document.getElementById("lblmsg");
+            lblmsg.textContent = "";
+            msgRow.classList.add("d-none");
+        }
+
+        // Search Accession details
+        async function loadAccessionSearch() {
+            const collegeName = document.getElementById("collegeName").value;
+            const accessionNo = document.getElementById("accessionNoInput").value.trim();
+
+            if (!collegeName || collegeName === "") {
+                showValidationMsg("Select College Name");
+                Swal.fire({ icon: 'warning', title: 'Validation Error', text: 'Select College Name' });
+                return;
+            }
+
+            if (!accessionNo || accessionNo === "") {
+                showValidationMsg("Enter Accession No.");
+                Swal.fire({ icon: 'warning', title: 'Validation Error', text: 'Enter Accession No.' });
+                return;
+            }
+
+            hideValidationMsg();
+            setLoading(true);
+
+            try {
+                const response = await fetch('/api/SearchAccession/Search?collegeName=' + encodeURIComponent(collegeName) + '&accessionNo=' + encodeURIComponent(accessionNo));
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(text || "Error searching accession catalog");
+                }
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    showValidationMsg("_No Record Found_");
+                    Swal.fire({ icon: 'info', title: 'No Records Found', text: '_No Record Found_' });
+                    clearBookDetails();
+                    clearIssueDetails();
+                    return;
+                }
+
+                showValidationMsg("");
+                const book = result.data.book;
+                const issue = result.data.issue;
+
+                // Populate Book Details
+                document.getElementById("bookAccessionBadge").innerText = "Accession: " + book.accessionNo;
+                document.getElementById("cmbBinding").value = book.bindingBook || "Yes";
+                document.getElementById("txttitle").value = book.title || "";
+                document.getElementById("txtsubtitle").value = book.subTitle || "";
+                document.getElementById("txtforename1").value = book.firstAuthorForeName || "";
+                document.getElementById("txtsirname1").value = book.firstAuthorSirName || "";
+                document.getElementById("txtforename2").value = book.secondAuthorForeName || "";
+                document.getElementById("txtsirname2").value = book.secondAuthorSirName || "";
+                document.getElementById("txtforename3").value = book.thirdAuthorForeName || "";
+                document.getElementById("txtsirname3").value = book.thirdAuthorSirName || "";
+                
+                const moreAuthors = book.moreThanThreeAuthors === "True";
+                document.getElementById("chkboxother").checked = moreAuthors;
+                hasMoreThanThreeAuthors = moreAuthors;
+                onAuthorsCheckboxChange();
+
+                document.getElementById("txtauthor").value = book.author || "";
+                
+                // Ensure dropdown values are set properly (or default to Select)
+                setSelectValue("cmbpublisher", book.publisher);
+                setSelectValue("cmbcategory", book.category);
+                setSelectValue("cmbtype", book.type);
+                setSelectValue("cmbsource", book.source);
+
+                document.getElementById("txtprice").value = book.price || "";
+                document.getElementById("txtdiscount").value = book.discount || "";
+                document.getElementById("txtnetprice").value = book.netPrice || "";
+                document.getElementById("txtyear").value = book.year || "";
+                document.getElementById("txtpages").value = book.pages || "";
+                document.getElementById("txtbillno").value = book.billNo || "";
+                document.getElementById("txtBillDate").value = book.billDate || "";
+                
+                document.getElementById("txtclassno").value = book.classNo || "";
+                document.getElementById("txtbookno").value = book.bookNo || "";
+                document.getElementById("txtISBN").value = book.isbn || "";
+                document.getElementById("txtlocation").value = book.location || "";
+                document.getElementById("txtplace").value = book.place || "";
+                document.getElementById("txtsize").value = book.bookSize || "";
+                document.getElementById("txtseries").value = book.series || "";
+                document.getElementById("txtsubjectheading1").value = book.subject1 || "";
+                document.getElementById("txtsubjectheading2").value = book.subject2 || "";
+                document.getElementById("txtremarks").value = book.remarks || "";
+
+                // Populate Issue Details
+                if (issue) {
+                    document.getElementById("lblissuemsg").innerText = "Issued";
+                    document.getElementById("lblissuemsg").className = "badge bg-success px-3 py-2";
+
+                    document.getElementById("txtissuedate").value = formatDate(issue.issueDate);
+                    document.getElementById("txtwhomissue").value = issue.whomIssued || "";
+                    document.getElementById("txtidno").value = issue.idNo || "";
+                    document.getElementById("txtdiscipline").value = issue.discipline || "";
+                    document.getElementById("txtreturndate").value = formatDate(issue.lastReturnDate);
+                    document.getElementById("txtClassRollno").value = issue.classRollNo || "";
+                    document.getElementById("txtUniRollNo").value = issue.uniRollNo || "";
+                    document.getElementById("txtissueremarks").value = issue.remarks || "";
+                    
+                    document.getElementById("btnUpdateIssue").disabled = false;
+
+                    // Load photo
+                    if (issue.idNo) {
+                        const imgUrl = '/api/SearchAccession/StudentImage?collegeName=' + encodeURIComponent(collegeName) + '&idNo=' + issue.idNo;
+                        document.getElementById("PicStuImage").src = imgUrl;
+                        document.getElementById("PicStuImage").classList.remove("d-none");
+                        document.getElementById("imagePlaceholder").classList.add("d-none");
+                    } else {
+                        resetStudentPhoto();
+                    }
+                } else {
+                    clearIssueDetails();
+                }
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire({ icon: 'error', title: 'Search Failed', text: error.message || 'An error occurred.' });
+                clearBookDetails();
+                clearIssueDetails();
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        function setSelectValue(selectId, val) {
+            const select = document.getElementById(selectId);
+            if (!val || val === "") {
+                select.value = "Select";
+                return;
+            }
+            // Check if option exists, otherwise select "Select"
+            const options = Array.from(select.options);
+            const matches = options.some(opt => opt.value === val);
+            if (matches) {
+                select.value = val;
+            } else {
+                select.value = "Select";
+            }
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return "";
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return "";
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        // Reset details
+        function clearBookDetails() {
+            document.getElementById("bookAccessionBadge").innerText = "No Book Loaded";
+            document.getElementById("cmbBinding").value = "Yes";
+            document.getElementById("txttitle").value = "";
+            document.getElementById("txtsubtitle").value = "";
+            document.getElementById("txtforename1").value = "";
+            document.getElementById("txtsirname1").value = "";
+            document.getElementById("txtforename2").value = "";
+            document.getElementById("txtsirname2").value = "";
+            document.getElementById("txtforename3").value = "";
+            document.getElementById("txtsirname3").value = "";
+            document.getElementById("chkboxother").checked = false;
+            hasMoreThanThreeAuthors = false;
+            onAuthorsCheckboxChange();
+
+            document.getElementById("txtauthor").value = "";
+            document.getElementById("cmbpublisher").value = "Select";
+            document.getElementById("cmbcategory").value = "Select";
+            document.getElementById("cmbtype").value = "Select";
+            document.getElementById("cmbsource").value = "Select";
+
+            document.getElementById("txtprice").value = "";
+            document.getElementById("txtdiscount").value = "";
+            document.getElementById("txtnetprice").value = "";
+            document.getElementById("txtyear").value = "";
+            document.getElementById("txtpages").value = "";
+            document.getElementById("txtbillno").value = "";
+            document.getElementById("txtBillDate").value = "";
+            
+            document.getElementById("txtclassno").value = "";
+            document.getElementById("txtbookno").value = "";
+            document.getElementById("txtISBN").value = "";
+            document.getElementById("txtlocation").value = "";
+            document.getElementById("txtplace").value = "";
+            document.getElementById("txtsize").value = "";
+            document.getElementById("txtseries").value = "";
+            document.getElementById("txtsubjectheading1").value = "";
+            document.getElementById("txtsubjectheading2").value = "";
+            document.getElementById("txtremarks").value = "";
+        }
+
+        function clearIssueDetails() {
+            document.getElementById("lblissuemsg").innerText = "Not Issued";
+            document.getElementById("lblissuemsg").className = "badge bg-danger px-3 py-2";
+
+            document.getElementById("txtissuedate").value = "";
+            document.getElementById("txtwhomissue").value = "";
+            document.getElementById("txtidno").value = "";
+            document.getElementById("txtdiscipline").value = "";
+            document.getElementById("txtreturndate").value = "";
+            document.getElementById("txtClassRollno").value = "";
+            document.getElementById("txtUniRollNo").value = "";
+            document.getElementById("txtissueremarks").value = "";
+            
+            document.getElementById("btnUpdateIssue").disabled = true;
+
+            resetStudentPhoto();
+        }
+
+        function resetStudentPhoto() {
+            document.getElementById("PicStuImage").src = "";
+            document.getElementById("PicStuImage").classList.add("d-none");
+            document.getElementById("imagePlaceholder").classList.remove("d-none");
+        }
+
+        function clearAllFields() {
+            document.getElementById("accessionNoInput").value = "";
+            document.getElementById("collegeName").value = "";
+            resetDropdowns();
+            clearBookDetails();
+            clearIssueDetails();
+            hideValidationMsg();
+        }
+
+        // Update book details in database
+        async function updateBookDetails() {
+            const collegeName = document.getElementById("collegeName").value;
+            const accessionNo = document.getElementById("accessionNoInput").value.trim();
+
+            if (!collegeName || collegeName === "") {
+                showValidationMsg("Select College Name");
+                Swal.fire({ icon: 'warning', title: 'Validation Error', text: 'Select College Name' });
+                return;
+            }
+            if (!accessionNo || accessionNo === "") {
+                showValidationMsg("Enter Accession No.");
+                Swal.fire({ icon: 'warning', title: 'Validation Error', text: 'Enter Accession No.' });
+                return;
+            }
+
+            const model = {
+                bindingBook: document.getElementById("cmbBinding").value,
+                collegeName: collegeName,
+                accessionNo: accessionNo,
+                title: document.getElementById("txttitle").value,
+                firstAuthorForeName: document.getElementById("txtforename1").value,
+                firstAuthorSirName: document.getElementById("txtsirname1").value,
+                secondAuthorForeName: document.getElementById("txtforename2").value,
+                secondAuthorSirName: document.getElementById("txtsirname2").value,
+                thirdAuthorForeName: document.getElementById("txtforename3").value,
+                thirdAuthorSirName: document.getElementById("txtsirname3").value,
+                moreThanThreeAuthors: hasMoreThanThreeAuthors ? "True" : "False",
+                author: document.getElementById("txtauthor").value,
+                publisher: document.getElementById("cmbpublisher").value,
+                edition: document.getElementById("txtedition").value,
+                price: document.getElementById("txtprice").value,
+                discount: document.getElementById("txtdiscount").value,
+                netPrice: document.getElementById("txtnetprice").value,
+                type: document.getElementById("cmbtype").value,
+                category: document.getElementById("cmbcategory").value,
+                source: document.getElementById("cmbsource").value,
+                year: document.getElementById("txtyear").value,
+                pages: document.getElementById("txtpages").value,
+                billNo: document.getElementById("txtbillno").value,
+                billDate: document.getElementById("txtBillDate").value,
+                location: document.getElementById("txtlocation").value,
+                classNo: document.getElementById("txtclassno").value,
+                bookNo: document.getElementById("txtbookno").value,
+                subTitle: document.getElementById("txtsubtitle").value,
+                isbn: document.getElementById("txtISBN").value,
+                place: document.getElementById("txtplace").value,
+                bookSize: document.getElementById("txtsize").value,
+                series: document.getElementById("txtseries").value,
+                subject1: document.getElementById("txtsubjectheading1").value,
+                subject2: document.getElementById("txtsubjectheading2").value,
+                remarks: document.getElementById("txtremarks").value
+            };
+
+            try {
+                const response = await fetch('/api/SearchAccession/UpdateStock', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(model)
+                });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(text || "Failed to update book catalog details");
+                }
+
+                const result = await response.json();
+                showValidationMsg("Updated Successfully");
+                Swal.fire({ icon: 'success', title: 'Success', text: 'Book details updated successfully.' });
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire({ icon: 'error', title: 'Update Failed', text: error.message || 'An error occurred during updating.' });
+            }
+        }
+
+        // Update issue details remarks in database
+        async function updateIssueRemarks() {
+            const collegeName = document.getElementById("collegeName").value;
+            const accessionNo = document.getElementById("accessionNoInput").value.trim();
+            const idNo = document.getElementById("txtidno").value.trim();
+            const remarks = document.getElementById("txtissueremarks").value;
+
+            if (!collegeName || collegeName === "") {
+                showValidationMsg("Select College Name");
+                Swal.fire({ icon: 'warning', title: 'Validation Error', text: 'Select College Name' });
+                return;
+            }
+            if (!accessionNo || accessionNo === "") {
+                showValidationMsg("Enter Accession No");
+                Swal.fire({ icon: 'warning', title: 'Validation Error', text: 'Enter Accession No' });
+                return;
+            }
+            if (!idNo || idNo === "") {
+                showValidationMsg("Zero ID No. Length is not allowed.");
+                Swal.fire({ icon: 'warning', title: 'Validation Error', text: 'Zero ID No. Length is not allowed.' });
+                return;
+            }
+
+            const model = {
+                collegeName: collegeName,
+                accessionNo: accessionNo,
+                idNo: parseInt(idNo),
+                remarks: remarks
+            };
+
+            try {
+                const response = await fetch('/api/SearchAccession/UpdateIssue', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(model)
+                });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    throw new Error(text || "Failed to update issue remarks");
+                }
+
+                const result = await response.json();
+                showValidationMsg("Issue Detail Update Successfully");
+                Swal.fire({ icon: 'success', title: 'Success', text: 'Issue Detail Update Successfully' });
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire({ icon: 'error', title: 'Update Failed', text: error.message || 'An error occurred during updating.' });
+            }
+        }
+    </script>
+}

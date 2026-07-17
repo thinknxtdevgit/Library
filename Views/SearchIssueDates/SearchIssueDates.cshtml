@@ -1,0 +1,439 @@
+@{
+    ViewData["Title"] = "Issue Dates Search";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="fade-in">
+    <!-- Page Header -->
+    <div class="page-header mt-2 mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="fas fa-calendar-alt me-2 text-primary"></i>Search Issue Dates</h2>
+            <p class="text-muted">Search and view complete history of issued library items by date range and college.</p>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="modern-card glass shadow-lg p-4" style="border-top: 4px solid var(--primary);">
+                <form id="searchForm" novalidate onsubmit="event.preventDefault(); loadIssueDatesSearch();">
+                    <div class="row align-items-end g-3">
+                        <div class="col-md-4">
+                            <label for="collegeName" class="form-label small fw-bold text-muted mb-2">College Filter</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 input-group-text-modern">
+                                    <i class="fas fa-university text-muted"></i>
+                                </span>
+                                <select id="collegeName" class="form-input-modern border-start-0" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" required>
+                                    <option value="">-- Select College --</option>
+                                </select>
+                                <div class="invalid-feedback">Please select a college.</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="issueDateFrom" class="form-label small fw-bold text-muted mb-2">Issue Date From</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 input-group-text-modern">
+                                    <i class="fas fa-calendar-day text-muted"></i>
+                                </span>
+                                <input type="date" id="issueDateFrom" class="form-input-modern border-start-0" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" required />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="issueDateTo" class="form-label small fw-bold text-muted mb-2">Issue Date To</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-transparent border-end-0 input-group-text-modern">
+                                    <i class="fas fa-calendar-day text-muted"></i>
+                                </span>
+                                <input type="date" id="issueDateTo" class="form-input-modern border-start-0" style="border-top-left-radius: 0; border-bottom-left-radius: 0;" required />
+                            </div>
+                        </div>
+                        <div class="col-md-2 d-flex gap-2">
+                            <button type="submit" id="btnSearch" class="btn btn-modern btn-primary-modern flex-grow-1" style="height: 48px;">
+                                <i class="fas fa-search me-2" id="searchIcon"></i>
+                                <span class="spinner-border spinner-border-sm me-2 d-none" id="searchSpinner" role="status" aria-hidden="true"></span>
+                                Search
+                            </button>
+                            <button type="button" id="btnExport" class="btn btn-modern btn-success-modern d-none" onclick="exportToExcel()" style="height: 48px;" title="Export to Excel">
+                                <i class="fas fa-file-excel"></i> Export
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Summary Row (Initially Hidden) -->
+    <div class="row g-3 mb-4 d-none" id="statsRow">
+        <div class="col-6 col-lg-6">
+            <div class="modern-card text-center p-3 h-100" style="border-top: 4px solid var(--primary);">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.75rem;">Total Issued Books</p>
+                <h3 class="fw-bold text-primary mb-0" id="statTotal">0</h3>
+            </div>
+        </div>
+        <div class="col-6 col-lg-6">
+            <div class="modern-card text-center p-3 h-100" style="border-top: 4px solid var(--info);">
+                <div class="bg-info bg-opacity-10 text-info rounded-circle mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <p class="text-muted small fw-bold text-uppercase mb-1" style="font-size: 0.75rem;">Unique Recipients</p>
+                <h3 class="fw-bold text-info mb-0" id="statRecipients">0</h3>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="modern-card shadow-sm p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0 text-main" id="resultsTitle">Search Results</h5>
+                    <span class="badge bg-primary px-3 py-2" id="rowCount">0 Records</span>
+                </div>
+
+                <!-- Desktop/Tablet Table View -->
+                <div class="table-responsive-modern d-none d-md-block" id="desktopView">
+                    <table class="table custom-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>Issue Date</th>
+                                <th>IDNo</th>
+                                <th>Title</th>
+                                <th>Accession No.</th>
+                                <th>Whom Issued</th>
+                                <th>Last Return Date</th>
+                                <th>Condition</th>
+                                <th>Discipline</th>
+                                <th>Type</th>
+                                <th>Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <tr>
+                                <td colspan="10" class="text-center py-5 text-muted">
+                                    <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                                    <p class="mb-0">Enter search criteria to view issued records.</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Mobile Card View -->
+                <div class="d-block d-md-none" id="mobileView">
+                    <div id="mobileCardsContainer">
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                            <p class="mb-0">Enter search criteria to view issued records.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            // Set Default Dates: First day of current month to today
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            
+            document.getElementById("issueDateFrom").value = formatDateToISO(firstDay);
+            document.getElementById("issueDateTo").value = formatDateToISO(today);
+
+            await loadColleges();
+        });
+
+        // Format Date to YYYY-MM-DD
+        function formatDateToISO(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // Format Date to MM/dd/yyyy
+        function formatDate(dateStr) {
+            if (!dateStr) return "-";
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return "-";
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${month}/${day}/${year}`;
+        }
+
+        // Load colleges for the dropdown
+        async function loadColleges() {
+            try {
+                const response = await fetch('/api/report/colleges');
+                if (!response.ok) throw new Error("Failed to load colleges");
+
+                const colleges = await response.json();
+                const ddl = document.getElementById("collegeName");
+                ddl.innerHTML = '<option value="">-- Select College --</option>';
+
+                colleges.forEach(college => {
+                    const option = document.createElement("option");
+                    option.value = college;
+                    option.textContent = college;
+                    ddl.appendChild(option);
+                });
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Unable to load colleges dropdown list.'
+                });
+            }
+        }
+
+        // Toggle search button loading state
+        function setLoading(isLoading) {
+            const btnSearch = document.getElementById("btnSearch");
+            const searchIcon = document.getElementById("searchIcon");
+            const searchSpinner = document.getElementById("searchSpinner");
+
+            if (isLoading) {
+                btnSearch.disabled = true;
+                searchIcon.classList.add("d-none");
+                searchSpinner.classList.remove("d-none");
+            } else {
+                btnSearch.disabled = false;
+                searchIcon.classList.remove("d-none");
+                searchSpinner.classList.add("d-none");
+            }
+        }
+
+        // Fetch issue dates search results
+        async function loadIssueDatesSearch() {
+            const collegeName = document.getElementById("collegeName").value;
+            const dateFrom = document.getElementById("issueDateFrom").value;
+            const dateTo = document.getElementById("issueDateTo").value;
+
+            const form = document.getElementById("searchForm");
+            if (!collegeName) {
+                form.classList.add("was-validated");
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Fields',
+                    text: 'Please select a College Name.'
+                });
+                return;
+            }
+            if (!dateFrom || !dateTo) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Fields',
+                    text: 'Please select both start and end dates.'
+                });
+                return;
+            }
+
+            form.classList.remove("was-validated");
+            setLoading(true);
+
+            try {
+                const url = `/SearchIssueDates/search?collegeName=${encodeURIComponent(collegeName)}&issueDateFrom=${dateFrom}&issueDateTo=${dateTo}`;
+                const response = await fetch(url);
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || "Error searching issued items");
+                }
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'No Records Found',
+                        text: result.message || 'No records found matching the criteria.'
+                    });
+                    clearResults();
+                    return;
+                }
+
+                const issueList = result.data || [];
+
+                // Render Results
+                renderStats(issueList);
+                renderTable(issueList);
+                renderMobileCards(issueList);
+                
+                // Show Stats and Export button
+                document.getElementById("statsRow").classList.remove("d-none");
+                document.getElementById("btnExport").classList.remove("d-none");
+                document.getElementById("rowCount").innerText = `${issueList.length} Records`;
+                document.getElementById("resultsTitle").innerText = `Issued Books in ${collegeName}`;
+
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Search Failed',
+                    text: error.message || 'An error occurred while searching records.'
+                });
+                clearResults();
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Reset elements
+        function clearResults() {
+            document.getElementById("statsRow").classList.add("d-none");
+            document.getElementById("btnExport").classList.add("d-none");
+            document.getElementById("rowCount").innerText = "0 Records";
+            document.getElementById("resultsTitle").innerText = "Search Results";
+
+            // Reset Desktop Table
+            document.getElementById("tableBody").innerHTML = `
+                <tr>
+                    <td colspan="10" class="text-center py-5 text-muted">
+                        <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                        <p class="mb-0">No records found.</p>
+                    </td>
+                </tr>
+            `;
+
+            // Reset Mobile Cards
+            document.getElementById("mobileCardsContainer").innerHTML = `
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-search fa-3x mb-3 opacity-25"></i>
+                    <p class="mb-0">No records found.</p>
+                </div>
+            `;
+        }
+
+        // Render Stats
+        function renderStats(records) {
+            const total = records.length;
+            const uniqueRecipients = new Set(records.map(r => (r.idNo || "").trim()).filter(id => id !== "")).size;
+
+            document.getElementById("statTotal").innerText = total;
+            document.getElementById("statRecipients").innerText = uniqueRecipients;
+        }
+
+        // Render Desktop Table
+        function renderTable(records) {
+            const tbody = document.getElementById("tableBody");
+            tbody.innerHTML = "";
+
+            if (records.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" class="text-center py-5">No Records Found</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            records.forEach(r => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td class="fw-semibold text-main">${formatDate(r.issueDate)}</td>
+                    <td class="fw-semibold text-primary">${r.idNo || '-'}</td>
+                    <td class="fw-semibold" style="max-width: 200px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="${r.title || ''}">${r.title || '-'}</td>
+                    <td><span class="badge bg-light text-dark border">${r.accessionNo || '-'}</span></td>
+                    <td>${r.whomIssued || '-'}</td>
+                    <td>${formatDate(r.lastDate)}</td>
+                    <td>${r.condition || '-'}</td>
+                    <td>${r.discipline || '-'}</td>
+                    <td>${r.type || '-'}</td>
+                    <td style="max-width: 150px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;" title="${r.remarks || ''}">${r.remarks || '-'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Render Mobile Contact Cards
+        function renderMobileCards(records) {
+            const container = document.getElementById("mobileCardsContainer");
+            container.innerHTML = "";
+
+            if (records.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        No Records Found
+                    </div>
+                `;
+                return;
+            }
+
+            records.forEach(r => {
+                const card = document.createElement("div");
+                card.className = "modern-card mb-3 p-3 shadow-sm border-start border-4";
+                card.style.borderLeftColor = "var(--primary)";
+                
+                card.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <h6 class="fw-bold mb-0 text-main">${r.title || '-'}</h6>
+                            <small class="text-muted">Accession No: ${r.accessionNo || '-'}</small>
+                        </div>
+                        <span class="badge bg-light text-dark border small">ID: ${r.idNo || '-'}</span>
+                    </div>
+                    
+                    <div class="row g-2 pt-2 border-top mt-2 text-muted" style="font-size: 0.825rem;">
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Issue Date</span>
+                            <span class="fw-semibold text-main">${formatDate(r.issueDate)}</span>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Whom Issued</span>
+                            <span class="fw-semibold text-main">${r.whomIssued || '-'}</span>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Last Return Date</span>
+                            <span class="fw-semibold text-main">${formatDate(r.lastDate)}</span>
+                        </div>
+                        <div class="col-6">
+                            <span class="text-muted small d-block">Type / Discipline</span>
+                            <span class="fw-semibold text-main">${r.type || '-'} / ${r.discipline || '-'}</span>
+                        </div>
+                        <div class="col-12 mt-1">
+                            <span class="text-muted small d-block">Condition / Remarks</span>
+                            <span class="fw-semibold text-main">${r.condition || '-'} / ${r.remarks || '-'}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Export data to Excel spreadsheet
+        function exportToExcel() {
+            const collegeName = document.getElementById("collegeName").value;
+            const dateFrom = document.getElementById("issueDateFrom").value;
+            const dateTo = document.getElementById("issueDateTo").value;
+
+            if (!collegeName) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Warning',
+                    text: 'Select College Name first.'
+                });
+                return;
+            }
+            if (!dateFrom || !dateTo) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Warning',
+                    text: 'Select Date From and Date To first.'
+                });
+                return;
+            }
+
+            // Redirect to the Export endpoint
+            window.location.href = `/SearchIssueDates/export?collegeName=${encodeURIComponent(collegeName)}&issueDateFrom=${dateFrom}&issueDateTo=${dateTo}`;
+        }
+    </script>
+}
