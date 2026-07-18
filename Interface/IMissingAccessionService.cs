@@ -5,7 +5,7 @@ namespace lib.Interface
 {
     public interface IMissingAccessionService
     {
-        Task<List<int>> GenerateAndFindMissingAsync(string collegeName);
+        Task<List<string>> GenerateAndFindMissingAsync(string collegeName);
         Task<byte[]> ExportExcelAsync(string collegeName);
     }
 }

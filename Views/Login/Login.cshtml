@@ -14,539 +14,439 @@
     <title>Login - LibMaster Pro</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
         :root {
-            --primary: #4F81BD;
-            --accent: #2575fc;
-            --bg-color: #f4f6fb;
-            --text-main: #1f385c;
-            --text-muted: #5c6f84;
-            --glass-bg: rgba(255, 255, 255, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.8);
-            --input-bg: #ffffff;
-            --input-border: #dce4ec;
-            --font-family: 'Plus Jakarta Sans', sans-serif;
-            --font-heading: 'Outfit', sans-serif;
+            --primary: #3b82f6;
+            --primary-dark: #2563eb;
+            --bg-gradient: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            --card-bg: #ffffff;
+            --text-dark: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --focus-ring: rgba(59, 130, 246, 0.2);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
         body {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
-            font-family: var(--font-family);
-            color: var(--text-main);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow-x: hidden;
-            position: relative;
+            padding: 20px;
         }
 
-        /* Abstract soft light glow background elements */
-        .bg-glow {
-            position: absolute;
-            width: 500px;
-            height: 500px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(79, 129, 189, 0.08) 0%, rgba(37, 117, 252, 0.0) 70%);
-            filter: blur(60px);
-            z-index: 0;
-            pointer-events: none;
-            animation: floatGlow 10s ease-in-out infinite alternate;
-        }
-        .bg-glow-1 { top: -10%; left: -10%; }
-        .bg-glow-2 { bottom: -10%; right: -10%; animation-delay: 5s; }
-
-        @@keyframes floatGlow {
-            0% { transform: translateY(0) scale(1); }
-            100% { transform: translateY(-40px) scale(1.1); }
-        }
-
-        .login-container {
+        .login-wrapper {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.08), 0 0 1px 1px rgba(15, 23, 42, 0.04);
             display: flex;
-            width: 1120px;
-            max-width: 95%;
-            min-height: 680px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 28px;
             overflow: hidden;
-            z-index: 10;
-            box-shadow: 0 20px 50px rgba(31, 56, 92, 0.08);
-            position: relative;
+            min-height: 580px;
         }
 
-        /* Left Visual Section */
-        .login-visual {
-            flex: 1.15;
-            padding: 60px;
+        /* Left Hero Banner */
+        .login-hero {
+            flex: 1;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            color: #ffffff;
+            padding: 45px 40px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            background: linear-gradient(135deg, rgba(79, 129, 189, 0.05) 0%, rgba(37, 117, 252, 0.01) 100%);
-            border-right: 1px solid rgba(0, 0, 0, 0.06);
             position: relative;
-            z-index: 2;
+            overflow: hidden;
         }
 
-        .visual-logo {
+        .login-hero::before {
+            content: '';
+            position: absolute;
+            top: -80px;
+            right: -80px;
+            width: 260px;
+            height: 260px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .hero-brand {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 12px;
         }
 
-        .visual-logo-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        .hero-logo {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.35rem;
+            font-size: 1.25rem;
             color: #ffffff;
-            box-shadow: 0 8px 20px rgba(79, 129, 189, 0.25);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
         }
 
-        .visual-logo-title {
-            font-family: var(--font-heading);
-            font-weight: 800;
-            font-size: 1.6rem;
-            letter-spacing: -0.03em;
-            color: var(--text-main);
-        }
-
-        .visual-main-text h1 {
-            font-family: var(--font-heading);
-            font-weight: 800;
-            font-size: 3rem;
-            line-height: 1.25;
-            letter-spacing: -0.04em;
-            margin-bottom: 24px;
-            color: var(--text-main);
-        }
-
-        .visual-main-text h1 span {
-            color: var(--primary);
-        }
-
-        .visual-main-text p {
-            color: var(--text-muted);
-            font-size: 1.05rem;
-            line-height: 1.7;
-            margin-bottom: 0;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-        }
-
-        .stat-item {
-            padding: 20px 16px;
-            background: rgba(255, 255, 255, 0.4);
-            border: 1px solid rgba(0, 0, 0, 0.04);
-            border-radius: 18px;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .stat-item:hover {
-            transform: translateY(-5px);
-            border-color: rgba(79, 129, 189, 0.25);
-            background: rgba(255, 255, 255, 0.8);
-            box-shadow: 0 10px 20px rgba(31, 56, 92, 0.05);
-        }
-
-        .stat-number {
-            font-family: var(--font-heading);
-            font-weight: 800;
-            font-size: 1.6rem;
-            color: var(--primary);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 0.75rem;
-            color: #7a8e9e;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+        .hero-title {
+            font-family: 'Outfit', sans-serif;
             font-weight: 700;
+            font-size: 1.4rem;
+            letter-spacing: -0.02em;
         }
 
-        /* Right Form Section */
-        .login-form-area {
-            flex: 0.85;
-            padding: 60px;
+        .hero-content h1 {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 2.2rem;
+            line-height: 1.25;
+            margin-bottom: 16px;
+            color: #ffffff;
+        }
+
+        .hero-content h1 span {
+            color: #60a5fa;
+        }
+
+        .hero-content p {
+            color: #94a3b8;
+            font-size: 0.925rem;
+            line-height: 1.6;
+        }
+
+        .hero-features {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        .feature-item i {
+            color: #38bdf8;
+        }
+
+        /* Right Form Area */
+        .login-form-container {
+            flex: 1;
+            padding: 45px 40px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            position: relative;
-            z-index: 2;
-            background: rgba(255, 255, 255, 0.3);
+            background: #ffffff;
         }
 
-        .form-header {
-            margin-bottom: 35px;
-        }
-
-        .form-header h2 {
-            font-family: var(--font-heading);
+        .form-title {
+            font-family: 'Outfit', sans-serif;
             font-weight: 700;
-            font-size: 2.1rem;
-            letter-spacing: -0.02em;
-            margin-bottom: 8px;
-            color: var(--text-main);
+            font-size: 1.8rem;
+            color: var(--text-dark);
+            margin-bottom: 6px;
         }
 
-        .form-header p {
+        .form-subtitle {
             color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-bottom: 0;
+            font-size: 0.875rem;
+            margin-bottom: 28px;
         }
 
-        /* Floating Input Group */
-        .input-group-modern {
-            position: relative;
-            margin-bottom: 24px;
+        .form-group-custom {
+            margin-bottom: 20px;
         }
 
-        .input-group-modern label {
+        .form-group-custom label {
             display: block;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 8px;
-            letter-spacing: 0.03em;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            letter-spacing: 0.02em;
         }
 
-        .input-wrapper-modern {
+        .input-box {
             position: relative;
             display: flex;
             align-items: center;
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(31, 56, 92, 0.02);
         }
 
-        .input-icon-left {
+        .input-box i.input-icon {
             position: absolute;
-            left: 18px;
-            color: #8c9ba5;
-            pointer-events: none;
-            transition: color 0.3s ease, transform 0.3s ease;
-        }
-
-        .form-input-modern {
-            width: 100%;
-            padding: 15px 18px 15px 48px;
-            background: var(--input-bg);
-            border: 1px solid var(--input-border);
-            border-radius: 14px;
-            color: var(--text-main);
-            font-family: var(--font-family);
+            left: 14px;
+            color: #94a3b8;
             font-size: 0.95rem;
-            outline: none;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            transition: color 0.2s ease;
         }
 
-        select.form-input-modern {
+        .input-field {
+            width: 100%;
+            height: 48px;
+            padding: 10px 14px 10px 42px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 0.925rem;
+            color: var(--text-dark);
+            background: #f8fafc;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--focus-ring);
+        }
+
+        .input-field:focus ~ i.input-icon {
+            color: var(--primary);
+        }
+
+        select.input-field {
             appearance: none;
             -webkit-appearance: none;
             cursor: pointer;
+            padding-right: 40px;
         }
 
-        .select-chevron {
+        select.input-field option {
+            background: #ffffff !important;
+            color: var(--text-dark) !important;
+        }
+
+        .select-arrow {
             position: absolute;
-            right: 18px;
-            color: #8c9ba5;
+            right: 14px;
+            color: #94a3b8;
             pointer-events: none;
+            font-size: 0.8rem;
         }
 
-        .form-input-modern:focus {
-            background: #ffffff;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(79, 129, 189, 0.15);
-        }
-
-        .form-input-modern:focus ~ .input-icon-left {
-            color: var(--primary);
-            transform: scale(1.1);
-        }
-
-        select.form-input-modern option {
-            background-color: #ffffff !important;
-            color: var(--text-main) !important;
-        }
-
-        .input-wrapper-modern input[type="password"] {
-            padding-right: 48px;
-        }
-
-        .pwd-toggle-btn {
+        .btn-eye {
             position: absolute;
-            right: 18px;
+            right: 12px;
             background: none;
             border: none;
-            color: #8c9ba5;
+            color: #94a3b8;
+            padding: 6px;
             cursor: pointer;
-            outline: none;
-            padding: 0;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: color 0.3s ease;
         }
 
-        .pwd-toggle-btn:hover {
-            color: var(--text-main);
+        .btn-eye:hover {
+            color: var(--text-dark);
         }
 
-        /* Checkbox Options */
-        .form-options {
+        .form-meta {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 30px;
-            font-size: 0.9rem;
+            margin-bottom: 24px;
+            font-size: 0.85rem;
         }
 
-        .check-container {
+        .checkbox-label {
             display: flex;
             align-items: center;
             gap: 8px;
             cursor: pointer;
+            color: var(--text-muted);
             user-select: none;
         }
 
-        .check-input {
-            width: 18px;
-            height: 18px;
-            border-radius: 6px;
-            border: 1px solid var(--input-border);
-            background: var(--input-bg);
-            cursor: pointer;
+        .checkbox-label input {
             accent-color: var(--primary);
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
         }
 
-        .forgot-link {
+        .link-forgot {
             color: var(--primary);
             text-decoration: none;
             font-weight: 600;
-            transition: color 0.3s ease;
         }
 
-        .forgot-link:hover {
-            color: #2575fc;
+        .link-forgot:hover {
             text-decoration: underline;
         }
 
-        /* Login Action Button */
-        .btn-login-modern {
+        .btn-submit {
             width: 100%;
-            padding: 16px;
-            border: none;
-            border-radius: 14px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: #ffffff;
-            font-family: var(--font-heading);
+            border: none;
+            border-radius: 12px;
             font-weight: 600;
-            font-size: 1.05rem;
-            cursor: pointer;
+            font-size: 0.95rem;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            box-shadow: 0 8px 20px rgba(79, 129, 189, 0.2);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            transition: all 0.2s ease;
         }
 
-        .btn-login-modern:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 25px rgba(79, 129, 189, 0.35);
-            filter: brightness(1.08);
+        .btn-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
         }
 
-        .btn-login-modern:active {
-            transform: translateY(0);
-        }
-
-        /* Footer Copyright */
-        .form-footer-text {
-            margin-top: 40px;
+        .form-footer {
+            margin-top: 24px;
             text-align: center;
-            font-size: 0.825rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
         }
 
-        /* Slide Transition Animations */
-        .fade-in {
-            animation: fadeIn 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-        }
-
-        @@keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Layout Responsiveness */
+        /* RESPONSIVE DESIGN */
         @@media (max-width: 991px) {
             body {
-                align-items: flex-start;
-                padding: 40px 10px;
-                height: auto;
+                padding: 15px;
             }
-            .login-visual {
+            .login-hero {
                 display: none !important;
             }
-            .login-container {
-                flex-direction: column;
-                max-width: 500px;
-                width: 100%;
-                min-height: auto !important;
-                height: auto !important;
+            .login-wrapper {
+                max-width: 450px;
+                min-height: auto;
+                border-radius: 20px;
             }
-            .login-form-area {
-                width: 100% !important;
-                flex: 1 !important;
-                padding: 45px 35px;
+            .login-form-container {
+                padding: 35px 25px;
             }
         }
 
-        @@media (max-width: 576px) {
-            body {
-                padding: 20px 10px;
+        @@media (max-width: 480px) {
+            .login-form-container {
+                padding: 28px 18px;
             }
-            .login-container {
-                border-radius: 20px;
-                margin: 0;
+            .form-title {
+                font-size: 1.6rem;
             }
-            .login-form-area {
-                padding: 35px 20px;
-            }
-            .form-header {
-                margin-bottom: 25px;
-            }
-            .form-header h2 {
-                font-size: 1.75rem;
-            }
-            .form-input-modern {
-                padding: 13px 16px 13px 44px;
-            }
-            .btn-login-modern {
-                padding: 14px;
-            }
-            .form-options {
+            .form-meta {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 12px;
-                margin-bottom: 24px;
+                gap: 10px;
             }
         }
     </style>
 </head>
 <body>
 
-    <!-- Soft background glow circles -->
-    <div class="bg-glow bg-glow-1"></div>
-    <div class="bg-glow bg-glow-2"></div>
-
-    <div class="login-container fade-in">
-        <!-- Visual Panel (Left) -->
-        <div class="login-visual">
-            <div class="visual-logo">
-                <div class="visual-logo-icon">
+    <div class="login-wrapper">
+        <!-- Hero Section (Desktop Left) -->
+        <div class="login-hero">
+            <div class="hero-brand">
+                <div class="hero-logo">
                     <i class="fas fa-book-reader"></i>
                 </div>
-                <div class="visual-logo-title">LibMaster Pro</div>
+                <div class="hero-title">LibMaster Pro</div>
             </div>
 
-            <div class="visual-main-text">
-                <h1>Manage Your Library <br /><span>With Absolute Precision.</span></h1>
-                <p>Professional, efficient, and exceptionally modern SaaS solution built specifically for academic cataloging, resource issuance registries, and institutional records management.</p>
+            <div class="hero-content">
+                <h1>Smart Library <br /><span>Management System</span></h1>
+                <p>Streamline book issuances, catalog records, member registries, and automated circulation reporting.</p>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number">10k+</div>
-                    <div class="stat-label">Books Managed</div>
+            <div class="hero-features">
+                <div class="feature-item">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Real-time Book Accession Tracking</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number">2.5k</div>
-                    <div class="stat-label">Active Cohorts</div>
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Role-Based Access Control</span>
                 </div>
-                <div class="stat-item">
-                    <div class="stat-number">99.9%</div>
-                    <div class="stat-label">System Uptime</div>
+                <div class="feature-item">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Automated Circulation Reports</span>
                 </div>
             </div>
         </div>
 
-        <!-- Credentials Form (Right) -->
-        <div class="login-form-area">
-            <div class="form-header">
-                <h2>Welcome Back</h2>
-                <p>Please enter your administrative credentials to continue.</p>
-            </div>
+        <!-- Form Section (Right) -->
+        <div class="login-form-container">
+            <div class="form-title">Welcome Back</div>
+            <div class="form-subtitle">Enter your credentials to access the library dashboard.</div>
 
             <form onsubmit="event.preventDefault(); login();">
-                <!-- Username Input -->
-                <div class="input-group-modern">
+                <!-- Username -->
+                <div class="form-group-custom">
                     <label for="txtUserName">User Name</label>
-                    <div class="input-wrapper-modern">
-                        <i class="fas fa-user input-icon-left"></i>
-                        <input type="text" id="txtUserName" class="form-input-modern" placeholder="Enter username" required autocomplete="username" />
+                    <div class="input-box">
+                        <input type="text" id="txtUserName" class="input-field" placeholder="Enter username" required autocomplete="username" />
+                        <i class="fas fa-user input-icon"></i>
                     </div>
                 </div>
 
-                <!-- Password Input -->
-                <div class="input-group-modern">
+                <!-- Password -->
+                <div class="form-group-custom">
                     <label for="txtPassword">Password</label>
-                    <div class="input-wrapper-modern">
-                        <i class="fas fa-lock input-icon-left"></i>
-                        <input type="password" id="txtPassword" class="form-input-modern" placeholder="••••••••" required autocomplete="current-password" />
-                        <button class="pwd-toggle-btn" type="button" onclick="togglePassword()" title="Toggle password visibility">
+                    <div class="input-box">
+                        <input type="password" id="txtPassword" class="input-field" placeholder="••••••••" required autocomplete="current-password" />
+                        <i class="fas fa-lock input-icon"></i>
+                        <button type="button" class="btn-eye" onclick="togglePassword()" title="Toggle Password">
                             <i class="fas fa-eye" id="eyeIcon"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Account Type Dropdown -->
-                <div class="input-group-modern">
+                <!-- Account Type -->
+                <div class="form-group-custom">
                     <label for="ddlLoginType">Login Type</label>
-                    <div class="input-wrapper-modern">
-                        <i class="fas fa-shield-alt input-icon-left"></i>
-                        <select id="ddlLoginType" class="form-input-modern" required>
+                    <div class="input-box">
+                        <select id="ddlLoginType" class="input-field" required>
                             <option value="">Loading...</option>
                         </select>
-                        <i class="fas fa-chevron-down select-chevron"></i>
+                        <i class="fas fa-shield-alt input-icon"></i>
+                        <i class="fas fa-chevron-down select-arrow"></i>
                     </div>
                 </div>
 
-                <!-- Options -->
-                <div class="form-options">
-                    <label class="check-container">
-                        <input type="checkbox" id="rememberMe" class="check-input">
+                <!-- Meta Options -->
+                <div class="form-meta">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="rememberMe">
                         <span>Remember me</span>
                     </label>
-                    <a href="#" class="forgot-link">Forgot Password?</a>
+                    <a href="#" class="link-forgot">Forgot Password?</a>
                 </div>
 
-                <!-- Login Button -->
-                <button type="submit" class="btn-login-modern">
-                    <span>Login to Dashboard</span>
+                <!-- Submit Button -->
+                <button type="submit" class="btn-submit">
+                    <span>Login to System</span>
                     <i class="fas fa-arrow-right"></i>
                 </button>
             </form>
 
-            <div class="form-footer-text">
-                &copy; 2026 BG Library Solutions &bull; UI Redesign
+            <div class="form-footer">
+                &copy; 2026 LibMaster Solutions &bull; All Rights Reserved
             </div>
         </div>
     </div>
@@ -590,7 +490,7 @@
                     icon: 'error',
                     title: 'System Error',
                     text: 'Unable to load login types.',
-                    confirmButtonColor: '#4F81BD'
+                    confirmButtonColor: '#3b82f6'
                 });
             }
         }
@@ -601,18 +501,16 @@
             let password = document.getElementById("txtPassword").value.trim();
             let loginType = document.getElementById("ddlLoginType").value;
 
-            // ================= VALIDATION =================
             if (!userName || !password || !loginType) {
                 Swal.fire({
                     icon: 'warning',
-                    title: 'Oops! Missing Information',
-                    text: 'Please complete all required fields to continue.',
-                    confirmButtonColor: '#f39c12'
+                    title: 'Missing Information',
+                    text: 'Please complete all required fields.',
+                    confirmButtonColor: '#f59e0b'
                 });
                 return;
             }
 
-            // ================= LOADING =================
             Swal.fire({
                 title: 'Authenticating...',
                 text: 'Please wait while verifying credentials',
@@ -637,44 +535,40 @@
 
                 let result = await response.json();
 
-                // ================= LOGIN FAILED =================
                 if (!response.ok) {
                     Swal.fire({
                         icon: 'error',
-                        title: "Oops...",
+                        title: "Login Failed",
                         html: `
-                            <div style="font-size:14px; color:#333;">
+                            <div style="font-size:14px; color:#475569;">
                                 Invalid Username, Password, or Login Type.
-                                <br><br>
-                                Please check your credentials and try again.
                             </div>
                         `,
                         confirmButtonText: 'Try Again',
-                        confirmButtonColor: '#dc3545'
+                        confirmButtonColor: '#ef4444'
                     });
                     return;
                 }
 
-                // ================= LOGIN SUCCESS =================
                 Swal.fire({
                     icon: 'success',
-                    title: 'Login Successful',
-                    text: 'Redirecting you to dashboard...',
+                    title: 'Welcome Back',
+                    text: 'Redirecting to dashboard...',
                     showConfirmButton: false,
-                    timer: 2000,
+                    timer: 1800,
                     timerProgressBar: true
                 });
 
                 setTimeout(() => {
                     window.location.href = "/Dashboard";
-                }, 1800);
+                }, 1600);
 
             } catch (err) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Connection Error',
                     text: 'Unable to connect to server. Please try again later.',
-                    confirmButtonColor: '#dc3545'
+                    confirmButtonColor: '#ef4444'
                 });
             }
         }

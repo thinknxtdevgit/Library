@@ -26,9 +26,9 @@ namespace lib.Service
         // ========================================================
         // Generate Temp numbers and Find Missing Accession numbers
         // ========================================================
-        public async Task<List<int>> GenerateAndFindMissingAsync(string collegeName)
+        public async Task<List<string>> GenerateAndFindMissingAsync(string collegeName)
         {
-            List<int> missingNumbers = new List<int>();
+            List<string> missingNumbers = new List<string>();
 
             using (SqlConnection con = new SqlConnection(_connectionString))
             {
@@ -109,7 +109,7 @@ namespace lib.Service
                         {
                             if (reader.GetValue(0) != DBNull.Value)
                             {
-                                missingNumbers.Add(Convert.ToInt32(reader.GetValue(0)));
+                                missingNumbers.Add(reader.GetValue(0)?.ToString() ?? string.Empty);
                             }
                         }
                     }

@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using lib.DtoModel.IssueReportDto;
 using lib.Interface;
 using Microsoft.Data.SqlClient;
@@ -20,16 +20,48 @@ namespace lib.Service
                 configuration.GetConnectionString("DefaultConnection");
         }
 
+        private static bool IsGlobalCatalog(string collegeName)
+        {
+            return string.IsNullOrWhiteSpace(collegeName) ||
+                   collegeName.Equals("Global Catalog", StringComparison.OrdinalIgnoreCase) ||
+                   collegeName.Equals("Global Stock", StringComparison.OrdinalIgnoreCase) ||
+                   collegeName.Equals("ALL", StringComparison.OrdinalIgnoreCase);
+        }
+
         // ========================= REPORT =========================
 
         public async Task<ReportResponseDto> GetCollegeReportAsync(string collegeName)
         {
             var result = new ReportResponseDto();
+            bool isGlobal = IsGlobalCatalog(collegeName);
 
             using SqlConnection con = new SqlConnection(_connectionString);
             await con.OpenAsync();
 
-            string query = @"
+            string query = isGlobal
+                ? @"
+SELECT
+    CONVERT(VARCHAR(20), IssueDate, 102) AS IssueDate,
+    IDNo,
+    WhomIssued,
+    Discipline,
+    TRY_CAST(AccessionNo AS INT) AS AccessionNo,
+    Title,
+    Author,
+    LastReturnDate,
+    Condition,
+    Type,
+    Category,
+    ReceiveDate,
+    Remarks
+FROM IssueRegister
+ORDER BY TRY_CAST(AccessionNo AS INT);
+
+SELECT COUNT(*) FROM StockRegister;
+
+SELECT COUNT(*) FROM IssueRegister;
+"
+                : @"
 SELECT
     CONVERT(VARCHAR(20), IssueDate, 102) AS IssueDate,
     IDNo,
@@ -54,7 +86,10 @@ SELECT COUNT(*) FROM IssueRegister WHERE CollegeName = @CollegeName;
 ";
 
             using SqlCommand cmd = new SqlCommand(query, con);
-            cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+            if (!isGlobal)
+            {
+                cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+            }
 
             using SqlDataReader dr = await cmd.ExecuteReaderAsync();
 
@@ -96,13 +131,20 @@ SELECT COUNT(*) FROM IssueRegister WHERE CollegeName = @CollegeName;
 
         public async Task<byte[]> ExportCollegeReportAsync(string collegeName)
         {
+            bool isGlobal = IsGlobalCatalog(collegeName);
+
             using SqlConnection con = new SqlConnection(_connectionString);
             await con.OpenAsync();
 
-            string query = @"SELECT * FROM StockRegister WHERE CollegeName=@CollegeName";
+            string query = isGlobal
+                ? @"SELECT * FROM StockRegister"
+                : @"SELECT * FROM StockRegister WHERE CollegeName=@CollegeName";
 
             using SqlCommand cmd = new SqlCommand(query, con);
-            cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+            if (!isGlobal)
+            {
+                cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+            }
 
             using SqlDataReader dr = await cmd.ExecuteReaderAsync();
 
@@ -120,14 +162,34 @@ SELECT COUNT(*) FROM IssueRegister WHERE CollegeName = @CollegeName;
 
             return stream.ToArray();
         }
+
         public async Task<List<IssueBookReportDto>> GetIssueBooksReport(string collegeName)
         {
             List<IssueBookReportDto> list = new();
+            bool isGlobal = IsGlobalCatalog(collegeName);
 
             using SqlConnection con = new SqlConnection(_connectionString);
             await con.OpenAsync();
 
-            string query = @"
+            string query = isGlobal
+                ? @"
+        SELECT
+            CONVERT(VARCHAR(20), IssueDate, 102) AS IssueDate,
+            IDNo,
+            WhomIssued,
+            Discipline,
+            TRY_CAST(AccessionNo AS INT) AS AccessionNo,
+            Title,
+            Author,
+            LastReturnDate,
+            Condition,
+            Type,
+            Category,
+            ReceiveDate,
+            Remarks
+        FROM IssueRegister
+        ORDER BY TRY_CAST(AccessionNo AS INT)"
+                : @"
         SELECT
             CONVERT(VARCHAR(20), IssueDate, 102) AS IssueDate,
             IDNo,
@@ -147,7 +209,10 @@ SELECT COUNT(*) FROM IssueRegister WHERE CollegeName = @CollegeName;
         ORDER BY TRY_CAST(AccessionNo AS INT)";
 
             using SqlCommand cmd = new SqlCommand(query, con);
-            cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+            if (!isGlobal)
+            {
+                cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+            }
 
             using SqlDataReader dr = await cmd.ExecuteReaderAsync();
 

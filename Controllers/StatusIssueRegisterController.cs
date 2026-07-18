@@ -1,4 +1,4 @@
-﻿using lib.DtoModel.IssueReportDto;
+using lib.DtoModel.IssueReportDto;
 using lib.Interface;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,25 +23,25 @@ namespace lib.Controllers
         [HttpPost("college")]
         public async Task<IActionResult> GetCollegeReport([FromBody] CollegeRequestDto req)
         {
-            if (req == null || string.IsNullOrWhiteSpace(req.CollegeName))
-                return BadRequest("Invalid College");
-
-            var result = await _reportService.GetCollegeReportAsync(req.CollegeName);
+            string collegeName = req?.CollegeName ?? string.Empty;
+            var result = await _reportService.GetCollegeReportAsync(collegeName);
             return Ok(result);
         }
 
         [HttpPost("college/export")]
         public async Task<IActionResult> ExportCollegeReport([FromBody] CollegeRequestDto req)
         {
-            if (req == null || string.IsNullOrWhiteSpace(req.CollegeName))
-                return BadRequest("Invalid College");
+            string collegeName = req?.CollegeName ?? string.Empty;
+            var file = await _reportService.ExportCollegeReportAsync(collegeName);
 
-            var file = await _reportService.ExportCollegeReportAsync(req.CollegeName);
+            string fileName = string.IsNullOrWhiteSpace(collegeName) || collegeName.Equals("Global Catalog", StringComparison.OrdinalIgnoreCase)
+                ? "GlobalCatalog_Report.xlsx"
+                : $"{collegeName.Replace(" ", "_")}_Report.xlsx";
 
             return File(
                 file,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                $"{req.CollegeName}_Report.xlsx"
+                fileName
             );
         }
         [HttpGet("colleges")]

@@ -26,24 +26,28 @@ namespace lib.Controllers
         [HttpPost]
         public async Task<IActionResult> GetStockPaged([FromBody] PagedRequest request)
         {
-            if (request == null || string.IsNullOrEmpty(request.Search))
-                return BadRequest("CollegeName is required");
+            string collegeName = request?.Search ?? string.Empty;
 
-            var data = await _reportService.GetIssueBooksReport(request.Search);
+            var data = await _reportService.GetIssueBooksReport(collegeName);
 
             int totalRecords = data.Count;
 
+            int pageNumber = request?.PageNumber ?? 1;
+            int pageSize = request?.PageSize ?? 10;
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
             var pagedData = data
-                .Skip((request.PageNumber - 1) * request.PageSize)
-                .Take(request.PageSize)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToList();
 
             return Ok(new PagedResult<IssueBookReportDto>
             {
                 Data = pagedData,
                 TotalRecords = totalRecords,
-                PageNumber = request.PageNumber,
-                PageSize = request.PageSize
+                PageNumber = pageNumber,
+                PageSize = pageSize
             });
         }
 

@@ -1,4 +1,4 @@
-﻿
+
 using lib.DtoModel.StockBookDto;
 using lib.Interface;
 using lib.Pagination_Helper;
@@ -58,24 +58,28 @@ namespace lib.Controllers
         [HttpPost]
         public async Task<IActionResult> GetStockPaged([FromBody] PagedRequest request)
         {
-            if (request == null || string.IsNullOrEmpty(request.Search))
-                return BadRequest("CollegeName is required");
+            string collegeName = request?.Search ?? string.Empty;
 
-            var data = await _service.GetStockBooksAsync(request.Search);
+            var data = await _service.GetStockBooksAsync(collegeName);
 
             int totalRecords = data.Count;
 
+            int pageNumber = request?.PageNumber ?? 1;
+            int pageSize = request?.PageSize ?? 10;
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 10;
+
             var pagedData = data
-                .Skip((request.PageNumber - 1) * request.PageSize)
-                .Take(request.PageSize)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .ToList();
 
             return Ok(new PagedResult<StockBookDto>
             {
                 Data = pagedData,
                 TotalRecords = totalRecords,
-                PageNumber = request.PageNumber,
-                PageSize = request.PageSize
+                PageNumber = pageNumber,
+                PageSize = pageSize
             });
         }
 
@@ -84,14 +88,13 @@ namespace lib.Controllers
         [HttpPost]
         public async Task<IActionResult> GetSummary([FromBody] CollegeRequestDto request)
         {
-            if (request == null || string.IsNullOrEmpty(request.CollegeName))
-                return BadRequest("CollegeName is required");
+            string collegeName = request?.CollegeName ?? string.Empty;
 
             var result = new
             {
-                TotalBooks = await _service.GetTotalBooksAsync(request.CollegeName),
-                TotalTitles = await _service.GetTotalTitlesAsync(request.CollegeName),
-                UnusedBooks = await _service.GetUnusedBooksAsync(request.CollegeName)
+                TotalBooks = await _service.GetTotalBooksAsync(collegeName),
+                TotalTitles = await _service.GetTotalTitlesAsync(collegeName),
+                UnusedBooks = await _service.GetUnusedBooksAsync(collegeName)
             };
 
             return Ok(result);
@@ -102,12 +105,13 @@ namespace lib.Controllers
         [HttpPost]
         public async Task<IActionResult> ExportExcel([FromBody] CollegeRequestDto request)
         {
-            if (request == null || string.IsNullOrEmpty(request.CollegeName))
-                return BadRequest("CollegeName is required");
+            string collegeName = request?.CollegeName ?? string.Empty;
 
-            var fileBytes = await _service.ExportToExcelAsync(request.CollegeName);
+            var fileBytes = await _service.ExportToExcelAsync(collegeName);
 
-            string fileName = $"StockBooks_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
+            string fileName = string.IsNullOrWhiteSpace(collegeName) || collegeName.Equals("Global Stock", StringComparison.OrdinalIgnoreCase)
+                ? $"GlobalStock_{DateTime.Now:yyyyMMddHHmmss}.xlsx"
+                : $"StockBooks_{collegeName.Replace(" ", "_")}_{DateTime.Now:yyyyMMddHHmmss}.xlsx";
 
             return File(fileBytes,
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

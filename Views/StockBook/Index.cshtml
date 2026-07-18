@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Stock Register Report";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -135,22 +135,26 @@
         let totalPages = 0;
 
         // ================= INIT =================
-        document.addEventListener("DOMContentLoaded", () => {
-            loadColleges();
-            // loadReport(1); // optional auto load
+        document.addEventListener("DOMContentLoaded", async () => {
+            await loadColleges();
+            // Data loading requires explicit college selection
         });
 
         // ================= COLLEGES =================
         async function loadColleges() {
-            const res = await fetch('/api/report/colleges');
-            const data = await res.json();
+            try {
+                const res = await fetch('/api/report/colleges');
+                const data = await res.json();
 
-            let ddl = document.getElementById("collegeName");
-            ddl.innerHTML = `<option value="">-- Select College --</option>`;
+                let ddl = document.getElementById("collegeName");
+                ddl.innerHTML = `<option value="">-- Select College --</option>`;
 
-            data.forEach(x => {
-                ddl.innerHTML += `<option value="${x}">${x}</option>`;
-            });
+                data.forEach(x => {
+                    ddl.innerHTML += `<option value="${x}">${x}</option>`;
+                });
+            } catch (err) {
+                console.error("Failed to load colleges dropdown:", err);
+            }
         }
 
         // ================= LOAD REPORT =================
@@ -160,74 +164,86 @@
 
             const collegeName = document.getElementById("collegeName").value;
 
-        if (!collegeName) {
-                  Swal.fire({
-                      icon: 'warning',
-                      title: 'College Name Required',
-                      text: 'Please select a college name.'
-                  });
-                  return;
+            if (!collegeName) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Select College Name',
+                    text: 'Please select a college name to view stock report.',
+                    confirmButtonColor: '#f39c12'
+                });
+                return;
+            }
+
+            const currentFilterSpan = document.getElementById("currentFilter");
+            if (currentFilterSpan) {
+                currentFilterSpan.innerText = collegeName;
+            }
+
+            try {
+
+                Swal.fire({
+                    title: 'Loading Stock Data...',
+                    text: 'Please wait',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => Swal.showLoading()
+                });
+
+                const summaryRes = await fetch('/StockBook/GetSummary', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ collegeName: collegeName })
+                });
+
+                if (summaryRes.ok) {
+                    const summary = await summaryRes.json();
+                    document.getElementById("totalBooks").innerText = summary.totalBooks ?? 0;
+                    document.getElementById("totalTitles").innerText = summary.totalTitles ?? 0;
+                    document.getElementById("unusedBooks").innerText = summary.unusedBooks ?? 0;
+                }
+
+                const res = await fetch('/StockBook/GetStockPaged', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        search: collegeName,
+                        pageNumber: currentPage,
+                        pageSize: pageSize
+                    })
+                });
+
+                if (res.ok) {
+                    const result = await res.json();
+
+                    renderTable(result.data);
+
+                    document.getElementById("rowCount").innerText =
+                        (result.totalRecords ?? 0) + " Records";
+
+                    totalPages = Math.ceil((result.totalRecords ?? 0) / pageSize);
+                    if (totalPages === 0) totalPages = 1;
+
+                    renderPagination();
+                } else {
+                    renderTable([]);
+                }
+
+            }
+            catch (error) {
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load stock report.'
+                });
+
+                console.error(error);
+            }
+            finally {
+                Swal.close();
+            }
         }
 
-                  try {
-
-            Swal.fire({
-                title: 'Loading Report...',
-                allowOutsideClick: false,
-                didOpen: () => Swal.showLoading()
-            });
-
-            const summaryRes = await fetch('/StockBook/GetSummary', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ collegeName })
-            });
-
-            const summary = await summaryRes.json();
-
-            document.getElementById("totalBooks").innerText = summary.totalBooks ?? 0;
-            document.getElementById("totalTitles").innerText = summary.totalTitles ?? 0;
-            document.getElementById("unusedBooks").innerText = summary.unusedBooks ?? 0;
-
-            const res = await fetch('/StockBook/GetStockPaged', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    search: collegeName,
-                    pageNumber: currentPage,
-                    pageSize: pageSize
-                })
-            });
-
-            const result = await res.json();
-
-            renderTable(result.data);
-
-            document.getElementById("rowCount").innerText =
-                result.totalRecords + " Records";
-
-            totalPages = Math.ceil(result.totalRecords / pageSize);
-            if (totalPages === 0) totalPages = 1;
-
-            renderPagination();
-
-        }
-        catch (error) {
-
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Failed to load report.'
-            });
-
-            console.error(error);
-        }
-        finally {
-
-            Swal.close(); // Hamesha loader band hoga
-
-        }
-        }
         // ================= TABLE =================
         function renderTable(data) {
 
@@ -238,7 +254,7 @@
             body.innerHTML = "";
 
             if (!data || data.length === 0) {
-                body.innerHTML = `<tr><td class="text-center py-4">No Data Found</td></tr>`;
+                body.innerHTML = `<tr><td class="text-center py-4 text-muted"><i class="fas fa-box-open fa-2x mb-2 d-block opacity-25"></i>No Stock Records Found</td></tr>`;
                 return;
             }
 
@@ -271,14 +287,14 @@
             let html = "";
 
             if (currentPage > 1) {
-                html += `<button class="btn btn-sm btn-primary"
+                html += `<button class="btn btn-sm btn-primary me-2"
                 onclick="loadReport(${currentPage - 1})">Prev</button>`;
             }
 
-            html += `<span class="px-3">Page ${currentPage} of ${totalPages}</span>`;
+            html += `<span class="px-3 align-self-center text-muted fw-bold">Page ${currentPage} of ${totalPages}</span>`;
 
             if (currentPage < totalPages) {
-                html += `<button class="btn btn-sm btn-primary"
+                html += `<button class="btn btn-sm btn-primary ms-2"
                 onclick="loadReport(${currentPage + 1})">Next</button>`;
             }
 
@@ -291,25 +307,46 @@
             const collegeName = document.getElementById("collegeName").value;
 
             if (!collegeName) {
-                Swal.fire({ icon: 'warning', title: 'College Required' });
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Select College Name',
+                    text: 'Please select a college name to export stock report.',
+                    confirmButtonColor: '#f39c12'
+                });
                 return;
             }
 
-            const res = await fetch('/StockBook/ExportExcel', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ collegeName })
-            });
+            try {
+                Swal.fire({
+                    title: 'Exporting Excel...',
+                    text: 'Please wait',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => Swal.showLoading()
+                });
 
-            const blob = await res.blob();
-            const url = window.URL.createObjectURL(blob);
+                const res = await fetch('/StockBook/ExportExcel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ collegeName: collegeName })
+                });
 
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "StockRegister.xlsx";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
+                if (!res.ok) throw new Error("Export failed");
+
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `StockBooks_${collegeName}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            } catch (err) {
+                Swal.fire({ icon: 'error', title: 'Export Failed', text: 'Unable to export Excel file.' });
+            } finally {
+                Swal.close();
+            }
         }
 
     </script>

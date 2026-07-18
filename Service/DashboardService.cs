@@ -103,120 +103,260 @@ namespace lib.Service
                     stats.TotalPublishers = (int)(await cmd.ExecuteScalarAsync() ?? 0);
                 }
 
-                // 9. Borrowing Trends (Last 7 Days)
-                string trendsQuery = $@"
-                    SELECT CAST(IssueDate AS DATE) AS IssueDate, COUNT(*) AS IssueCount 
-                    FROM IssueRegister 
-                    WHERE CollegeName IN ({inClause}) 
-                    AND IssueDate >= DATEADD(day, -6, CAST(GETDATE() AS DATE)) 
-                    GROUP BY CAST(IssueDate AS DATE) 
-                    ORDER BY IssueDate ASC";
-                
-                var trendsMap = new Dictionary<DateTime, int>();
-                using (SqlCommand cmd = new SqlCommand(trendsQuery, con))
+                // 9. Borrowing Trends (Monthly Wise - Last 12 Months)
+                var monthlyTrendsMap = new Dictionary<(int Year, int Month), int>();
+
+                try
                 {
-                    cmd.Parameters.AddRange(cmdParameters.Select(p => ((ICloneable)p).Clone() as SqlParameter).ToArray());
-                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    string trendsQuery = $@"
+                        SELECT 
+                            YEAR(IssueDate) AS IssueYear, 
+                            MONTH(IssueDate) AS IssueMonth, 
+                            COUNT(*) AS IssueCount 
+                        FROM IssueRegister 
+                        WHERE CollegeName IN ({inClause}) 
+                          AND IssueDate IS NOT NULL 
+                          AND IssueDate >= DATEADD(month, -11, DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) 
+                        GROUP BY YEAR(IssueDate), MONTH(IssueDate) 
+                        ORDER BY IssueYear ASC, IssueMonth ASC";
+
+                    using (SqlCommand cmd = new SqlCommand(trendsQuery, con))
                     {
-                        while (await reader.ReadAsync())
+                        cmd.Parameters.AddRange(cmdParameters.Select(p => ((ICloneable)p).Clone() as SqlParameter).ToArray());
+                        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                         {
-                            if (reader[0] != DBNull.Value)
+                            while (await reader.ReadAsync())
                             {
-                                trendsMap[Convert.ToDateTime(reader[0]).Date] = Convert.ToInt32(reader[1]);
+                                int yr = Convert.ToInt32(reader["IssueYear"]);
+                                int mn = Convert.ToInt32(reader["IssueMonth"]);
+                                int cnt = Convert.ToInt32(reader["IssueCount"]);
+                                monthlyTrendsMap[(yr, mn)] = cnt;
                             }
                         }
                     }
                 }
-
-                // Generate continuous 7 days trend points
-                DateTime today = DateTime.Today;
-                for (int i = 6; i >= 0; i--)
+                catch (Exception ex)
                 {
-                    DateTime date = today.AddDays(-i);
-                    int count = trendsMap.ContainsKey(date) ? trendsMap[date] : 0;
+                    Console.WriteLine("Monthly trends query error: " + ex.Message);
+                }
+
+                // Fallback to Transactions table if IssueRegister has no monthly entries
+                if (monthlyTrendsMap.Count == 0)
+                {
+                    try
+                    {
+                        string txTrendsQuery = $@"
+                            SELECT 
+                                YEAR(TransactionDate) AS IssueYear, 
+                                MONTH(TransactionDate) AS IssueMonth, 
+                                COUNT(*) AS IssueCount 
+                            FROM Transactions 
+                            WHERE CollegeName IN ({inClause}) 
+                              AND TransactionDate IS NOT NULL 
+                              AND TransactionName LIKE '%Issue%' 
+                              AND TransactionDate >= DATEADD(month, -11, DATEFROMPARTS(YEAR(GETDATE()), MONTH(GETDATE()), 1)) 
+                            GROUP BY YEAR(TransactionDate), MONTH(TransactionDate) 
+                            ORDER BY IssueYear ASC, IssueMonth ASC";
+
+                        using (SqlCommand cmd = new SqlCommand(txTrendsQuery, con))
+                        {
+                            cmd.Parameters.AddRange(cmdParameters.Select(p => ((ICloneable)p).Clone() as SqlParameter).ToArray());
+                            using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                            {
+                                while (await reader.ReadAsync())
+                                {
+                                    int yr = Convert.ToInt32(reader["IssueYear"]);
+                                    int mn = Convert.ToInt32(reader["IssueMonth"]);
+                                    int cnt = Convert.ToInt32(reader["IssueCount"]);
+                                    monthlyTrendsMap[(yr, mn)] = cnt;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Transactions monthly trends query error: " + ex.Message);
+                    }
+                }
+
+                // Generate continuous 12 months trend points ending at current month
+                DateTime currentMonthStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                for (int i = 11; i >= 0; i--)
+                {
+                    DateTime mDate = currentMonthStart.AddMonths(-i);
+                    int count = monthlyTrendsMap.ContainsKey((mDate.Year, mDate.Month)) 
+                        ? monthlyTrendsMap[(mDate.Year, mDate.Month)] 
+                        : 0;
+
                     stats.BorrowingTrends.Add(new TrendPointDto
                     {
-                        Date = date.ToString("dd MMM"),
+                        Date = mDate.ToString("MMM yyyy"),
                         Count = count
                     });
                 }
 
-                // 10. Recent Activities
+                // 10. Recent Activities (Real Dynamic Data from Transactions, IssueRegister & StockRegister)
                 var rawActivities = new List<(DateTime Time, ActivityDto Act)>();
 
-                // Recent Book Additions (ordered by accession no descending)
-                string recentBooksQuery = $@"
-                    SELECT TOP 3 Title, AccessionNo, CollegeName 
-                    FROM StockRegister 
-                    WHERE CollegeName IN ({inClause}) 
-                    ORDER BY TRY_CAST(AccessionNo AS INT) DESC";
-                
-                using (SqlCommand cmd = new SqlCommand(recentBooksQuery, con))
+                // A. Real Transactions Table Query
+                try
                 {
-                    cmd.Parameters.AddRange(cmdParameters.Select(p => ((ICloneable)p).Clone() as SqlParameter).ToArray());
-                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                    string transactionsQuery = $@"
+                        SELECT TOP 5 
+                            TransactionDate,
+                            TransactionTime,
+                            TransactionName,
+                            Type,
+                            AccessionNo,
+                            Title,
+                            IDNo,
+                            PersonName,
+                            PersonType
+                        FROM Transactions
+                        WHERE CollegeName IN ({inClause})
+                        ORDER BY TransactionDate DESC";
+
+                    using (SqlCommand cmd = new SqlCommand(transactionsQuery, con))
                     {
-                        while (await reader.ReadAsync())
+                        cmd.Parameters.AddRange(cmdParameters.Select(p => ((ICloneable)p).Clone() as SqlParameter).ToArray());
+                        using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                         {
-                            string title = reader["Title"]?.ToString() ?? "Unknown Title";
-                            string accNo = reader["AccessionNo"]?.ToString() ?? "";
-                            rawActivities.Add((DateTime.Now.AddMinutes(-10 * rawActivities.Count - 5), new ActivityDto
+                            while (await reader.ReadAsync())
                             {
-                                Title = "New Book Registered",
-                                Details = $"\"{title}\" (Accession No. {accNo}) was registered in stock catalog.",
-                                Status = "success"
-                            }));
+                                string tName = reader["TransactionName"]?.ToString() ?? "Transaction";
+                                string title = reader["Title"]?.ToString() ?? "Book";
+                                string accNo = reader["AccessionNo"]?.ToString() ?? "";
+                                string person = reader["PersonName"]?.ToString() ?? "";
+                                string pType = reader["PersonType"]?.ToString() ?? "";
+                                string dateStr = reader["TransactionDate"]?.ToString() ?? "";
+                                string timeStr = reader["TransactionTime"]?.ToString() ?? "";
+
+                                DateTime actTime = DateTime.Now;
+                                if (DateTime.TryParse($"{dateStr} {timeStr}", out DateTime parsedDt))
+                                {
+                                    actTime = parsedDt;
+                                }
+                                else if (reader["TransactionDate"] != DBNull.Value && reader["TransactionDate"] is DateTime dtVal)
+                                {
+                                    actTime = dtVal;
+                                }
+
+                                string status = "info";
+                                string lowerName = tName.ToLower();
+                                if (lowerName.Contains("return")) status = "success";
+                                else if (lowerName.Contains("renew")) status = "warning";
+                                else if (lowerName.Contains("issue")) status = "info";
+                                else status = "primary";
+
+                                string details = string.IsNullOrEmpty(person)
+                                    ? $"\"{title}\" (Accession No. {accNo})"
+                                    : $"\"{title}\" (Acc No. {accNo}) - {person} ({pType})";
+
+                                rawActivities.Add((actTime, new ActivityDto
+                                {
+                                    Title = tName,
+                                    Details = details,
+                                    TimeAgo = FormatTimeAgo(actTime),
+                                    Status = status
+                                }));
+                            }
                         }
                     }
                 }
-
-                // Recent Book Issuances (ordered by issue date descending)
-                string recentIssuesQuery = $@"
-                    SELECT TOP 3 IssueDate, WhomIssued, Title, CollegeName 
-                    FROM IssueRegister 
-                    WHERE CollegeName IN ({inClause}) 
-                    ORDER BY IssueDate DESC";
-                
-                using (SqlCommand cmd = new SqlCommand(recentIssuesQuery, con))
+                catch (Exception ex)
                 {
-                    cmd.Parameters.AddRange(cmdParameters.Select(p => ((ICloneable)p).Clone() as SqlParameter).ToArray());
-                    using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            DateTime issueDate = reader["IssueDate"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(reader["IssueDate"]);
-                            string whom = reader["WhomIssued"]?.ToString() ?? "Borrower";
-                            string title = reader["Title"]?.ToString() ?? "Unknown Title";
-                            
-                            // Format TimeAgo nicely
-                            string timeAgoStr = FormatTimeAgo(issueDate);
+                    Console.WriteLine("Transactions query error: " + ex.Message);
+                }
 
-                            rawActivities.Add((issueDate, new ActivityDto
+                // B. If Transactions table has fewer than 5 items, supplement with recent IssueRegister entries
+                if (rawActivities.Count < 5)
+                {
+                    try
+                    {
+                        string recentIssuesQuery = $@"
+                            SELECT TOP 5 IssueDate, WhomIssued, Title, AccessionNo 
+                            FROM IssueRegister 
+                            WHERE CollegeName IN ({inClause}) 
+                            ORDER BY IssueDate DESC";
+
+                        using (SqlCommand cmd = new SqlCommand(recentIssuesQuery, con))
+                        {
+                            cmd.Parameters.AddRange(cmdParameters.Select(p => ((ICloneable)p).Clone() as SqlParameter).ToArray());
+                            using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
                             {
-                                Title = "Book Issued",
-                                Details = $"{whom} checked out \"{title}\".",
-                                TimeAgo = timeAgoStr,
-                                Status = "info"
-                            }));
+                                while (await reader.ReadAsync())
+                                {
+                                    DateTime issueDate = reader["IssueDate"] == DBNull.Value ? DateTime.Now : Convert.ToDateTime(reader["IssueDate"]);
+                                    string whom = reader["WhomIssued"]?.ToString() ?? "Borrower";
+                                    string title = reader["Title"]?.ToString() ?? "Unknown Title";
+                                    string accNo = reader["AccessionNo"]?.ToString() ?? "";
+
+                                    rawActivities.Add((issueDate, new ActivityDto
+                                    {
+                                        Title = "Book Issued",
+                                        Details = $"{whom} checked out \"{title}\" (Acc No. {accNo}).",
+                                        TimeAgo = FormatTimeAgo(issueDate),
+                                        Status = "info"
+                                    }));
+                                }
+                            }
                         }
                     }
-                }
-
-                // Sort merged activities by date descending
-                var sortedActs = rawActivities.OrderByDescending(x => x.Time).Take(5).Select(x => x.Act).ToList();
-                
-                // For additions, let's make their time ago look natural relative to order
-                int addIndex = 1;
-                foreach (var act in sortedActs)
-                {
-                    if (string.IsNullOrEmpty(act.TimeAgo))
+                    catch (Exception ex)
                     {
-                        act.TimeAgo = $"{addIndex * 15} mins ago";
-                        addIndex++;
+                        Console.WriteLine("Recent issues query error: " + ex.Message);
                     }
                 }
 
-                stats.RecentActivities = sortedActs;
+                // C. If still fewer than 5 items, supplement with recent StockRegister entries
+                if (rawActivities.Count < 5)
+                {
+                    try
+                    {
+                        string recentBooksQuery = $@"
+                            SELECT TOP 5 Title, AccessionNo, DateEntry 
+                            FROM StockRegister 
+                            WHERE CollegeName IN ({inClause}) 
+                            ORDER BY DateEntry DESC, TRY_CAST(AccessionNo AS INT) DESC";
+
+                        using (SqlCommand cmd = new SqlCommand(recentBooksQuery, con))
+                        {
+                            cmd.Parameters.AddRange(cmdParameters.Select(p => ((ICloneable)p).Clone() as SqlParameter).ToArray());
+                            using (SqlDataReader reader = await cmd.ExecuteReaderAsync())
+                            {
+                                while (await reader.ReadAsync())
+                                {
+                                    string title = reader["Title"]?.ToString() ?? "Unknown Title";
+                                    string accNo = reader["AccessionNo"]?.ToString() ?? "";
+                                    DateTime entryDate = (reader["DateEntry"] != DBNull.Value && reader["DateEntry"] is DateTime dt)
+                                        ? dt
+                                        : DateTime.Now;
+
+                                    rawActivities.Add((entryDate, new ActivityDto
+                                    {
+                                        Title = "Book Stock Registered",
+                                        Details = $"\"{title}\" (Accession No. {accNo}) registered in catalog.",
+                                        TimeAgo = FormatTimeAgo(entryDate),
+                                        Status = "success"
+                                    }));
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Recent books query error: " + ex.Message);
+                    }
+                }
+
+                // Sort merged real activities by date descending, deduplicate, and take top 5
+                stats.RecentActivities = rawActivities
+                    .OrderByDescending(x => x.Time)
+                    .Select(x => x.Act)
+                    .GroupBy(x => x.Details)
+                    .Select(g => g.First())
+                    .Take(5)
+                    .ToList();
             }
 
             return stats;

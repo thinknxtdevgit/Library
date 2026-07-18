@@ -1,4 +1,4 @@
-﻿using ClosedXML.Excel;
+using ClosedXML.Excel;
 using DocumentFormat.OpenXml.Bibliography;
 using DocumentFormat.OpenXml.Spreadsheet;
 using lib.DtoModel.StockBookDto;
@@ -20,12 +20,21 @@ namespace lib.Service
       
         }
 
+        private static bool IsGlobalStock(string collegeName)
+        {
+            return string.IsNullOrWhiteSpace(collegeName) ||
+                   collegeName.Equals("Global Stock", StringComparison.OrdinalIgnoreCase) ||
+                   collegeName.Equals("ALL", StringComparison.OrdinalIgnoreCase);
+        }
+
         // ================= GET STOCK =================
         public async Task<List<StockBookDto>> GetStockBooksAsync(string collegeName)
         {
             var list = new List<StockBookDto>();
 
             using SqlConnection con = new SqlConnection(_connectionString);
+            bool isGlobal = IsGlobalStock(collegeName);
+
             string sql = @"
 SELECT
     DateEntry,
@@ -65,11 +74,18 @@ SELECT
     BookSize,
     Subject1,
     Subject2
-FROM StockRegister
-WHERE LTRIM(RTRIM(CollegeName)) = LTRIM(RTRIM(@CollegeName))";
+FROM StockRegister";
+
+            if (!isGlobal)
+            {
+                sql += " WHERE LTRIM(RTRIM(CollegeName)) = LTRIM(RTRIM(@CollegeName))";
+            }
 
             using SqlCommand cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+            if (!isGlobal)
+            {
+                cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+            }
 
             await con.OpenAsync();
             using var reader = await cmd.ExecuteReaderAsync();
@@ -133,7 +149,6 @@ WHERE LTRIM(RTRIM(CollegeName)) = LTRIM(RTRIM(@CollegeName))";
                     BillNo = reader["BillNo"]?.ToString(),
                     ClassNo = reader["ClassNo"]?.ToString(),
 
-                    // ✅ FIXED
                     BillDate = billDate?.ToString("yyyy-MM-dd"),
 
                     BookNo = reader["BookNo"]?.ToString(),
@@ -165,16 +180,20 @@ WHERE LTRIM(RTRIM(CollegeName)) = LTRIM(RTRIM(@CollegeName))";
             return list;
         }
 
-        
-
         // ================= TOTAL BOOKS =================
         public async Task<int> GetTotalBooksAsync(string collegeName)
         {
             using SqlConnection con = new SqlConnection(_connectionString);
-            string sql = "SELECT COUNT(*) FROM StockRegister WHERE CollegeName=@CollegeName";
+            bool isGlobal = IsGlobalStock(collegeName);
+            string sql = isGlobal 
+                ? "SELECT COUNT(*) FROM StockRegister"
+                : "SELECT COUNT(*) FROM StockRegister WHERE CollegeName=@CollegeName";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+            if (!isGlobal)
+            {
+                cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+            }
 
             await con.OpenAsync();
             return (int)await cmd.ExecuteScalarAsync();
@@ -184,14 +203,23 @@ WHERE LTRIM(RTRIM(CollegeName)) = LTRIM(RTRIM(@CollegeName))";
         public async Task<int> GetTotalTitlesAsync(string collegeName)
         {
             using SqlConnection con = new SqlConnection(_connectionString);
-            string sql = @"SELECT COUNT(*) FROM (
+            bool isGlobal = IsGlobalStock(collegeName);
+            string sql = isGlobal
+                ? @"SELECT COUNT(*) FROM (
+                       SELECT Title, Author 
+                       FROM StockRegister 
+                       GROUP BY Title, Author) t"
+                : @"SELECT COUNT(*) FROM (
                        SELECT Title, Author 
                        FROM StockRegister 
                        WHERE CollegeName=@CollegeName 
                        GROUP BY Title, Author) t";
 
             using SqlCommand cmd = new SqlCommand(sql, con);
-            cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+            if (!isGlobal)
+            {
+                cmd.Parameters.AddWithValue("@CollegeName", collegeName);
+            }
 
             await con.OpenAsync();
             return (int)await cmd.ExecuteScalarAsync();
@@ -202,17 +230,24 @@ WHERE LTRIM(RTRIM(CollegeName)) = LTRIM(RTRIM(@CollegeName))";
         {
             int stock = 0;
             int issued = 0;
+            bool isGlobal = IsGlobalStock(collegeName);
 
             using (SqlConnection con = new SqlConnection(_connectionString))
             {
                 await con.OpenAsync();
 
-                SqlCommand cmd1 = new SqlCommand("SELECT COUNT(*) FROM StockRegister WHERE CollegeName=@CollegeName", con);
-                cmd1.Parameters.AddWithValue("@CollegeName", collegeName);
+                string query1 = isGlobal
+                    ? "SELECT COUNT(*) FROM StockRegister"
+                    : "SELECT COUNT(*) FROM StockRegister WHERE CollegeName=@CollegeName";
+                SqlCommand cmd1 = new SqlCommand(query1, con);
+                if (!isGlobal) cmd1.Parameters.AddWithValue("@CollegeName", collegeName);
                 stock = (int)await cmd1.ExecuteScalarAsync();
 
-                SqlCommand cmd2 = new SqlCommand("SELECT COUNT(*) FROM IssueRegister WHERE CollegeName=@CollegeName", con);
-                cmd2.Parameters.AddWithValue("@CollegeName", collegeName);
+                string query2 = isGlobal
+                    ? "SELECT COUNT(*) FROM IssueRegister"
+                    : "SELECT COUNT(*) FROM IssueRegister WHERE CollegeName=@CollegeName";
+                SqlCommand cmd2 = new SqlCommand(query2, con);
+                if (!isGlobal) cmd2.Parameters.AddWithValue("@CollegeName", collegeName);
                 issued = (int)await cmd2.ExecuteScalarAsync();
             }
 

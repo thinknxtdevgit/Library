@@ -104,8 +104,9 @@
         let totalPages = 0;
 
         // ================= INIT =================
-        document.addEventListener("DOMContentLoaded", () => {
-            loadColleges();
+        document.addEventListener("DOMContentLoaded", async () => {
+            await loadColleges();
+            // Data loading requires explicit college selection
         });
 
         // ================= HELPERS =================
@@ -162,19 +163,21 @@
         async function loadReport(page = 1) {
 
             currentPage = page;
-
-            const collegeName =
-                document.getElementById("collegeName").value;
+            const collegeName = document.getElementById("collegeName").value;
 
             if (!collegeName) {
-
                 Swal.fire({
                     icon: 'warning',
-                    title: 'College Name Required',
-                    text: 'Please select a college name.'
+                    title: 'Select College Name',
+                    text: 'Please select a college name to view issued books report.',
+                    confirmButtonColor: '#f39c12'
                 });
-
                 return;
+            }
+
+            const currentFilterSpan = document.getElementById("currentFilterDisplay");
+            if (currentFilterSpan) {
+                currentFilterSpan.innerText = collegeName;
             }
 
             try {
@@ -184,7 +187,7 @@
                 // ================= SUMMARY =================
                 const summary = await postJson(
                     '/api/report/college',
-                    { collegeName }
+                    { collegeName: collegeName }
                 );
 
                 document.getElementById("totalBooks").innerText =
@@ -209,10 +212,10 @@
                 renderTable(pagedResult);
 
                 document.getElementById("rowCountDisplay").innerText =
-                    `${pagedResult.totalRecords} Records`;
+                    `${pagedResult.totalRecords ?? 0} Records`;
 
                 totalPages = Math.ceil(
-                    pagedResult.totalRecords / pageSize
+                    (pagedResult.totalRecords ?? 0) / pageSize
                 );
 
                 if (totalPages <= 0)
@@ -312,7 +315,7 @@
 
             if (currentPage > 1) {
                 html += `
-                    <button class="btn btn-sm btn-primary"
+                    <button class="btn btn-sm btn-primary me-2"
                         onclick="loadReport(${currentPage - 1})">
                         Prev
                     </button>
@@ -320,14 +323,14 @@
             }
 
             html += `
-                <span class="px-3 align-self-center">
+                <span class="px-3 align-self-center text-muted fw-bold">
                     Page ${currentPage} of ${totalPages}
                 </span>
             `;
 
             if (currentPage < totalPages) {
                 html += `
-                    <button class="btn btn-sm btn-primary"
+                    <button class="btn btn-sm btn-primary ms-2"
                         onclick="loadReport(${currentPage + 1})">
                         Next
                     </button>
@@ -344,13 +347,12 @@
                 document.getElementById("collegeName").value;
 
             if (!collegeName) {
-
                 Swal.fire({
                     icon: 'warning',
-                    title: 'College Name Required',
-                    text: 'Please select a college name.'
+                    title: 'Select College Name',
+                    text: 'Please select a college name to export report.',
+                    confirmButtonColor: '#f39c12'
                 });
-
                 return;
             }
 
@@ -365,8 +367,10 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ collegeName })
+                        body: JSON.stringify({ collegeName: collegeName })
                     });
+
+                if (!response.ok) throw new Error("Export failed");
 
                 const blob = await response.blob();
 
@@ -388,7 +392,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'Export Failed',
-                    text: err.message
+                    text: err.message || 'Export failed'
                 });
             }
             finally {
